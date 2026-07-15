@@ -379,6 +379,32 @@ class EventReliabilityTest extends TestCase
         $this->assertDatabaseHas('predictions', ['player_id' => $player->id, 'score_home' => 1]);
     }
 
+    public function test_big_screen_prediction_feed_returns_every_player_without_phone_data(): void
+    {
+        [$first] = $this->player();
+        $second = Player::create([
+            'phone' => '254711222333', 'nickname' => 'Second Fan', 'consent' => true,
+        ]);
+        foreach ([$first, $second] as $index => $player) {
+            Prediction::create([
+                'player_id' => $player->id,
+                'score_home' => $index,
+                'score_away' => 1,
+                'first_scorer' => 'No goal / N/A',
+                'potm' => 'TBD',
+            ]);
+        }
+
+        $response = $this->getJson('/api/predictions/feed')
+            ->assertOk()
+            ->assertJsonPath('count', 2)
+            ->assertJsonCount(2, 'entries');
+
+        $this->assertEqualsCanonicalizing(['Test Player', 'Second Fan'], collect($response->json('entries'))->pluck('nickname')->all());
+        $this->assertArrayNotHasKey('phone', $response->json('entries.0'));
+        $this->assertArrayNotHasKey('phone_last4', $response->json('entries.0'));
+    }
+
     public function test_admin_can_manage_reusable_teams_and_players(): void
     {
         $admin = $this->withSession(['admin_logged_in' => true]);

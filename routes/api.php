@@ -14,4 +14,5 @@ Route::post('/answers', [PlayerApiController::class, 'submitAnswer'])->middlewar
 Route::get('/answers/result', [PlayerApiController::class, 'answerResult'])->middleware('throttle:60,1');
 Route::post('/predictions', [PlayerApiController::class, 'submitPrediction'])->middleware('throttle:30,1');
 Route::get('/predictions/current', [PlayerApiController::class, 'currentPrediction'])->middleware('throttle:60,1');
+Route::get('/predictions/feed', [PlayerApiController::class, 'predictionFeed'])->middleware('throttle:60,1');
 Route::get('/leaderboard', [PlayerApiController::class, 'leaderboard']);

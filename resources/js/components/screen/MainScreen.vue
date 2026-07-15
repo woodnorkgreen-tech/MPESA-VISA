@@ -34,8 +34,8 @@
             class="object-contain drop-shadow-lg" style="height: clamp(1.4rem, 3vw, 3.6rem)" />
         </div>
 
-        <!-- QR anchored left, call-to-action stacked below it; status centred in the rest -->
-        <div class="w-full flex items-center gap-8 lg:gap-16 mb-8 lg:mb-12">
+        <!-- Broadcast layout: join left, event status centre, recent activity right -->
+        <div class="broadcast-grid mb-6 grid w-full grid-cols-[minmax(12rem,.85fr)_minmax(18rem,1.25fr)_minmax(15rem,1fr)] items-center gap-6 lg:gap-10">
           <!-- LEFT: QR — large enough to scan from across the room -->
           <div class="flex flex-col items-center flex-shrink-0">
             <div class="bg-white p-4 lg:p-5 rounded-3xl shadow-2xl">
@@ -54,17 +54,19 @@
             </p>
           </div>
 
-          <!-- RIGHT: live status -->
+          <!-- CENTRE: kick-off and prediction state remain on the screen axis -->
           <div class="flex-1 flex flex-col items-center text-center">
-            <p v-if="phase === 'predictions_closed'"
-              class="text-orange-400 font-bold"
-              style="font-size: clamp(1rem, 1.8vw, 2.2rem)">
-              🔒 Predictions Closed
-            </p>
-            <p v-else class="text-visa-gold font-semibold"
-              style="font-size: clamp(1rem, 1.8vw, 2.2rem)">
-              {{ predictionCount }} predictions locked in
-            </p>
+            <div class="rounded-2xl border px-6 py-3"
+              :class="phase === 'predictions_closed' ? 'border-orange-400/30 bg-orange-400/10' : 'border-safaricom-light/30 bg-safaricom/10'">
+              <p class="font-black uppercase tracking-widest"
+                :class="phase === 'predictions_closed' ? 'text-orange-400' : 'text-safaricom-light'"
+                style="font-size: clamp(.65rem, 1vw, 1rem)">
+                {{ phase === 'predictions_closed' ? '🔒 Predictions closed' : '● Predictions open' }}
+              </p>
+              <p class="mt-1 font-black tabular-nums text-white" style="font-size: clamp(1.1rem, 2.1vw, 2.7rem)">
+                {{ predictionCount }} locked in
+              </p>
+            </div>
             <div v-if="phase === 'predictions_open'" class="mt-4 max-w-xl rounded-xl border border-visa-gold/25 bg-visa-gold/10 px-4 py-3">
               <p class="font-black uppercase tracking-widest text-visa-gold" style="font-size: clamp(.6rem,.9vw,.9rem)">Prediction rule</p>
               <p class="mt-1 font-semibold leading-snug text-white" style="font-size: clamp(.8rem,1.25vw,1.35rem)">
@@ -72,31 +74,34 @@
               </p>
               <p class="mt-1 text-gray-400" style="font-size: clamp(.65rem,.95vw,1rem)">Extra time and penalty shootouts do not count.</p>
             </div>
-            <div v-if="match.kickoff_at && kickoffCountdown" class="mt-4 rounded-xl border border-white/10 bg-black/25 px-6 py-3">
+            <div v-if="match.kickoff_at && kickoffCountdown" class="mt-4 w-full max-w-lg rounded-2xl border border-white/10 bg-black/30 px-6 py-4">
               <p class="text-gray-500 uppercase tracking-widest" style="font-size: clamp(.6rem, 1vw, 1rem)">Kick-off countdown</p>
-              <p class="font-black tabular-nums text-white" style="font-size: clamp(1.1rem, 2.4vw, 3rem)">{{ kickoffCountdown }}</p>
+              <p class="font-black tabular-nums text-white" style="font-size: clamp(1.35rem, 2.8vw, 3.6rem)">{{ kickoffCountdown }}</p>
               <p class="text-gray-500" style="font-size: clamp(.6rem, .9vw, .9rem)">{{ match.venue }}</p>
             </div>
-
-            <!-- Latest predictions — newest first, top 5 -->
-            <div v-if="recentPredictions.length"
-              class="mt-4 w-full max-w-lg rounded-xl border border-white/10 bg-black/25 px-6 py-4 text-left">
-              <p class="text-gray-500 uppercase tracking-widest mb-2" style="font-size: clamp(.6rem, 1vw, 1rem)">
-                Latest predictions
-              </p>
-              <TransitionGroup name="ticker" tag="ul" class="space-y-1.5">
-                <li v-for="(name, idx) in recentPredictions.slice(0, 5)" :key="`${name}-${idx}`"
-                  class="flex items-baseline gap-2.5 font-semibold text-white"
-                  style="font-size: clamp(.9rem, 1.5vw, 1.9rem)">
-                  <span class="text-safaricom-light">●</span>
-                  <span class="truncate">{{ name }}</span>
-                  <span class="text-gray-500 font-normal whitespace-nowrap" style="font-size: clamp(.65rem, 1vw, 1.2rem)">
-                    just locked in their prediction!
-                  </span>
-                </li>
-              </TransitionGroup>
-            </div>
           </div>
+
+          <!-- RIGHT: latest locked-in entries, newest first -->
+          <aside class="broadcast-latest min-w-0 rounded-2xl border border-white/10 bg-black/30 p-4 text-left lg:p-5">
+            <div class="mb-3 flex items-center justify-between gap-3 border-b border-white/10 pb-3">
+              <div>
+                <p class="font-black uppercase tracking-widest text-white" style="font-size: clamp(.65rem,1vw,1rem)">Latest locked in</p>
+                <p class="mt-0.5 text-gray-500" style="font-size: clamp(.55rem,.8vw,.8rem)">{{ predictionFeed.length }} players · newest first</p>
+              </div>
+              <span class="h-2.5 w-2.5 shrink-0 animate-pulse rounded-full bg-safaricom-light"></span>
+            </div>
+            <TransitionGroup v-if="predictionFeed.length" name="ticker" tag="ol" class="prediction-feed-scroll max-h-[42vh] space-y-2 overflow-y-auto overscroll-contain pr-1">
+              <li v-for="(entry, idx) in predictionFeed" :key="entry.id"
+                class="flex min-w-0 items-center gap-3 rounded-xl border border-white/5 bg-white/5 px-3 py-2.5">
+                <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-safaricom/20 text-xs font-black text-safaricom-light">{{ idx + 1 }}</span>
+                <div class="min-w-0">
+                  <p class="truncate font-bold text-white" style="font-size: clamp(.75rem,1.2vw,1.3rem)">{{ entry.nickname }}</p>
+                  <p class="text-gray-500" style="font-size: clamp(.55rem,.75vw,.75rem)">Prediction locked ✓</p>
+                </div>
+              </li>
+            </TransitionGroup>
+            <p v-else class="py-8 text-center text-sm text-gray-600">Waiting for the first prediction…</p>
+          </aside>
         </div>
 
         <p class="mt-6 text-gray-700" style="font-size: clamp(0.75rem, 1.2vw, 1.5rem)">
@@ -316,6 +321,7 @@
 <script setup>
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import QRCode from 'qrcode'
+import axios from 'axios'
 import { useEventState } from '../../composables/useEventState'
 import Leaderboard from './Leaderboard.vue'
 import OnIcon from '../brand/OnIcon.vue'
@@ -333,7 +339,18 @@ const screenUrl = `${window.location.origin}/screen`
 const joinUrlDisplay = appUrl.replace(/^https?:\/\//, '')
 const isFullscreen = ref(!!document.fullscreenElement)
 const linkMessage = ref('')
+const predictionFeed = ref([])
 let linkMessageTimer = null
+let predictionFeedTimer = null
+
+async function loadPredictionFeed() {
+  try {
+    const { data } = await axios.get('/api/predictions/feed')
+    predictionFeed.value = data.entries ?? []
+  } catch {
+    // Shared event polling continues; retain the last successful feed on transient errors.
+  }
+}
 
 async function copyScreenLink() {
   try {
@@ -365,6 +382,8 @@ const qrSize = computed(() =>
 
 onMounted(() => {
   document.addEventListener('fullscreenchange', syncFullscreen)
+  loadPredictionFeed()
+  predictionFeedTimer = setInterval(loadPredictionFeed, 3000)
   if (qrCanvas.value) {
     QRCode.toCanvas(qrCanvas.value, appUrl, {
       width:  qrSize.value,
@@ -429,6 +448,7 @@ onUnmounted(() => {
   clearInterval(triviaTimer)
   clearInterval(clockTimer)
   clearTimeout(linkMessageTimer)
+  clearInterval(predictionFeedTimer)
   document.removeEventListener('fullscreenchange', syncFullscreen)
 })
 </script>
@@ -445,10 +465,19 @@ onUnmounted(() => {
 .ticker-enter-active, .ticker-leave-active { transition: all 0.5s ease; }
 .ticker-enter-from { opacity: 0; transform: translateY(14px); }
 .ticker-leave-to   { opacity: 0; transform: translateY(-14px); }
+.prediction-feed-scroll { scrollbar-width: thin; scrollbar-color: rgba(53,208,111,.65) rgba(255,255,255,.06); }
+.prediction-feed-scroll::-webkit-scrollbar { width: 7px; }
+.prediction-feed-scroll::-webkit-scrollbar-track { background: rgba(255,255,255,.05); border-radius: 999px; }
+.prediction-feed-scroll::-webkit-scrollbar-thumb { background: rgba(53,208,111,.65); border-radius: 999px; }
 .phase-enter { animation: phase-in .45s cubic-bezier(.2,.8,.2,1) both; }
 .count-enter-active, .count-leave-active { transition: all .2s ease; }
 .count-enter-from { opacity: 0; transform: translateY(12px) scale(1.15); }
 .count-leave-to { opacity: 0; transform: translateY(-10px); }
+@media (max-width: 900px), (orientation: portrait) {
+  .broadcast-grid { grid-template-columns: minmax(11rem,.8fr) minmax(17rem,1.2fr); align-items: center; }
+  .broadcast-latest { grid-column: 1 / -1; }
+  .broadcast-latest ol { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .5rem; }
+}
 @keyframes phase-in {
   from { opacity: 0; transform: translateY(18px) scale(.985); }
   to { opacity: 1; transform: translateY(0) scale(1); }

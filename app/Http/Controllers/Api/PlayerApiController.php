@@ -13,6 +13,7 @@ use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Validation\Rule;
 
 class PlayerApiController extends Controller
@@ -165,8 +166,31 @@ class PlayerApiController extends Controller
                 'resolved'     => false,
             ]
         );
+        Cache::forget('public-prediction-feed');
 
         return response()->json(['message' => 'Predictions locked in! ⚽', 'prediction_id' => $prediction->id]);
+    }
+
+    /** Public big-screen activity feed. Contains nicknames only, never phone numbers. */
+    public function predictionFeed(): JsonResponse
+    {
+        $load = fn () =>
+            Prediction::query()
+                ->join('players', 'players.id', '=', 'predictions.player_id')
+                ->latest('predictions.updated_at')
+                ->get(['predictions.id', 'players.nickname', 'predictions.updated_at'])
+                ->map(fn ($prediction) => [
+                    'id' => $prediction->id,
+                    'nickname' => $prediction->nickname,
+                    'updated_at' => $prediction->updated_at?->toIso8601String(),
+                ])
+                ->values()
+                ->all();
+        $entries = app()->environment('testing')
+            ? $load()
+            : Cache::remember('public-prediction-feed', now()->addSeconds(2), $load);
+
+        return response()->json(['count' => count($entries), 'entries' => $entries]);
     }
 
     public function currentPrediction(Request $request): JsonResponse
