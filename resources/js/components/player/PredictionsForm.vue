@@ -4,7 +4,7 @@
       <header class="mb-4 text-center sm:mb-6">
         <p class="brand-kicker mb-1.5">Before kick-off</p>
         <h2 class="text-2xl font-extrabold text-white sm:text-3xl">Make your prediction</h2>
-        <p class="mt-1 text-sm text-gray-400">Four quick steps. You can edit it until predictions close.</p>
+        <p class="mt-1 text-sm text-gray-400">Six quick steps. You can edit it until predictions close.</p>
         <p class="mx-auto mt-2 max-w-md rounded-full border border-visa-gold/20 bg-visa-gold/10 px-3 py-1.5 text-[11px] font-semibold text-visa-gold">
           Score predictions use 90 minutes + stoppage time. Extra time and penalties do not count.
         </p>
@@ -13,11 +13,11 @@
       <form @submit.prevent="submit" class="glass-card overflow-hidden rounded-2xl">
         <div class="border-b border-white/10 px-4 pb-3 pt-4 sm:px-7 sm:pt-6">
           <div class="mb-2 flex items-center justify-between text-xs font-bold">
-            <span class="uppercase tracking-widest text-safaricom-light">Step {{ step }} of 4</span>
+            <span class="uppercase tracking-widest text-safaricom-light">Step {{ step }} of 6</span>
             <span class="text-gray-500">{{ stepTitles[step - 1] }}</span>
           </div>
-          <div class="grid grid-cols-4 gap-1.5" aria-label="Prediction progress">
-            <button v-for="number in 4" :key="number" type="button" @click="goToCompletedStep(number)"
+          <div class="grid grid-cols-6 gap-1.5" aria-label="Prediction progress">
+            <button v-for="number in 6" :key="number" type="button" @click="goToCompletedStep(number)"
               :aria-label="`Go to step ${number}: ${stepTitles[number - 1]}`"
               class="h-1.5 rounded-full transition"
               :class="number <= step ? 'bg-safaricom-light' : 'bg-white/10'" />
@@ -54,20 +54,68 @@
                 </button>
               </div>
             </div>
+            <div class="mt-4 rounded-xl border border-safaricom/20 bg-safaricom/10 px-4 py-3 text-center">
+              <p class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Full-time winner · derived from your score</p>
+              <div class="mt-2 flex justify-center">
+                <img v-if="outcomeFlag(fulltimeWinner)" :src="outcomeFlag(fulltimeWinner)" :alt="outcomeLabel(fulltimeWinner)"
+                  class="h-9 w-14 rounded object-cover shadow ring-2 ring-safaricom-light/40" />
+                <p v-else class="font-black text-safaricom-light">Draw</p>
+              </div>
+            </div>
           </section>
 
           <!-- Step 2 -->
           <section v-else-if="step === 2" class="prediction-step" aria-labelledby="scorer-title">
             <div class="mb-4 text-center">
-              <h3 id="scorer-title" class="text-lg font-black text-white sm:text-xl">Who scores first?</h3>
-              <p class="mt-1 text-xs text-gray-500">Search or tap a player card.</p>
+              <h3 id="scorer-title" class="text-lg font-black text-white sm:text-xl">Which team scores first?</h3>
+              <p class="mt-1 text-xs text-gray-500">Choose the first team on the scoresheet.</p>
             </div>
-            <PlayerCardPicker v-model="form.first_scorer" label="First goalscorer" :groups="playerGroups"
-              fallback-value="No goal / N/A" fallback-label="No goal in the match" />
+            <div class="grid gap-3 sm:grid-cols-2">
+              <button v-for="choice in teamChoices" :key="choice.value" type="button" @click="form.first_scoring_team = choice.value"
+                :disabled="!teamCanScore(choice.value)"
+                class="choice-card disabled:cursor-not-allowed disabled:opacity-30" :class="form.first_scoring_team === choice.value ? 'choice-card-active' : ''">
+                <img v-if="choice.flag" :src="choice.flag" :alt="`${choice.label} flag`" class="h-9 w-14 rounded object-cover ring-1 ring-white/20" />
+                <span :class="choice.flag ? 'sr-only' : 'font-black'">{{ choice.label }}</span>
+              </button>
+              <button type="button" @click="form.first_scoring_team = 'none'" :disabled="form.score_home + form.score_away > 0"
+                class="choice-card sm:col-span-2 disabled:cursor-not-allowed disabled:opacity-30"
+                :class="form.first_scoring_team === 'none' ? 'choice-card-active' : ''">No team scores · 0–0 only</button>
+            </div>
           </section>
 
-          <!-- Step 3 -->
-          <section v-else-if="step === 3" class="prediction-step" aria-labelledby="potm-title">
+          <!-- Step 3: first player, constrained to the selected team -->
+          <section v-else-if="step === 3" class="prediction-step" aria-labelledby="halftime-title">
+            <div class="mb-4 text-center">
+              <h3 class="text-lg font-black text-white sm:text-xl">Which player scores first?</h3>
+              <p class="mt-1 text-xs text-gray-500">Only players from your selected first-scoring team are shown.</p>
+            </div>
+            <div v-if="form.first_scoring_team === 'none'" class="rounded-2xl border border-safaricom/20 bg-safaricom/10 px-5 py-8 text-center">
+              <p class="text-2xl">✓</p>
+              <p class="mt-2 font-black text-white">No goalscorer</p>
+              <p class="mt-1 text-xs text-gray-400">Your predicted score is 0–0.</p>
+            </div>
+            <PlayerCardPicker v-else v-model="form.first_scorer" label="First goalscorer" :groups="firstScorerGroups"
+              fallback-value="No goal / N/A" fallback-label="No goalscorer" :show-fallback="false" />
+          </section>
+
+          <!-- Step 4: half-time outcome -->
+          <section v-else-if="step === 4" class="prediction-step" aria-labelledby="halftime-title">
+            <div class="mb-4 text-center">
+              <h3 id="halftime-title" class="text-lg font-black text-white sm:text-xl">Who leads at half-time?</h3>
+              <p class="mt-1 text-xs text-gray-500">A level score at half-time counts as a draw.</p>
+            </div>
+            <div class="grid gap-3">
+              <button v-for="choice in outcomeChoices" :key="choice.value" type="button" @click="form.halftime_winner = choice.value"
+                :disabled="!halftimeOutcomePossible(choice.value)"
+                class="choice-card disabled:cursor-not-allowed disabled:opacity-30" :class="form.halftime_winner === choice.value ? 'choice-card-active' : ''">
+                <img v-if="choice.flag" :src="choice.flag" :alt="`${choice.label} flag`" class="h-8 w-12 rounded object-cover ring-1 ring-white/20" />
+                <span :class="choice.flag ? 'sr-only' : 'font-black'">{{ choice.label }}</span>
+              </button>
+            </div>
+          </section>
+
+          <!-- Step 5 -->
+          <section v-else-if="step === 5" class="prediction-step" aria-labelledby="potm-title">
             <div class="mb-4 text-center">
               <h3 id="potm-title" class="text-lg font-black text-white sm:text-xl">Who will be Player of the Match?</h3>
               <p class="mt-1 text-xs text-gray-500">Choose the player you expect to stand out.</p>
@@ -76,7 +124,7 @@
               fallback-value="TBD" fallback-label="Skip — no Player of the Match pick (0 pts)" />
           </section>
 
-          <!-- Step 4: explicit review prevents accidental submissions. -->
+          <!-- Step 6: explicit review prevents accidental submissions. -->
           <section v-else class="prediction-step" aria-labelledby="review-title">
             <div class="mb-4 text-center">
               <h3 id="review-title" class="text-lg font-black text-white sm:text-xl">Review your prediction</h3>
@@ -88,10 +136,31 @@
                 <span class="text-xs font-bold text-safaricom-light">Edit</span>
               </button>
               <button type="button" @click="step = 2" class="review-row">
-                <span class="min-w-0"><span class="review-label">First goalscorer</span><strong class="review-value truncate">{{ form.first_scorer }}</strong></span>
+                <span class="min-w-0"><span class="review-label">First team to score</span>
+                  <img v-if="outcomeFlag(form.first_scoring_team)" :src="outcomeFlag(form.first_scoring_team)" :alt="firstTeamLabel" class="mt-1 h-7 w-11 rounded object-cover ring-1 ring-white/20" />
+                  <strong v-else class="review-value truncate">{{ firstTeamLabel }}</strong>
+                </span>
                 <span class="text-xs font-bold text-safaricom-light">Edit</span>
               </button>
               <button type="button" @click="step = 3" class="review-row">
+                <span class="min-w-0"><span class="review-label">First goalscorer</span><strong class="review-value truncate">{{ form.first_scorer }}</strong></span>
+                <span class="text-xs font-bold text-safaricom-light">Edit</span>
+              </button>
+              <button type="button" @click="step = 4" class="review-row">
+                <span class="min-w-0"><span class="review-label">Half-time winner</span>
+                  <img v-if="outcomeFlag(form.halftime_winner)" :src="outcomeFlag(form.halftime_winner)" :alt="outcomeLabel(form.halftime_winner)" class="mt-1 h-7 w-11 rounded object-cover ring-1 ring-white/20" />
+                  <strong v-else class="review-value truncate">Draw</strong>
+                </span>
+                <span class="text-xs font-bold text-safaricom-light">Edit</span>
+              </button>
+              <div class="review-row">
+                <span class="min-w-0"><span class="review-label">Full-time winner</span>
+                  <img v-if="outcomeFlag(fulltimeWinner)" :src="outcomeFlag(fulltimeWinner)" :alt="outcomeLabel(fulltimeWinner)" class="mt-1 h-7 w-11 rounded object-cover ring-1 ring-white/20" />
+                  <strong v-else class="review-value truncate">Draw</strong>
+                </span>
+                <span class="text-[10px] font-bold text-gray-500">From score</span>
+              </div>
+              <button type="button" @click="step = 5" class="review-row">
                 <span class="min-w-0"><span class="review-label">Player of the Match</span><strong class="review-value truncate">{{ form.potm }}</strong></span>
                 <span class="text-xs font-bold text-safaricom-light">Edit</span>
               </button>
@@ -109,7 +178,7 @@
             class="min-h-12 rounded-xl border border-white/15 px-5 font-bold text-gray-300 transition hover:border-white/30 disabled:opacity-50">
             Back
           </button>
-          <button v-if="step < 4" type="button" @click="nextStep" :disabled="readOnly"
+          <button v-if="step < 6" type="button" @click="nextStep" :disabled="readOnly"
             class="min-h-12 flex-1 rounded-xl bg-safaricom px-5 font-black text-white transition hover:bg-safaricom-dark disabled:opacity-50">
             Continue →
           </button>
@@ -149,7 +218,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted, watch } from 'vue'
 import axios from 'axios'
 import PlayerCardPicker from './PlayerCardPicker.vue'
 import ScoreStepper from './ScoreStepper.vue'
@@ -163,16 +232,26 @@ const props = defineProps({
 const emit = defineEmits(['submitted'])
 
 const step = ref(1)
-const stepTitles = ['Score', 'First scorer', 'Player of the Match', 'Review']
+const stepTitles = ['Score & full-time result', 'First team to score', 'First goalscorer', 'Half-time result', 'Player of the Match', 'Review']
 const quickScores = [[0, 0], [1, 0], [1, 1], [2, 0], [2, 1], [2, 2], [3, 1], [3, 2]]
 const scorerOptions = computed(() => [...(props.match.home_squad ?? []), ...(props.match.away_squad ?? [])])
 const playerGroups = computed(() => [
   { name: props.match.home_team, flag: teamFlag(props.match.home_team), players: props.match.home_squad ?? [] },
   { name: props.match.away_team, flag: teamFlag(props.match.away_team), players: props.match.away_squad ?? [] },
 ].filter(group => group.players.length))
+const firstScorerGroups = computed(() => playerGroups.value.filter((group, index) =>
+  form.first_scoring_team === 'home' ? index === 0 : index === 1
+))
 const configReady = computed(() => scorerOptions.value.length > 0)
+const teamChoices = computed(() => [
+  { value: 'home', label: props.match.home_team, flag: teamFlag(props.match.home_team) },
+  { value: 'away', label: props.match.away_team, flag: teamFlag(props.match.away_team) },
+])
+const outcomeChoices = computed(() => [...teamChoices.value, { value: 'draw', label: 'Draw at half-time', flag: '' }])
+const fulltimeWinner = computed(() => form.score_home > form.score_away ? 'home' : form.score_away > form.score_home ? 'away' : 'draw')
+const firstTeamLabel = computed(() => form.first_scoring_team === 'none' ? 'No team scores' : outcomeLabel(form.first_scoring_team))
 
-const form = reactive({ score_home: 0, score_away: 0, first_scorer: '', potm: '' })
+const form = reactive({ score_home: 0, score_away: 0, first_scoring_team: 'none', first_scorer: 'No goal / N/A', halftime_winner: '', potm: '' })
 const submitting = ref(false)
 const loadingSaved = ref(false)
 const hasSavedPrediction = ref(false)
@@ -190,7 +269,9 @@ async function loadSavedPrediction() {
       Object.assign(form, {
         score_home: data.prediction.score_home,
         score_away: data.prediction.score_away,
-        first_scorer: data.prediction.first_scorer,
+        first_scoring_team: data.prediction.first_scoring_team ?? '',
+        first_scorer: data.prediction.first_scorer ?? '',
+        halftime_winner: data.prediction.halftime_winner ?? '',
         potm: data.prediction.potm,
       })
       hasSavedPrediction.value = true
@@ -206,13 +287,42 @@ async function loadSavedPrediction() {
 
 function nextStep() {
   errorMsg.value = ''
-  if (step.value === 2 && !form.first_scorer) return errorMsg.value = 'Choose a first goalscorer or select “No goal”.'
-  if (step.value === 3 && !form.potm) return errorMsg.value = 'Choose a Player of the Match or select “Decide later”.'
-  step.value = Math.min(4, step.value + 1)
+  if (step.value === 2 && !form.first_scoring_team) return errorMsg.value = 'Choose which team scores first.'
+  if (step.value === 3 && !form.first_scorer) return errorMsg.value = 'Choose the player who scores first.'
+  if (step.value === 4 && !form.halftime_winner) return errorMsg.value = 'Choose the half-time result.'
+  if (step.value === 5 && !form.potm) return errorMsg.value = 'Choose a Player of the Match or use the skip option.'
+  step.value = Math.min(6, step.value + 1)
 }
 function goToCompletedStep(number) { if (number <= step.value) step.value = number }
 function setScore([home, away]) { form.score_home = home; form.score_away = away }
 function isScore([home, away]) { return form.score_home === home && form.score_away === away }
+function teamCanScore(team) { return team === 'home' ? form.score_home > 0 : form.score_away > 0 }
+function halftimeOutcomePossible(outcome) {
+  if (outcome === 'home') return form.score_home > 0
+  if (outcome === 'away') return form.score_away > 0
+  return true
+}
+function outcomeLabel(value) {
+  if (value === 'home') return `${props.match.home_team} win`
+  if (value === 'away') return `${props.match.away_team} win`
+  return 'Draw'
+}
+function outcomeFlag(value) {
+  if (value === 'home') return teamFlag(props.match.home_team)
+  if (value === 'away') return teamFlag(props.match.away_team)
+  return ''
+}
+
+watch(() => [form.score_home, form.score_away], ([home, away]) => {
+  if (home + away === 0) form.first_scoring_team = 'none'
+  else if (form.first_scoring_team === 'none') form.first_scoring_team = ''
+  if ((form.first_scoring_team === 'home' && home === 0) || (form.first_scoring_team === 'away' && away === 0)) form.first_scoring_team = ''
+  if ((form.halftime_winner === 'home' && home === 0) || (form.halftime_winner === 'away' && away === 0)) form.halftime_winner = ''
+})
+watch(() => form.first_scoring_team, (team, previous) => {
+  if (team === 'none') form.first_scorer = 'No goal / N/A'
+  else if (team !== previous) form.first_scorer = ''
+})
 
 function teamFlag(team) {
   return ({ england: '/images/flags/england.svg', argentina: '/images/flags/argentina.svg' })[String(team ?? '').trim().toLowerCase()] ?? ''
@@ -220,7 +330,10 @@ function teamFlag(team) {
 
 async function submit() {
   if (props.readOnly || submitting.value) return
-  if (!form.first_scorer || !form.potm) { step.value = !form.first_scorer ? 2 : 3; errorMsg.value = 'Complete this selection first.'; return }
+  if (!form.first_scoring_team || !form.first_scorer || !form.halftime_winner || !form.potm) {
+    step.value = !form.first_scoring_team ? 2 : !form.first_scorer ? 3 : !form.halftime_winner ? 4 : 5
+    errorMsg.value = 'Complete this selection first.'; return
+  }
   submitting.value = true; errorMsg.value = ''
   try {
     await axios.post('/api/predictions', { player_id: props.playerId, ...form })
@@ -242,6 +355,9 @@ async function submit() {
 .review-row { display:flex; width:100%; min-height:4rem; align-items:center; justify-content:space-between; gap:1rem; border:1px solid rgba(255,255,255,.1); border-radius:.9rem; background:rgba(255,255,255,.04); padding:.75rem 1rem; text-align:left; }
 .review-label { display:block; color:#6b7280; font-size:.7rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; }
 .review-value { display:block; margin-top:.15rem; color:#fff; font-size:1rem; }
+.choice-card { display:flex; min-height:4rem; align-items:center; justify-content:center; gap:.75rem; border:1px solid rgba(255,255,255,.1); border-radius:1rem; background:rgba(255,255,255,.04); padding:.8rem 1rem; color:#d1d5db; transition:.2s; }
+.choice-card:hover { border-color:rgba(255,255,255,.25); }
+.choice-card-active { border-color:#35d06f; background:rgba(0,166,81,.18); color:#fff; box-shadow:0 0 0 1px rgba(53,208,111,.18); }
 @keyframes prediction-step-in { from { opacity:0; transform:translateX(10px); } to { opacity:1; transform:none; } }
 @media (prefers-reduced-motion: reduce) { .prediction-step { animation:none; } }
 </style>

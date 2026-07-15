@@ -22,29 +22,34 @@ class PlayerApiController extends Controller
 
     public function store(Request $request): JsonResponse
     {
+        // Data minimisation: the nickname is the whole identity. No phone,
+        // no email — nothing personally identifying is collected.
         $data = $request->validate([
-            'nickname'      => 'required|string|max:50',
-            'phone'         => ['required', 'string', 'max:20', 'regex:/^(?:\+?254|0)?[17](?:[\s-]?\d){8}$/'],
-            'email'         => 'nullable|email|max:100',
+            'nickname'      => 'required|string|min:2|max:50',
             'consent'       => 'required|accepted',
             'has_visa_card' => 'boolean',
         ]);
 
-        $phone = Player::normalisePhone($data['phone']);
+        $nickname = trim($data['nickname']);
+
+        $taken = Player::whereRaw('LOWER(nickname) = ?', [mb_strtolower($nickname)])->exists();
+        if ($taken) {
+            return response()->json([
+                'message' => "\"{$nickname}\" is already taken — pick another nickname.",
+            ], 422);
+        }
 
         try {
-            $player = Player::firstOrCreate(
-                ['phone' => $phone],
-                [
-                    'nickname'      => $data['nickname'],
-                    'email'         => $data['email'] ?? null,
-                    'consent'       => true,
-                    'has_visa_card' => $data['has_visa_card'] ?? false,
-                ]
-            );
+            $player = Player::create([
+                'nickname'      => $nickname,
+                'consent'       => true,
+                'has_visa_card' => $data['has_visa_card'] ?? false,
+            ]);
         } catch (UniqueConstraintViolationException) {
-            // Two simultaneous requests for the same phone — safe to return the existing record
-            $player = Player::where('phone', $phone)->firstOrFail();
+            // Simultaneous registration of the same nickname — first one wins
+            return response()->json([
+                'message' => "\"{$nickname}\" is already taken — pick another nickname.",
+            ], 422);
         }
 
         return response()->json([
@@ -134,22 +139,46 @@ class PlayerApiController extends Controller
     public function submitPrediction(Request $request): JsonResponse
     {
         $matchConfig = MatchConfig::current();
-        $players = $matchConfig->players();
         $data = $request->validate([
             'player_id'    => 'required|exists:players,id',
             'score_home'   => 'required|integer|min:0|max:20',
             'score_away'   => 'required|integer|min:0|max:20',
+            'first_scoring_team' => 'required|in:home,away,none',
             'first_scorer' => 'required|string|max:100',
+            'halftime_winner' => 'required|in:home,away,draw',
             'potm'         => 'required|string|max:100',
         ]);
 
         $request->validate([
-            'first_scorer' => ['required', Rule::in(array_merge($players, ['No goal / N/A']))],
-            'potm' => ['required', Rule::in(array_merge($players, ['TBD']))],
+            'first_scorer' => ['required', Rule::in(array_merge($matchConfig->players(), ['No goal / N/A']))],
+            'potm' => ['required', Rule::in(array_merge($matchConfig->players(), ['TBD']))],
         ]);
 
+        $fulltimeWinner = $this->matchOutcome($data['score_home'], $data['score_away']);
+        if ($data['first_scoring_team'] === 'none' && ($data['score_home'] + $data['score_away']) > 0) {
+            return response()->json(['message' => '“No team scores” is only consistent with a 0–0 prediction.'], 422);
+        }
+        if ($data['first_scoring_team'] !== 'none' && ($data['score_home'] + $data['score_away']) === 0) {
+            return response()->json(['message' => 'A 0–0 prediction must use “No team scores”.'], 422);
+        }
+        if (($data['first_scoring_team'] === 'home' && $data['score_home'] === 0)
+            || ($data['first_scoring_team'] === 'away' && $data['score_away'] === 0)) {
+            return response()->json(['message' => 'A team predicted to score zero goals cannot score first.'], 422);
+        }
+        if (($data['halftime_winner'] === 'home' && $data['score_home'] === 0)
+            || ($data['halftime_winner'] === 'away' && $data['score_away'] === 0)) {
+            return response()->json(['message' => 'A team predicted to score zero goals cannot lead at half-time.'], 422);
+        }
+        $expectedSquad = $data['first_scoring_team'] === 'home' ? ($matchConfig->home_squad ?? []) : ($matchConfig->away_squad ?? []);
+        if ($data['first_scoring_team'] === 'none' && $data['first_scorer'] !== 'No goal / N/A') {
+            return response()->json(['message' => 'A no-goal prediction cannot have a first goalscorer.'], 422);
+        }
+        if ($data['first_scoring_team'] !== 'none' && !in_array($data['first_scorer'], $expectedSquad, true)) {
+            return response()->json(['message' => 'The first goalscorer must belong to the selected first-scoring team.'], 422);
+        }
+
         $state = EventState::current();
-        if (!in_array($state->phase, ['predictions_open', 'lobby'])) {
+        if ($state->phase !== 'predictions_open') {
             return response()->json(['message' => 'Predictions are closed.'], 422);
         }
 
@@ -162,6 +191,9 @@ class PlayerApiController extends Controller
                 'score_home'   => $data['score_home'],
                 'score_away'   => $data['score_away'],
                 'first_scorer' => $data['first_scorer'],
+                'first_scoring_team' => $data['first_scoring_team'],
+                'halftime_winner' => $data['halftime_winner'],
+                'fulltime_winner' => $fulltimeWinner,
                 'potm'         => $data['potm'],
                 'resolved'     => false,
             ]
@@ -206,31 +238,13 @@ class PlayerApiController extends Controller
             'prediction' => $prediction ? [
                 'score_home' => $prediction->score_home,
                 'score_away' => $prediction->score_away,
+                'first_scoring_team' => $prediction->first_scoring_team,
                 'first_scorer' => $prediction->first_scorer,
+                'halftime_winner' => $prediction->halftime_winner,
+                'fulltime_winner' => $prediction->fulltime_winner,
                 'potm' => $prediction->potm,
                 'updated_at' => $prediction->updated_at?->toIso8601String(),
             ] : null,
-        ]);
-    }
-
-    // ── Phone lookup (re-identification after session loss) ───────────────────
-
-    public function lookup(Request $request): JsonResponse
-    {
-        $data  = $request->validate([
-            'phone' => ['required', 'string', 'max:20', 'regex:/^(?:\+?254|0)?[17](?:[\s-]?\d){8}$/'],
-        ]);
-        $phone = Player::normalisePhone($data['phone']);
-        $player = Player::where('phone', $phone)->first();
-
-        if (!$player) {
-            return response()->json(['message' => 'No player found with that number.'], 404);
-        }
-
-        return response()->json([
-            'player_id' => $player->id,
-            'nickname'  => $player->nickname,
-            'session_token' => $player->issueSessionToken(),
         ]);
     }
 
@@ -252,5 +266,14 @@ class PlayerApiController extends Controller
             && hash_equals($player->session_token_hash, hash('sha256', $token));
 
         abort_unless($valid, 401, 'Your player session has expired. Please sign in again.');
+    }
+
+    private function matchOutcome(int $home, int $away): string
+    {
+        return match (true) {
+            $home > $away => 'home',
+            $away > $home => 'away',
+            default => 'draw',
+        };
     }
 }

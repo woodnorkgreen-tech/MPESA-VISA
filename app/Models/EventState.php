@@ -20,18 +20,28 @@ class EventState extends Model
     /** Always update row id=1 (single-row table). */
     public static function setCurrent(array $attributes): self
     {
-        $state = self::firstOrCreate(['id' => 1]);
+        $state = self::firstOrCreate(['id' => 1], [
+            'phase' => 'lobby',
+            'current_question_id' => null,
+            'show_phone_on_screen' => false,
+        ]);
         $state->update($attributes);
-        Cache::forget('public-event-state-v2');
+        Cache::forget('public-event-state-v3');
         return $state->fresh();
     }
 
     public static function current(): self
     {
-        return self::firstOrCreate(['id' => 1], [
+        $state = self::firstOrCreate(['id' => 1], [
             'phase' => 'lobby',
             'current_question_id' => null,
             'show_phone_on_screen' => false,
         ]);
+
+        if ($state->show_phone_on_screen === null) {
+            $state->update(['show_phone_on_screen' => false]);
+        }
+
+        return $state->fresh();
     }
 }

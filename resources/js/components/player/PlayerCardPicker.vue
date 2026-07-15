@@ -36,7 +36,7 @@
       No player matches “{{ search }}”
     </p>
 
-    <button type="button" role="radio" :aria-checked="modelValue === fallbackValue"
+    <button v-if="showFallback" type="button" role="radio" :aria-checked="modelValue === fallbackValue"
       @click="$emit('update:modelValue', fallbackValue)"
       class="w-full rounded-lg border px-3 py-2.5 text-left text-xs font-bold transition"
       :class="modelValue === fallbackValue ? 'border-visa-gold bg-visa-gold/15 text-white' : 'border-white/10 bg-gray-800/80 text-gray-400'">
@@ -55,6 +55,7 @@ const props = defineProps({
   groups: { type: Array, required: true },
   fallbackValue: { type: String, required: true },
   fallbackLabel: { type: String, required: true },
+  showFallback: { type: Boolean, default: true },
 })
 
 defineEmits(['update:modelValue'])

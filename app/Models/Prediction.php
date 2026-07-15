@@ -9,7 +9,8 @@ class Prediction extends Model
 {
     protected $fillable = [
         'player_id', 'score_home', 'score_away',
-        'first_scorer', 'potm', 'prediction_score', 'resolved',
+        'first_scorer', 'first_scoring_team', 'halftime_winner', 'fulltime_winner',
+        'potm', 'prediction_score', 'resolved',
     ];
 
     protected $casts = [

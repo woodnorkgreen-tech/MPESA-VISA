@@ -12,14 +12,15 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         // Every guest at the venue reaches a public host through ONE shared
-        // public IP, so per-IP limits would throttle the whole room. Limit by
-        // phone/player instead, keeping a generous per-IP ceiling as abuse cover.
-        RateLimiter::for('per-phone', function (Request $request) {
-            $phone = preg_replace('/\D+/', '', (string) $request->input('phone'));
+        // public IP, so per-IP limits must be generous. Registration is
+        // nickname-only (no phone collected), so combine a generous venue-IP
+        // ceiling with a strict per-nickname ceiling to stop hammering.
+        RateLimiter::for('register', function (Request $request) {
+            $nickname = mb_strtolower(trim((string) $request->input('nickname')));
 
             return [
-                Limit::perMinute(15)->by('phone:'.($phone !== '' ? $phone : $request->ip())),
-                Limit::perMinute(600)->by('phone-ip:'.$request->ip()),
+                Limit::perMinute(10)->by('register-nick:'.($nickname !== '' ? $nickname : $request->ip())),
+                Limit::perMinute(500)->by('register-ip:'.$request->ip()),
             ];
         });
 

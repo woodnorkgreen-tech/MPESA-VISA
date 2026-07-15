@@ -129,33 +129,46 @@ class ScoringService
      * Points stack independently per outcome category.
      *
      * Exact scoreline          500 pts
-     * Correct winner / draw    200 pts  (wrong exact score)
-     * Correct first goalscorer 300 pts
+     * Correct full-time result 200 pts
+     * Correct first team       200 pts
+     * Correct first scorer     300 pts
+     * Correct half-time result 200 pts
      * Correct POTM             200 pts
      */
     public function calculatePredictionScore(Prediction $prediction, MatchResult $result): int
     {
         $score = 0;
 
-        // Exact scoreline
+        // Exact scoreline and full-time result are separate predictions.
         if ($prediction->score_home === $result->score_home && $prediction->score_away === $result->score_away) {
             $score += 500;
-        } else {
-            // Correct winner / draw (but wrong exact score)
-            $predictedOutcome = $this->matchOutcome($prediction->score_home, $prediction->score_away);
-            $actualOutcome    = $this->matchOutcome($result->score_home, $result->score_away);
-            if ($predictedOutcome === $actualOutcome) {
-                $score += 200;
-            }
+        }
+        $predictedOutcome = $prediction->fulltime_winner
+            ?: $this->matchOutcome($prediction->score_home, $prediction->score_away);
+        $actualOutcome = $this->matchOutcome($result->score_home, $result->score_away);
+        if ($predictedOutcome === $actualOutcome) {
+            $score += 200;
         }
 
-        // A deliberate "No goal" pick wins this category only for a genuine 0–0.
-        // A missing scorer on a match with goals remains unresolved/operator-incomplete.
-        $predictedNoGoal = strtolower(trim($prediction->first_scorer)) === 'no goal / n/a';
+        // First team to score. "None" is valid only for a genuine final 0–0.
         $isGoalless = $result->score_home === 0 && $result->score_away === 0;
+        $predictedFirstTeam = $prediction->first_scoring_team;
+        if (($predictedFirstTeam === 'none' && $isGoalless)
+            || ($predictedFirstTeam && $predictedFirstTeam === $result->first_scoring_team)
+            // Compatibility for predictions submitted before the team-based migration.
+            || (!$predictedFirstTeam && strtolower(trim($prediction->first_scorer)) === 'no goal / n/a' && $isGoalless)) {
+            $score += 200;
+        }
+
+        $predictedNoGoal = strtolower(trim($prediction->first_scorer)) === 'no goal / n/a';
         if (($predictedNoGoal && $isGoalless)
             || ($result->scorer && strtolower(trim($prediction->first_scorer)) === strtolower(trim($result->scorer)))) {
             $score += 300;
+        }
+
+        if ($prediction->halftime_winner && $result->halftime_score_home !== null && $result->halftime_score_away !== null
+            && $prediction->halftime_winner === $this->matchOutcome($result->halftime_score_home, $result->halftime_score_away)) {
+            $score += 200;
         }
 
         // Player of the Match — skip if not yet resolved
@@ -177,7 +190,7 @@ class ScoringService
      */
     public function triviaLeaderboard(int $limit = 10): array
     {
-        return Player::select('id', 'nickname', 'phone', 'trivia_score', 'trivia_correct_count', 'trivia_double_correct')
+        return Player::select('id', 'nickname', 'trivia_score', 'trivia_correct_count', 'trivia_double_correct')
             ->selectSub(
                 Answer::selectRaw('AVG(response_time_ms)')
                     ->whereColumn('player_id', 'players.id')
@@ -194,7 +207,6 @@ class ScoringService
                 'id'             => $p->id,
                 'rank'           => $i + 1,
                 'nickname'       => $p->nickname,
-                'phone_last4'    => substr($p->phone, -4),
                 'trivia_score'   => $p->trivia_score,
                 'correct_count'  => $p->trivia_correct_count,
             ])
@@ -203,16 +215,20 @@ class ScoringService
 
     public function predictionLeaderboard(int $limit = 10): array
     {
-        return Player::select('id', 'nickname', 'phone', 'prediction_score')
+        return Prediction::query()
+            ->with('player:id,nickname,prediction_score')
             ->orderByDesc('prediction_score')
+            ->orderBy('created_at')
+            ->orderBy('id')
             ->limit($limit)
             ->get()
-            ->map(fn ($p, $i) => [
-                'id'               => $p->id,
+            ->map(fn ($prediction, $i) => [
+                'id'               => $prediction->player->id,
                 'rank'             => $i + 1,
-                'nickname'         => $p->nickname,
-                'phone_last4'      => substr($p->phone, -4),
-                'prediction_score' => $p->prediction_score,
+                'nickname'         => $prediction->player->nickname,
+                'prediction_score' => $prediction->prediction_score,
+                'predicted_score'  => "{$prediction->score_home}–{$prediction->score_away}",
+                'submitted_at'     => $prediction->created_at?->toIso8601String(),
             ])
             ->toArray();
     }

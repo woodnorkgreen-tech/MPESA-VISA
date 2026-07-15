@@ -166,7 +166,7 @@ class AdminApiController extends Controller
             return response()->json(['message' => 'Configure both match squads before simulating users.'], 422);
         }
 
-        $simulation = DB::transaction(function () use ($data, $squad, $questions, $answerRate, $correctRate, $scoring) {
+        $simulation = DB::transaction(function () use ($data, $match, $squad, $questions, $answerRate, $correctRate, $scoring) {
             $created = 0;
             $answersCreated = 0;
             for ($i = 0; $i < $data['count']; $i++) {
@@ -182,11 +182,18 @@ class AdminApiController extends Controller
                     'is_simulated' => true,
                 ]);
 
+                $homeScore = random_int(0, 4);
+                $awayScore = random_int(0, 4);
+                $firstTeam = ($homeScore + $awayScore) === 0 ? 'none' : (random_int(0, 1) ? 'home' : 'away');
+                $firstTeamSquad = $firstTeam === 'home' ? ($match->home_squad ?? []) : ($match->away_squad ?? []);
                 Prediction::create([
                     'player_id' => $player->id,
-                    'score_home' => random_int(0, 4),
-                    'score_away' => random_int(0, 4),
-                    'first_scorer' => $squad[array_rand($squad)],
+                    'score_home' => $homeScore,
+                    'score_away' => $awayScore,
+                    'first_scorer' => $firstTeam === 'none' ? 'No goal / N/A' : $firstTeamSquad[array_rand($firstTeamSquad)],
+                    'first_scoring_team' => $firstTeam,
+                    'halftime_winner' => ['home', 'away', 'draw'][array_rand(['home', 'away', 'draw'])],
+                    'fulltime_winner' => $homeScore > $awayScore ? 'home' : ($awayScore > $homeScore ? 'away' : 'draw'),
                     'potm' => $squad[array_rand($squad)],
                 ]);
 
@@ -484,7 +491,7 @@ class AdminApiController extends Controller
             $changes['activated_at'] = now();
         }
         $question->update($changes);
-        Cache::forget('public-event-state-v2');
+        Cache::forget('public-event-state-v3');
         EventAudit::record('question.duration_updated', $question, [
             'duration_seconds' => $question->duration_seconds,
             'live_timer_restarted' => $question->status === 'live',
@@ -611,7 +618,10 @@ class AdminApiController extends Controller
         $data = $request->validate([
             'score_home' => 'required|integer|min:0|max:20',
             'score_away' => 'required|integer|min:0|max:20',
-            'scorer'     => 'nullable|string|max:100',
+            'halftime_score_home' => 'required|integer|min:0|max:20',
+            'halftime_score_away' => 'required|integer|min:0|max:20',
+            'first_scoring_team' => 'required|in:home,away,none',
+            'scorer' => 'nullable|string|max:100',
             'potm'       => 'nullable|string|max:100',
         ]);
 
@@ -619,6 +629,27 @@ class AdminApiController extends Controller
             'scorer' => ['nullable', Rule::in($players)],
             'potm' => ['nullable', Rule::in($players)],
         ]);
+
+        if ($data['halftime_score_home'] > $data['score_home'] || $data['halftime_score_away'] > $data['score_away']) {
+            return response()->json(['message' => 'Half-time goals cannot exceed the final regulation-time score.'], 422);
+        }
+        $isGoalless = ($data['score_home'] + $data['score_away']) === 0;
+        if (($isGoalless && $data['first_scoring_team'] !== 'none') || (!$isGoalless && $data['first_scoring_team'] === 'none')) {
+            return response()->json(['message' => $isGoalless
+                ? 'A 0–0 result must use “No team scored”.'
+                : 'Select the team that scored first.'], 422);
+        }
+        if (($data['first_scoring_team'] === 'home' && $data['score_home'] === 0)
+            || ($data['first_scoring_team'] === 'away' && $data['score_away'] === 0)) {
+            return response()->json(['message' => 'The first-scoring team must have at least one goal in the final score.'], 422);
+        }
+        $expectedSquad = $data['first_scoring_team'] === 'home' ? ($matchConfig->home_squad ?? []) : ($matchConfig->away_squad ?? []);
+        if ($isGoalless && !empty($data['scorer'])) {
+            return response()->json(['message' => 'A 0–0 result cannot have a first goalscorer.'], 422);
+        }
+        if (!$isGoalless && (empty($data['scorer']) || !in_array($data['scorer'], $expectedSquad, true))) {
+            return response()->json(['message' => 'Select a first goalscorer from the first-scoring team.'], 422);
+        }
 
         $result = MatchResult::current();
         $result->fill(array_merge($data, ['resolved' => true]))->save();
@@ -641,9 +672,8 @@ class AdminApiController extends Controller
 
     public function lookupPlayer(Request $request): JsonResponse
     {
-        $data   = $request->validate(['phone' => 'required|string|max:20']);
-        $phone  = Player::normalisePhone($data['phone']);
-        $player = Player::where('phone', $phone)->first();
+        $data   = $request->validate(['nickname' => 'required|string|max:50']);
+        $player = Player::whereRaw('LOWER(nickname) = ?', [mb_strtolower(trim($data['nickname']))])->first();
 
         if (!$player) {
             return response()->json(['message' => 'Player not found.'], 404);

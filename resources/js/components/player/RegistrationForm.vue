@@ -42,9 +42,9 @@
         Join the game <span aria-hidden="true">→</span>
       </button>
 
-      <button @click="view = 'login'"
+      <button @click="goToPlay"
         class="mt-5 text-white/50 text-xs sm:text-sm hover:text-white transition underline-offset-2 hover:underline pb-safe">
-        Already registered? <span class="text-white font-semibold">Sign in</span>
+        Already registered on this device? <span class="text-white font-semibold">Continue playing</span>
       </button>
     </main>
 
@@ -85,25 +85,13 @@
 
         <div>
           <label class="block text-sm sm:text-base font-medium text-gray-300 mb-1.5">Nickname *</label>
-          <input v-model="form.nickname" type="text" maxlength="50" required
+          <input v-model="form.nickname" type="text" maxlength="50" minlength="2" required
             placeholder="What should we call you?"
             autocomplete="nickname" class="field-control px-4 py-3.5 text-base placeholder-white/30" />
-        </div>
-
-        <div>
-          <label class="block text-sm sm:text-base font-medium text-gray-300 mb-1.5">
-            Mobile Number * <span class="text-gray-500 text-xs">(Safaricom)</span>
-          </label>
-          <input v-model="form.phone" type="tel" required placeholder="07XX XXX XXX" inputmode="tel" autocomplete="tel"
-            class="field-control px-4 py-3.5 text-base placeholder-white/30" />
-        </div>
-
-        <div>
-          <label class="block text-sm sm:text-base font-medium text-gray-300 mb-1.5">
-            Email <span class="text-gray-500 text-xs">(optional)</span>
-          </label>
-          <input v-model="form.email" type="email" placeholder="you@example.com" autocomplete="email"
-            class="field-control px-4 py-3.5 text-base placeholder-white/30" />
+          <p class="mt-1.5 text-xs text-gray-500">
+            Your nickname is your identity for the whole event — no phone number or email needed.
+            Pick something unique; it appears on the big screen.
+          </p>
         </div>
 
         <label class="flex items-start gap-3 cursor-pointer">
@@ -118,7 +106,7 @@
           <input v-model="form.consent" type="checkbox" required
             class="mt-0.5 w-5 h-5 rounded accent-safaricom flex-shrink-0" />
           <span class="text-sm text-gray-400 leading-snug">
-            I consent to my data being used for this event *
+            I agree to take part in this event's games and accept the event rules *
           </span>
         </label>
 
@@ -129,58 +117,10 @@
           {{ submitting ? 'Creating your profile…' : 'Create profile →' }}
         </button>
 
-        <div class="flex items-center gap-3">
-          <div class="flex-1 h-px bg-gray-700"></div>
-          <span class="text-gray-600 text-xs">already registered?</span>
-          <div class="flex-1 h-px bg-gray-700"></div>
-        </div>
-        <button type="button" @click="view = 'login'"
-          class="w-full text-sm text-gray-300 hover:text-white border border-gray-700 hover:border-gray-500 py-3 rounded-xl transition font-semibold">
-          Log In →
-        </button>
+        <p class="text-center text-xs text-gray-500 leading-snug">
+          Keep this browser open during the event — your nickname and progress live on this device.
+        </p>
       </form>
-
-    </div>
-  </div>
-
-  <!-- ═══════════════════════════════════════════════════════════════════
-       LOGIN (RETURNING PLAYER)
-  ════════════════════════════════════════════════════════════════════ -->
-  <div v-else-if="view === 'login'" class="event-surface min-h-dvh flex items-center justify-center p-4 sm:p-6 pt-safe pb-safe">
-    <div class="w-full max-w-md sm:max-w-lg">
-
-      <button @click="view = 'landing'" class="flex items-center gap-1 text-gray-500 hover:text-gray-300 text-sm mb-5 transition">
-        ← Back
-      </button>
-
-      <div class="text-center mb-6">
-        <p class="brand-kicker mb-2">Returning player</p>
-        <h1 class="text-2xl sm:text-3xl font-extrabold text-white mb-1">Welcome back</h1>
-        <p class="text-white/60 text-sm sm:text-base">Use the Safaricom number you registered with.</p>
-      </div>
-
-      <div class="glass-card rounded-2xl p-6 sm:p-8 space-y-4">
-        <label class="block text-sm font-medium text-gray-300">Mobile number</label>
-        <input v-model="returnPhone" type="tel" placeholder="07XX XXX XXX" inputmode="tel" autocomplete="tel"
-          class="field-control px-4 py-4 text-base placeholder-white/30" />
-
-        <p v-if="returnError" class="text-mpesa text-sm text-center">{{ returnError }}</p>
-
-        <button @click="rejoin" :disabled="rejoining"
-          class="w-full bg-safaricom hover:bg-safaricom-dark disabled:opacity-50 text-white font-bold py-4 rounded-xl transition text-base">
-          {{ rejoining ? 'Logging in…' : 'Log In →' }}
-        </button>
-
-        <div class="flex items-center gap-3">
-          <div class="flex-1 h-px bg-gray-700"></div>
-          <span class="text-gray-600 text-xs">new player?</span>
-          <div class="flex-1 h-px bg-gray-700"></div>
-        </div>
-        <button @click="view = 'register'"
-          class="w-full text-gray-400 hover:text-white border border-gray-700 hover:border-gray-500 py-3 rounded-xl transition text-sm font-semibold">
-          Register Here →
-        </button>
-      </div>
 
     </div>
   </div>
@@ -193,13 +133,11 @@ import axios from 'axios'
 import OnIcon from '../brand/OnIcon.vue'
 
 // ── State machine ─────────────────────────────────────────────────────────────
-const view = ref('landing')   // 'landing' | 'register' | 'login'
+const view = ref('landing')   // 'landing' | 'register'
 
-// ── Registration ──────────────────────────────────────────────────────────────
+// ── Registration — nickname only, no personal data collected ─────────────────
 const form = reactive({
   nickname:      '',
-  phone:         '',
-  email:         '',
   has_visa_card: false,
   consent:       false,
 })
@@ -223,27 +161,6 @@ async function submit() {
     errorMsg.value = e.response?.data?.message ?? 'Something went wrong. Try again.'
   } finally {
     submitting.value = false
-  }
-}
-
-// ── Login / rejoin ────────────────────────────────────────────────────────────
-const returnPhone = ref('')
-const returnError = ref('')
-const rejoining   = ref(false)
-
-async function rejoin() {
-  rejoining.value   = true
-  returnError.value = ''
-  try {
-    const { data } = await axios.post('/api/players/lookup', { phone: returnPhone.value })
-    sessionStorage.setItem('player_id', data.player_id)
-    sessionStorage.setItem('player_nickname', data.nickname)
-    sessionStorage.setItem('player_session_token', data.session_token)
-    window.location.href = '/play'
-  } catch (e) {
-    returnError.value = e.response?.data?.message ?? 'Not found. Check your number.'
-  } finally {
-    rejoining.value = false
   }
 }
 

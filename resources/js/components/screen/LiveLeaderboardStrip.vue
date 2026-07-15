@@ -14,7 +14,6 @@
         <div class="min-w-0 flex-1">
           <p class="truncate text-[clamp(.7rem,1.3vw,1.35rem)] font-bold text-white">
             {{ entry.nickname }}
-            <span v-if="showPhone && entry.phone_last4" class="font-semibold text-gray-500"> · •••• {{ entry.phone_last4 }}</span>
           </p>
           <p class="text-[clamp(.55rem,.75vw,.75rem)] font-bold" :class="movement(entry) > 0 ? 'text-safaricom-light' : movement(entry) < 0 ? 'text-mpesa' : 'text-gray-600'">
             {{ movement(entry) > 0 ? `▲ ${movement(entry)}` : movement(entry) < 0 ? `▼ ${Math.abs(movement(entry))}` : '—' }}
@@ -31,7 +30,6 @@ import { computed, ref, watch } from 'vue'
 
 const props = defineProps({
   entries: { type: Array, default: () => [] },
-  showPhone: { type: Boolean, default: false },
 })
 const previousRanks = ref(new Map())
 const rankChanges = ref(new Map())

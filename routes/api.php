@@ -8,8 +8,7 @@ use Illuminate\Support\Facades\Route;
 Route::get('/state', [EventStateController::class, 'show']);
 
 // ── Player ────────────────────────────────────────────────────────────────────
-Route::post('/players', [PlayerApiController::class, 'store'])->middleware('throttle:per-phone');
-Route::post('/players/lookup', [PlayerApiController::class, 'lookup'])->middleware('throttle:per-phone');
+Route::post('/players', [PlayerApiController::class, 'store'])->middleware('throttle:register');
 Route::post('/answers', [PlayerApiController::class, 'submitAnswer'])->middleware('throttle:per-player');
 Route::get('/answers/result', [PlayerApiController::class, 'answerResult'])->middleware('throttle:per-player');
 Route::post('/predictions', [PlayerApiController::class, 'submitPrediction'])->middleware('throttle:per-player');

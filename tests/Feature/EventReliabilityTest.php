@@ -240,7 +240,7 @@ class EventReliabilityTest extends TestCase
         $service = app(ScoringService::class);
         $this->assertSame(1, $service->scorePredictions($result));
         $firstScore = $player->fresh()->prediction_score;
-        $this->assertSame(1000, $firstScore);
+        $this->assertSame(1200, $firstScore);
 
         $this->assertSame(0, $service->scorePredictions($result));
         $this->assertSame($firstScore, $player->fresh()->prediction_score);
@@ -259,15 +259,15 @@ class EventReliabilityTest extends TestCase
         $service = app(ScoringService::class);
 
         $goalless = new MatchResult(['score_home' => 0, 'score_away' => 0, 'scorer' => null, 'potm' => null]);
-        $this->assertSame(500, $service->calculatePredictionScore($prediction, $goalless));
+        $this->assertSame(700, $service->calculatePredictionScore($prediction, $goalless));
 
         $scorerMissingDespiteGoals = new MatchResult(['score_home' => 1, 'score_away' => 1, 'scorer' => null, 'potm' => null]);
-        $this->assertSame(500, $service->calculatePredictionScore($prediction, $scorerMissingDespiteGoals));
+        $this->assertSame(700, $service->calculatePredictionScore($prediction, $scorerMissingDespiteGoals));
 
         $wrongOutcomeWithNoGoals = new MatchResult(['score_home' => 0, 'score_away' => 0, 'scorer' => null, 'potm' => null]);
         $prediction->score_home = 1;
         $prediction->score_away = 0;
-        $this->assertSame(300, $service->calculatePredictionScore($prediction, $wrongOutcomeWithNoGoals));
+        $this->assertSame(500, $service->calculatePredictionScore($prediction, $wrongOutcomeWithNoGoals));
     }
 
     public function test_correcting_the_match_result_rescores_predictions(): void
@@ -283,22 +283,27 @@ class EventReliabilityTest extends TestCase
         [$player] = $this->player();
         Prediction::create([
             'player_id' => $player->id, 'score_home' => 1, 'score_away' => 2,
-            'first_scorer' => 'Lionel Messi', 'potm' => 'Lionel Messi',
+            'first_scorer' => 'Lionel Messi', 'first_scoring_team' => 'away',
+            'halftime_winner' => 'draw', 'fulltime_winner' => 'away', 'potm' => 'Lionel Messi',
         ]);
         $admin = $this->withSession(['admin_logged_in' => true]);
 
         // Fat-fingered entry — the player scores nothing
         $admin->postJson('/api/admin/match-result', [
-            'score_home' => 2, 'score_away' => 1, 'scorer' => 'Harry Kane', 'potm' => 'Harry Kane',
+            'score_home' => 2, 'score_away' => 1,
+            'halftime_score_home' => 1, 'halftime_score_away' => 0,
+            'first_scoring_team' => 'home', 'scorer' => 'Harry Kane', 'potm' => 'Harry Kane',
         ])->assertOk();
         $this->assertSame(0, $player->fresh()->prediction_score);
 
-        // Corrected entry — exact score 500 + scorer 300 + POTM 200
+        // Corrected entry — exact 500 + FT 200 + first team 300 + HT 200 + POTM 200
         $admin->postJson('/api/admin/match-result', [
-            'score_home' => 1, 'score_away' => 2, 'scorer' => 'Lionel Messi', 'potm' => 'Lionel Messi',
+            'score_home' => 1, 'score_away' => 2,
+            'halftime_score_home' => 0, 'halftime_score_away' => 0,
+            'first_scoring_team' => 'away', 'scorer' => 'Lionel Messi', 'potm' => 'Lionel Messi',
         ])->assertOk();
 
-        $this->assertSame(1000, $player->fresh()->prediction_score);
+        $this->assertSame(1600, $player->fresh()->prediction_score);
         $this->assertSame(1, MatchResult::count());
     }
 
@@ -337,16 +342,62 @@ class EventReliabilityTest extends TestCase
 
         $base = [
             'player_id' => $player->id, 'score_home' => 2, 'score_away' => 1,
-            'potm' => 'Away One',
+            'first_scorer' => 'Home One', 'halftime_winner' => 'draw', 'potm' => 'Away One',
         ];
 
         $this->withHeader('X-Player-Token', $token)->postJson('/api/predictions', array_merge($base, [
-            'first_scorer' => 'Not In Either Squad',
+            'first_scoring_team' => 'invalid',
         ]))->assertStatus(422);
 
         $this->withHeader('X-Player-Token', $token)->postJson('/api/predictions', array_merge($base, [
-            'first_scorer' => 'Home One',
+            'first_scoring_team' => 'away',
+        ]))->assertStatus(422)->assertJsonFragment([
+            'message' => 'The first goalscorer must belong to the selected first-scoring team.',
+        ]);
+
+        $this->withHeader('X-Player-Token', $token)->postJson('/api/predictions', array_merge($base, [
+            'first_scoring_team' => 'home',
         ]))->assertOk();
+    }
+
+    public function test_prediction_api_rejects_impossible_outcomes_and_lobby_submissions(): void
+    {
+        MatchConfig::current()->update([
+            'home_team' => 'England', 'away_team' => 'Argentina',
+            'home_squad' => ['Harry Kane'], 'away_squad' => ['Lionel Messi'],
+        ]);
+        [$player, $token] = $this->player();
+        $headers = ['X-Player-Token' => $token];
+        EventState::setCurrent(['phase' => 'predictions_open']);
+
+        $base = [
+            'player_id' => $player->id,
+            'score_home' => 0,
+            'score_away' => 1,
+            'first_scoring_team' => 'home',
+            'first_scorer' => 'Harry Kane',
+            'halftime_winner' => 'draw',
+            'potm' => 'Lionel Messi',
+        ];
+        $this->withHeaders($headers)->postJson('/api/predictions', $base)
+            ->assertUnprocessable()
+            ->assertJsonFragment(['message' => 'A team predicted to score zero goals cannot score first.']);
+
+        $this->withHeaders($headers)->postJson('/api/predictions', array_merge($base, [
+            'score_away' => 0,
+            'first_scoring_team' => 'none',
+            'first_scorer' => 'No goal / N/A',
+            'halftime_winner' => 'home',
+        ]))->assertUnprocessable()
+            ->assertJsonFragment(['message' => 'A team predicted to score zero goals cannot lead at half-time.']);
+
+        EventState::setCurrent(['phase' => 'lobby']);
+        $this->withHeaders($headers)->postJson('/api/predictions', array_merge($base, [
+            'score_home' => 1,
+            'first_scoring_team' => 'home',
+        ]))->assertUnprocessable()
+            ->assertJsonFragment(['message' => 'Predictions are closed.']);
+        $this->assertSame(0, Prediction::count());
     }
 
     public function test_player_can_securely_load_and_update_their_saved_prediction(): void
@@ -360,7 +411,8 @@ class EventReliabilityTest extends TestCase
 
         $payload = [
             'player_id' => $player->id, 'score_home' => 2, 'score_away' => 1,
-            'first_scorer' => 'Harry Kane', 'potm' => 'Lionel Messi',
+            'first_scoring_team' => 'home', 'first_scorer' => 'Harry Kane',
+            'halftime_winner' => 'draw', 'potm' => 'Lionel Messi',
         ];
         $this->withHeader('X-Player-Token', $token)->postJson('/api/predictions', $payload)->assertOk();
 
@@ -371,7 +423,9 @@ class EventReliabilityTest extends TestCase
             ->getJson("/api/predictions/current?player_id={$player->id}")
             ->assertOk()
             ->assertJsonPath('prediction.score_home', 2)
-            ->assertJsonPath('prediction.first_scorer', 'Harry Kane');
+            ->assertJsonPath('prediction.first_scoring_team', 'home')
+            ->assertJsonPath('prediction.halftime_winner', 'draw')
+            ->assertJsonPath('prediction.fulltime_winner', 'home');
 
         $payload['score_home'] = 1;
         $this->withHeader('X-Player-Token', $token)->postJson('/api/predictions', $payload)->assertOk();
@@ -566,33 +620,34 @@ class EventReliabilityTest extends TestCase
             ->assertJsonPath('question.answer_distribution.Nairobi', 1);
 
         $player->update(['prediction_score' => 750]);
+        Prediction::create([
+            'player_id' => $player->id,
+            'score_home' => 1,
+            'score_away' => 0,
+            'first_scorer' => 'Home team',
+            'first_scoring_team' => 'home',
+            'halftime_winner' => 'draw',
+            'fulltime_winner' => 'home',
+            'potm' => 'TBD',
+            'prediction_score' => 750,
+            'resolved' => true,
+        ]);
         EventState::setCurrent(['phase' => 'prediction_reveal', 'current_question_id' => null]);
         $this->getJson('/api/state')->assertOk()
             ->assertJsonPath('leaderboard.0.nickname', 'Test Player')
             ->assertJsonPath('leaderboard.0.prediction_score', 750);
     }
 
-    public function test_admin_can_toggle_phone_suffixes_for_every_big_screen_leaderboard(): void
+    public function test_leaderboards_never_expose_phone_data(): void
     {
         [$player] = $this->player();
-        $this->getJson('/api/state')
-            ->assertOk()
-            ->assertJsonPath('show_phone_on_screen', false)
-            ->assertJsonPath('leaderboard.0.phone_last4', substr($player->phone, -4));
+        $player->update(['trivia_score' => 100]);
 
-        $this->postJson('/api/state/toggle-phone')->assertUnauthorized();
+        $response = $this->getJson('/api/state')->assertOk()
+            ->assertJsonPath('leaderboard.0.nickname', 'Test Player');
 
-        $this->withSession(['admin_logged_in' => true])
-            ->postJson('/api/state/toggle-phone')
-            ->assertOk()
-            ->assertJsonPath('show_phone_on_screen', true);
-
-        $this->getJson('/api/state')
-            ->assertOk()
-            ->assertJsonPath('show_phone_on_screen', true);
-        $this->assertDatabaseHas('event_audits', [
-            'action' => 'display.phone_suffix_toggled',
-        ]);
+        $this->assertArrayNotHasKey('phone_last4', $response->json('leaderboard.0'));
+        $this->assertArrayNotHasKey('phone', $response->json('leaderboard.0'));
     }
 
     public function test_player_view_admin_preview_requires_admin_session(): void
@@ -605,30 +660,39 @@ class EventReliabilityTest extends TestCase
             ->assertSee(':admin-preview="true"', false);
     }
 
-    public function test_venue_crowd_behind_one_shared_ip_is_not_rate_limited(): void
+    public function test_venue_crowd_behind_one_shared_ip_registers_with_nickname_only(): void
     {
         // Public hosting: the whole venue shares one public IP. 30 different
-        // guests registering within a minute must all succeed.
+        // guests registering within a minute must all succeed — nickname only,
+        // no personal data collected.
         for ($i = 0; $i < 30; $i++) {
-            $this->postJson('/api/players', [
+            $response = $this->postJson('/api/players', [
                 'nickname' => 'Guest '.$i,
-                'phone' => '2547'.str_pad((string) (10000000 + $i), 8, '0', STR_PAD_LEFT),
                 'consent' => true,
             ])->assertCreated();
+
+            $this->assertNotEmpty($response->json('session_token'));
         }
 
-        // …while a single phone number hammering the endpoint still gets cut off.
-        $responses = collect(range(1, 20))->map(fn () => $this->postJson('/api/players', [
-            'nickname' => 'Same Phone', 'phone' => '254712345678', 'consent' => true,
-        ])->getStatusCode());
+        $this->assertSame(30, Player::count());
+        $this->assertSame(0, Player::whereNotNull('phone')->count());
+    }
 
-        $this->assertContains(429, $responses, 'Per-phone abuse limit should engage.');
+    public function test_nicknames_are_unique_case_insensitively(): void
+    {
+        $this->postJson('/api/players', ['nickname' => 'Kevin', 'consent' => true])->assertCreated();
+
+        $this->postJson('/api/players', ['nickname' => 'KEVIN', 'consent' => true])
+            ->assertStatus(422);
+        $this->postJson('/api/players', ['nickname' => '  kevin  ', 'consent' => true])
+            ->assertStatus(422);
+
+        $this->assertSame(1, Player::count());
     }
 
     private function player(): array
     {
         $player = Player::create([
-            'phone' => '254712345678',
             'nickname' => 'Test Player',
             'consent' => true,
         ]);

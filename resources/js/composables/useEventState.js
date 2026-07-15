@@ -12,7 +12,6 @@ export function useEventState(intervalMs = 1500) {
     const leaderboard         = ref([])
     const playerCount         = ref(0)
     const predictionCount     = ref(0)
-    const showPhone           = ref(false)
     const recentPredictions   = ref([])
     const match               = ref({ home_team: 'Home Team', away_team: 'Away Team', home_squad: [], away_squad: [] })
     const round               = ref({ current: 0, total: 0, completed: 0 })
@@ -33,7 +32,6 @@ export function useEventState(intervalMs = 1500) {
             leaderboard.value       = data.leaderboard
             playerCount.value       = data.player_count
             predictionCount.value   = data.prediction_count
-            showPhone.value         = data.show_phone_on_screen
             recentPredictions.value = data.recent_predictions ?? []
             match.value             = data.match ?? match.value
             round.value             = data.round ?? round.value
@@ -64,5 +62,5 @@ export function useEventState(intervalMs = 1500) {
         window.removeEventListener('online', fetchState)
     })
 
-    return { phase, question, leaderboard, playerCount, predictionCount, showPhone, recentPredictions, match, round, lastUpdatedAt, loading, error, fetchState }
+    return { phase, question, leaderboard, playerCount, predictionCount, recentPredictions, match, round, lastUpdatedAt, loading, error, fetchState }
 }

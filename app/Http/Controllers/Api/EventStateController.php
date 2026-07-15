@@ -21,7 +21,7 @@ class EventStateController extends Controller
     {
         $payload = app()->environment('testing')
             ? $this->buildPayload($scoring)
-            : Cache::remember('public-event-state-v2', now()->addSecond(), fn () => $this->buildPayload($scoring));
+            : Cache::remember('public-event-state-v3', now()->addSecond(), fn () => $this->buildPayload($scoring));
 
         return response()->json($payload)->header('Cache-Control', 'no-store');
     }
@@ -83,7 +83,7 @@ class EventStateController extends Controller
             'state_version'       => $state->updated_at?->getTimestampMs(),
             'round'               => $round,
             'question'            => $question,
-            'show_phone_on_screen'=> $state->show_phone_on_screen,
+            'show_phone_on_screen'=> (bool) $state->show_phone_on_screen,
             'leaderboard'         => in_array($state->phase, ['match_ended', 'prediction_reveal'])
                 ? $scoring->predictionLeaderboard(10)
                 : $scoring->triviaLeaderboard(10),
@@ -112,8 +112,9 @@ class EventStateController extends Controller
             return $enabled;
         });
 
-        Cache::forget('public-event-state-v2');
+        Cache::forget('public-event-state-v3');
 
         return response()->json(['show_phone_on_screen' => $enabled]);
     }
+
 }

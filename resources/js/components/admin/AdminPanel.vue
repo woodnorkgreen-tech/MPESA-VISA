@@ -210,7 +210,7 @@
           </div>
         </div>
         <form @submit.prevent="saveMatchConfig(false)" class="space-y-4">
-          <div class="grid sm:grid-cols-2 gap-3">
+          <div class="grid sm:grid-cols-3 gap-3">
             <label class="text-xs text-gray-500">Home team<input v-model="matchForm.home_team" required class="mt-1 w-full bg-white text-gray-900 border border-gray-300 rounded-xl px-3 py-3 text-sm focus:border-safaricom focus:outline-none" /></label>
             <label class="text-xs text-gray-500">Away team<input v-model="matchForm.away_team" required class="mt-1 w-full bg-white text-gray-900 border border-gray-300 rounded-xl px-3 py-3 text-sm focus:border-safaricom focus:outline-none" /></label>
           </div>
@@ -363,13 +363,35 @@
             </div>
           </div>
 
-          <div class="grid sm:grid-cols-2 gap-3">
+          <div>
+            <p class="mb-2 text-xs font-bold uppercase tracking-wider text-gray-500">Half-time score</p>
+            <div class="flex items-center gap-4">
+              <input v-model.number="result.halftime_score_home" type="number" min="0" :max="result.score_home" required aria-label="Home half-time goals"
+                class="min-w-0 flex-1 rounded-xl border px-3 py-3 text-center text-xl font-bold focus:border-safaricom focus:outline-none" />
+              <span class="font-bold text-gray-400">–</span>
+              <input v-model.number="result.halftime_score_away" type="number" min="0" :max="result.score_away" required aria-label="Away half-time goals"
+                class="min-w-0 flex-1 rounded-xl border px-3 py-3 text-center text-xl font-bold focus:border-safaricom focus:outline-none" />
+            </div>
+          </div>
+
+          <div class="grid sm:grid-cols-3 gap-3">
             <div>
-              <label class="block text-xs text-gray-400 mb-1">First Goalscorer</label>
-              <select v-model="result.scorer"
+              <label class="block text-xs text-gray-400 mb-1">Which team scored first?</label>
+              <select v-model="result.first_scoring_team" required
                 class="w-full border rounded-xl px-3 py-3 text-sm focus:outline-none focus:border-safaricom">
-                <option value="">No goal / N/A</option>
-                <option v-for="p in squadList" :key="p" :value="p">{{ p }}</option>
+                <option value="" disabled>Select result…</option>
+                <option value="home">{{ matchForm.home_team }}</option>
+                <option value="away">{{ matchForm.away_team }}</option>
+                <option value="none">No team scored (0–0 only)</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs text-gray-400 mb-1">Which player scored first?</label>
+              <select v-model="result.scorer" :required="result.first_scoring_team !== 'none'"
+                :disabled="!result.first_scoring_team || result.first_scoring_team === 'none'"
+                class="w-full border rounded-xl px-3 py-3 text-sm focus:outline-none focus:border-safaricom disabled:bg-gray-100 disabled:text-gray-400">
+                <option value="">{{ result.first_scoring_team === 'none' ? 'No goalscorer' : 'Select player…' }}</option>
+                <option v-for="p in resultScorerList" :key="p" :value="p">{{ p }}</option>
               </select>
             </div>
             <div>
@@ -397,21 +419,6 @@
       <!-- ── Display Settings ────────────────────────────────────────────── -->
       <section v-show="adminSection === 'display'" class="bg-white rounded-2xl shadow p-4 sm:p-5">
         <h2 class="font-semibold text-gray-600 mb-4 text-xs uppercase tracking-widest">Display Settings</h2>
-
-        <!-- Phone toggle -->
-        <div class="flex items-center justify-between py-3 border-b border-gray-100">
-          <div class="pr-4">
-            <p class="text-sm font-medium text-gray-700">Show phone identifiers on leaderboard</p>
-            <p class="text-xs text-gray-400 mt-0.5">Shows only the last 4 digits next to nicknames on every big-screen leaderboard</p>
-          </div>
-          <button @click="togglePhone" :disabled="phoneToggleBusy" role="switch" :aria-checked="showPhone"
-            :aria-label="showPhone ? 'Hide phone suffixes' : 'Show phone suffixes'"
-            :class="showPhone ? 'bg-safaricom' : 'bg-gray-200'"
-            class="relative w-12 h-6 rounded-full transition-colors duration-200 flex-shrink-0 disabled:opacity-50">
-            <span :class="showPhone ? 'translate-x-6' : 'translate-x-1'"
-              class="absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-transform duration-200 inline-block" />
-          </button>
-        </div>
 
         <!-- QR Code -->
         <div class="pt-4 flex items-center gap-4 sm:gap-6">
@@ -523,7 +530,7 @@
 
           <div v-if="!adjust.player" class="space-y-2">
             <div class="flex gap-2">
-              <input v-model="adjust.phone" type="tel" placeholder="Player phone number"
+              <input v-model="adjust.nickname" type="text" placeholder="Player nickname"
                 class="flex-1 border rounded-xl px-3 py-3 text-sm focus:outline-none" />
               <button @click="lookupPlayer" :disabled="adjust.looking"
                 class="bg-gray-800 text-white px-4 py-3 rounded-xl text-sm font-semibold hover:bg-gray-700 disabled:opacity-50 transition">
@@ -539,7 +546,7 @@
                 <p class="font-semibold text-gray-800">{{ adjust.player.nickname }}</p>
                 <p class="text-xs text-gray-500 mt-0.5">Current score: {{ adjust.player.trivia_score }} pts</p>
               </div>
-              <button @click="adjust.player = null; adjust.phone = ''"
+              <button @click="adjust.player = null; adjust.nickname = ''"
                 class="text-gray-400 hover:text-gray-600 text-lg w-8 h-8 flex items-center justify-center">✕</button>
             </div>
             <input v-model.number="adjust.amount" type="number" placeholder="±pts (e.g. +100 or -50)"
@@ -631,7 +638,7 @@ import QuestionForm from './QuestionForm.vue'
 import PlayerReview from './PlayerReview.vue'
 import OnIcon from '../brand/OnIcon.vue'
 
-const { phase, question: stateQuestion, playerCount, predictionCount, showPhone, fetchState } = useEventState()
+const { phase, question: stateQuestion, playerCount, predictionCount, fetchState } = useEventState()
 
 const qrCanvas  = ref(null)
 const appUrl    = document.querySelector('meta[name="app-url"]')?.content ?? window.location.origin
@@ -687,7 +694,6 @@ const teamMessage = ref('')
 const teamError = ref(false)
 const managedTeam = computed(() => teams.value.find(team => team.id === Number(managedTeamId.value)))
 const showModal       = ref(false)
-const phoneToggleBusy = ref(false)
 const countdownDraft = ref(30)
 const countdownSaving = ref(false)
 const countdownMessage = ref('')
@@ -756,13 +762,13 @@ const phaseColors = {
   prediction_reveal:  'bg-visa/10 text-visa',
 }
 
-const result           = reactive({ score_home: 0, score_away: 0, scorer: '', potm: '' })
+const result           = reactive({ score_home: 0, score_away: 0, halftime_score_home: 0, halftime_score_away: 0, first_scoring_team: 'none', scorer: '', potm: '' })
 const submittingResult = ref(false)
 const matchResultMsg   = ref('')
 const matchResultSuccess = ref(false)
 
 const adjust = reactive({
-  phone: '', looking: false, lookupError: '',
+  nickname: '', looking: false, lookupError: '',
   player: null,
   amount: 0, reason: '', applying: false, successMsg: '',
 })
@@ -784,6 +790,11 @@ watch(liveQuestion, question => {
 })
 
 const squadList = computed(() => [...lines(matchForm.home_squad_text), ...lines(matchForm.away_squad_text)])
+const resultScorerList = computed(() => result.first_scoring_team === 'home'
+  ? lines(matchForm.home_squad_text)
+  : result.first_scoring_team === 'away' ? lines(matchForm.away_squad_text) : [])
+
+watch(() => result.first_scoring_team, () => { result.scorer = '' })
 
 onMounted(() => {
   loadQuestions()
@@ -914,7 +925,7 @@ async function resetEvent() {
     const summary = data.summary ?? {}
     testTools.message = `${data.message} Cleared ${summary.answers ?? 0} answers and ${summary.predictions ?? 0} predictions.`
     testTools.confirmation = ''; testTools.removePlayers = false
-    Object.assign(result, { score_home: 0, score_away: 0, scorer: '', potm: '' })
+    Object.assign(result, { score_home: 0, score_away: 0, halftime_score_home: 0, halftime_score_away: 0, first_scoring_team: 'none', scorer: '', potm: '' })
     await Promise.all([fetchState(), loadQuestions(), loadAudits(), loadMatchConfig(), loadTestingStatus()])
   } catch (e) {
     testTools.error = true; testTools.message = e.response?.data?.message ?? 'Could not reset the event.'
@@ -1108,7 +1119,10 @@ async function submitMatchResult() {
     const { data } = await axios.post('/api/admin/match-result', {
       score_home: result.score_home,
       score_away: result.score_away,
-      scorer:     result.scorer || null,
+      halftime_score_home: result.halftime_score_home,
+      halftime_score_away: result.halftime_score_away,
+      first_scoring_team: result.first_scoring_team,
+      scorer: result.scorer || null,
       potm:       result.potm   || null,
     })
     matchResultMsg.value     = `✅ Scored ${data.predictions_scored} predictions.`
@@ -1144,25 +1158,11 @@ async function invalidateQuestion(q) {
   }
 }
 
-async function togglePhone() {
-  if (phoneToggleBusy.value) return
-  phoneToggleBusy.value = true
-  try {
-    const { data } = await axios.post('/api/state/toggle-phone')
-    showPhone.value = data.show_phone_on_screen
-    await Promise.all([fetchState(), loadAudits()])
-  } catch (e) {
-    alert(e.response?.data?.message ?? 'Could not change phone display setting.')
-  } finally {
-    phoneToggleBusy.value = false
-  }
-}
-
 async function lookupPlayer() {
   adjust.looking     = true
   adjust.lookupError = ''
   try {
-    const { data } = await axios.post('/api/admin/players/lookup', { phone: adjust.phone })
+    const { data } = await axios.post('/api/admin/players/lookup', { nickname: adjust.nickname })
     adjust.player = data
   } catch (e) {
     adjust.lookupError = e.response?.data?.message ?? 'Not found.'

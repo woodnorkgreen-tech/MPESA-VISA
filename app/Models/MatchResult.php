@@ -9,7 +9,8 @@ class MatchResult extends Model
     protected $table = 'match_result';
 
     protected $fillable = [
-        'score_home', 'score_away', 'scorer', 'potm', 'resolved',
+        'score_home', 'score_away', 'halftime_score_home', 'halftime_score_away',
+        'scorer', 'first_scoring_team', 'potm', 'resolved',
     ];
 
     protected $casts = [

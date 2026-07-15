@@ -11,7 +11,7 @@
     </div>
 
     <div class="grid gap-2 sm:grid-cols-[1fr_10rem] mb-4">
-      <input v-model="search" @input="scheduleSearch" type="search" placeholder="Search name, phone or email…"
+      <input v-model="search" @input="scheduleSearch" type="search" placeholder="Search by nickname…"
         class="w-full border border-gray-300 rounded-xl px-3 py-3 text-sm focus:outline-none focus:border-safaricom" />
       <select v-model="type" @change="loadPlayers(1)" class="border border-gray-300 rounded-xl px-3 py-3 text-sm bg-white">
         <option value="all">All players</option><option value="real">Real attendees</option><option value="simulated">Simulated</option>
@@ -31,7 +31,7 @@
               <p class="font-bold text-gray-800 truncate">{{ player.nickname }}</p>
               <span v-if="player.is_simulated" class="rounded-full bg-purple-100 px-2 py-0.5 text-[10px] font-bold text-purple-700">TEST</span>
             </div>
-            <p class="text-xs text-gray-500 mt-0.5">{{ player.phone }}<span v-if="player.email"> · {{ player.email }}</span></p>
+            <p class="text-xs text-gray-500 mt-0.5">Player #{{ player.id }} · joined {{ new Date(player.created_at).toLocaleTimeString() }}</p>
           </div>
           <div class="shrink-0 text-right">
             <p class="text-sm font-black text-safaricom">{{ (player.trivia_score + player.prediction_score).toLocaleString() }} pts</p>
@@ -53,7 +53,7 @@
       <div class="flex items-start justify-between gap-4 mb-5">
         <div>
           <div class="flex items-center gap-2"><h3 class="text-xl font-black text-gray-900">{{ selectedPlayer.nickname }}</h3><span v-if="selectedPlayer.is_simulated" class="rounded-full bg-purple-100 px-2 py-0.5 text-[10px] font-bold text-purple-700">TEST</span></div>
-          <p class="text-sm text-gray-500">{{ selectedPlayer.phone }}<span v-if="selectedPlayer.email"> · {{ selectedPlayer.email }}</span></p>
+          <p class="text-sm text-gray-500">Player #{{ selectedPlayer.id }}</p>
         </div>
         <button @click="selectedPlayer = null" class="h-9 w-9 rounded-full bg-gray-100 text-gray-500">✕</button>
       </div>
@@ -69,7 +69,10 @@
         <div v-if="selectedPlayer.prediction" class="rounded-xl border border-gray-200 p-4 grid grid-cols-2 gap-3 text-sm">
           <div><p class="text-xs text-gray-400">Scoreline</p><p class="font-bold">{{ selectedPlayer.prediction.score_home }} – {{ selectedPlayer.prediction.score_away }}</p></div>
           <div><p class="text-xs text-gray-400">Prediction points</p><p class="font-bold">{{ selectedPlayer.prediction.prediction_score.toLocaleString() }}</p></div>
-          <div><p class="text-xs text-gray-400">First scorer</p><p class="font-semibold">{{ selectedPlayer.prediction.first_scorer }}</p></div>
+          <div><p class="text-xs text-gray-400">First team to score</p><p class="font-semibold">{{ predictionOutcome(selectedPlayer.prediction.first_scoring_team, true) }}</p></div>
+          <div><p class="text-xs text-gray-400">First goalscorer</p><p class="font-semibold">{{ selectedPlayer.prediction.first_scorer }}</p></div>
+          <div><p class="text-xs text-gray-400">Half-time result</p><p class="font-semibold">{{ predictionOutcome(selectedPlayer.prediction.halftime_winner) }}</p></div>
+          <div><p class="text-xs text-gray-400">Full-time result</p><p class="font-semibold">{{ predictionOutcome(selectedPlayer.prediction.fulltime_winner) }}</p></div>
           <div><p class="text-xs text-gray-400">Player of match</p><p class="font-semibold">{{ selectedPlayer.prediction.potm }}</p></div>
         </div>
         <p v-else class="rounded-xl bg-gray-50 p-4 text-sm text-gray-400">No prediction submitted.</p>
@@ -100,6 +103,13 @@ let searchTimer
 onMounted(() => loadPlayers())
 
 function initials(name) { return String(name ?? '').split(/\s+/).slice(0, 2).map(part => part[0]).join('').toUpperCase() }
+function predictionOutcome(value, firstTeam = false) {
+  if (value === 'home') return 'Home team'
+  if (value === 'away') return 'Away team'
+  if (value === 'draw') return 'Draw'
+  if (value === 'none') return 'No team scored'
+  return firstTeam ? 'Legacy player selection' : 'Not captured'
+}
 function scheduleSearch() { clearTimeout(searchTimer); searchTimer = setTimeout(() => loadPlayers(1), 300) }
 
 async function loadPlayers(targetPage = 1) {

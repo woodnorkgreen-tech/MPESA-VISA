@@ -60,6 +60,4 @@ Route::middleware('admin.auth')->group(function () {
         Route::post('/players/{player}/adjust-score',      [AdminApiController::class, 'adjustScore']);
     });
 
-    Route::post('/api/state/toggle-phone', [\App\Http\Controllers\Api\EventStateController::class, 'togglePhone']);
-
 });

@@ -180,7 +180,7 @@
           </div>
         </div>
 
-        <LiveLeaderboardStrip v-if="leaderboard.length" :entries="leaderboard" :show-phone="showPhone" class="mt-4 flex-shrink-0" />
+        <LiveLeaderboardStrip v-if="leaderboard.length" :entries="leaderboard" class="mt-4 flex-shrink-0" />
 
       </div>
     </template>
@@ -223,7 +223,7 @@
         </div>
 
         <div class="flex-1 overflow-hidden">
-          <Leaderboard :entries="leaderboard" :show-phone="showPhone" />
+          <Leaderboard :entries="leaderboard" />
         </div>
       </div>
     </template>
@@ -248,7 +248,7 @@
           </p>
         </div>
         <div class="w-full max-w-3xl">
-          <Leaderboard :entries="leaderboard" :show-phone="showPhone" />
+          <Leaderboard :entries="leaderboard" />
         </div>
       </div>
     </template>
@@ -271,7 +271,7 @@
           </p>
         </div>
         <div class="w-full max-w-3xl overflow-hidden">
-          <Leaderboard :entries="leaderboard" :show-phone="showPhone" title="Prediction leaderboard" />
+          <Leaderboard :entries="leaderboard" title="Prediction leaderboard" />
         </div>
       </div>
     </template>
@@ -321,7 +321,7 @@ import Leaderboard from './Leaderboard.vue'
 import OnIcon from '../brand/OnIcon.vue'
 import LiveLeaderboardStrip from './LiveLeaderboardStrip.vue'
 
-const { phase, question, leaderboard, playerCount, predictionCount, showPhone, recentPredictions, match, round, error } = useEventState(1500)
+const { phase, question, leaderboard, playerCount, predictionCount, recentPredictions, match, round, error } = useEventState(1500)
 
 // ── QR Code — size scales with viewport, capped for readability ───────────────
 const qrCanvas = ref(null)

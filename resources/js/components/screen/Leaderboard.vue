@@ -22,10 +22,6 @@
         <p class="truncate font-black text-white" style="font-size: clamp(.8rem,1.7vw,2rem)">
           {{ entry.nickname }}
         </p>
-        <p v-if="showPhone && entry.phone_last4" class="truncate font-semibold text-white/50"
-          style="font-size: clamp(.55rem,.8vw,.85rem)">
-          •••• {{ entry.phone_last4 }}
-        </p>
         <p class="mt-1 font-black tabular-nums text-visa-gold" style="font-size: clamp(1rem,2.2vw,2.7rem)">
           {{ score(entry).toLocaleString() }} <span class="text-[.45em] uppercase tracking-wider text-white/40">pts</span>
         </p>
@@ -42,7 +38,6 @@
         <div class="min-w-0 flex-1">
           <p class="truncate font-bold text-white" style="font-size: clamp(.75rem,1.35vw,1.45rem)">
             {{ entry.nickname }}
-            <span v-if="showPhone && entry.phone_last4" class="font-medium text-gray-500"> · •••• {{ entry.phone_last4 }}</span>
           </p>
         </div>
         <span class="shrink-0 font-black tabular-nums text-visa-gold"
@@ -61,7 +56,6 @@ import { computed } from 'vue'
 
 const props = defineProps({
   entries: { type: Array, default: () => [] },
-  showPhone: { type: Boolean, default: false },
   title: { type: String, default: 'Leaderboard' },
 })
 
