@@ -605,6 +605,26 @@ class EventReliabilityTest extends TestCase
             ->assertSee(':admin-preview="true"', false);
     }
 
+    public function test_venue_crowd_behind_one_shared_ip_is_not_rate_limited(): void
+    {
+        // Public hosting: the whole venue shares one public IP. 30 different
+        // guests registering within a minute must all succeed.
+        for ($i = 0; $i < 30; $i++) {
+            $this->postJson('/api/players', [
+                'nickname' => 'Guest '.$i,
+                'phone' => '2547'.str_pad((string) (10000000 + $i), 8, '0', STR_PAD_LEFT),
+                'consent' => true,
+            ])->assertCreated();
+        }
+
+        // …while a single phone number hammering the endpoint still gets cut off.
+        $responses = collect(range(1, 20))->map(fn () => $this->postJson('/api/players', [
+            'nickname' => 'Same Phone', 'phone' => '254712345678', 'consent' => true,
+        ])->getStatusCode());
+
+        $this->assertContains(429, $responses, 'Per-phone abuse limit should engage.');
+    }
+
     private function player(): array
     {
         $player = Player::create([
