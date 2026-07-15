@@ -223,7 +223,7 @@
         </div>
 
         <div class="flex-1 overflow-hidden">
-          <Leaderboard :entries="leaderboard" />
+          <Leaderboard :entries="leaderboard" compact />
         </div>
       </div>
     </template>
@@ -232,23 +232,13 @@
          TRIVIA COMPLETE
     ══════════════════════════════════════════════════════════════════════ -->
     <template v-else-if="phase === 'trivia_complete'">
-      <div class="flex-1 flex flex-col items-center justify-center px-8 lg:px-16 text-center">
-        <img src="/images/brand/football-celebration.webp" alt="Football trivia"
-          class="object-cover rounded-3xl shadow-2xl mb-5" style="width: clamp(8rem, 13vw, 16rem); aspect-ratio: 4 / 5" />
-        <h2 class="font-black text-visa-gold mb-6"
-          style="font-size: clamp(2rem, 5vw, 7rem)">
-          TRIVIA CHAMPION
+      <div class="phase-enter flex-1 flex flex-col px-8 lg:px-16 pt-6 lg:pt-8 pb-4 overflow-hidden">
+        <h2 class="flex-shrink-0 text-center font-light uppercase tracking-[.15em] text-visa-gold mb-3 lg:mb-4"
+          style="font-size: clamp(1.1rem, 2.2vw, 2.4rem)">
+          TRIVIA LEADERBOARD
         </h2>
-        <div v-if="leaderboard[0]" class="bg-white/10 rounded-3xl px-12 lg:px-20 py-8 lg:py-12 mb-8">
-          <p class="font-black text-white mb-2" style="font-size: clamp(2rem, 5.5vw, 8rem)">
-            {{ leaderboard[0].nickname }}
-          </p>
-          <p class="text-visa-gold font-bold" style="font-size: clamp(1.25rem, 3vw, 4rem)">
-            {{ leaderboard[0].trivia_score?.toLocaleString() }} pts
-          </p>
-        </div>
-        <div class="w-full max-w-3xl">
-          <Leaderboard :entries="leaderboard" />
+        <div class="min-h-0 flex-1">
+          <Leaderboard :entries="leaderboard" title="Trivia leaderboard" />
         </div>
       </div>
     </template>
@@ -257,20 +247,12 @@
          MATCH ENDED / PREDICTION REVEAL
     ══════════════════════════════════════════════════════════════════════ -->
     <template v-else-if="['match_ended', 'prediction_reveal'].includes(phase)">
-      <div class="flex-1 flex flex-col items-center justify-center px-8 text-center overflow-hidden">
-        <h2 class="font-black text-visa-gold mb-8"
-          style="font-size: clamp(2rem, 5vw, 7rem)">
-          PREDICTION CHAMPION
+      <div class="flex-1 flex flex-col px-8 lg:px-16 pt-6 lg:pt-8 pb-4 overflow-hidden">
+        <h2 class="flex-shrink-0 text-center font-light uppercase tracking-[.15em] text-visa-gold mb-3 lg:mb-4"
+          style="font-size: clamp(1.1rem, 2.2vw, 2.4rem)">
+          PREDICTIONS LEADERBOARD
         </h2>
-        <div v-if="leaderboard[0]" class="bg-white/10 rounded-3xl px-12 lg:px-20 py-5 lg:py-7 mb-5">
-          <p class="font-black text-white mb-2" style="font-size: clamp(2rem, 5.5vw, 8rem)">
-            {{ leaderboard[0].nickname }}
-          </p>
-          <p class="text-mpesa font-bold" style="font-size: clamp(1.25rem, 3vw, 4rem)">
-            {{ leaderboard[0].prediction_score?.toLocaleString() ?? '—' }} pts
-          </p>
-        </div>
-        <div class="w-full max-w-3xl overflow-hidden">
+        <div class="min-h-0 flex-1">
           <Leaderboard :entries="leaderboard" title="Prediction leaderboard" />
         </div>
       </div>
