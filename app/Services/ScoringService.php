@@ -1,0 +1,230 @@
+<?php
+
+namespace App\Services;
+
+use App\Models\Answer;
+use App\Models\MatchResult;
+use App\Models\Player;
+use App\Models\Prediction;
+use App\Models\Question;
+use Illuminate\Support\Facades\DB;
+
+class ScoringService
+{
+    // ── Trivia scoring ────────────────────────────────────────────────────────
+
+    /**
+     * Score a single answer and persist the result atomically.
+     * Returns points awarded (0 on wrong/late).
+     */
+    public function scoreAnswer(Player $player, Question $question, string $selectedOption, int $responseTimeMs): int
+    {
+        return DB::transaction(function () use ($player, $question, $selectedOption, $responseTimeMs) {
+            Player::whereKey($player->id)->lockForUpdate()->firstOrFail();
+
+            $answer = Answer::updateOrCreate([
+                'player_id'        => $player->id,
+                'question_id'      => $question->id,
+            ], [
+                'selected_option'  => $selectedOption,
+                'is_correct'       => $selectedOption === $question->correct_answer,
+                'response_time_ms' => $responseTimeMs,
+                'server_received_at' => now(),
+            ]);
+
+            $this->recalculatePlayerTrivia($player);
+
+            return (int) $answer->fresh()->points_awarded;
+        });
+    }
+
+    /** Rebuild all trivia totals so changing a live answer cannot duplicate points or streaks. */
+    public function recalculatePlayerTrivia(Player $player): void
+    {
+        $answers = Answer::where('player_id', $player->id)
+            ->with('question')
+            ->get()
+            ->sortBy(fn (Answer $answer) => sprintf('%010d-%010d', $answer->question->order_index, $answer->question_id));
+
+        $score = $correctCount = $doubleCorrect = $streak = 0;
+
+        foreach ($answers as $answer) {
+            $question = $answer->question;
+            $isCorrect = $answer->selected_option === $question->correct_answer;
+            $points = 0;
+
+            if ($isCorrect) {
+                $streak++;
+                $correctCount++;
+                $doubleCorrect += $question->is_double_points ? 1 : 0;
+                $secondsRemaining = max(0, $question->duration_seconds - (int) ceil($answer->response_time_ms / 1000));
+                $points = $this->calculateTriviaPoints(
+                    $question->is_double_points,
+                    $secondsRemaining,
+                    $question->duration_seconds,
+                    $streak,
+                );
+                $score += $points;
+            } else {
+                $streak = 0;
+            }
+
+            $answer->update(['is_correct' => $isCorrect, 'points_awarded' => $points]);
+        }
+
+        $player->update([
+            'trivia_score' => $score,
+            'trivia_streak' => $streak,
+            'trivia_correct_count' => $correctCount,
+            'trivia_double_correct' => $doubleCorrect,
+        ]);
+    }
+
+    /**
+     * Hardcoded trivia point formula — not admin-configurable.
+     *
+     * Standard:  800 + speed_bonus(200) + streak_bonus(200 max)
+     * Double:   1600 + speed_bonus(400) + streak_bonus(200 max)
+     */
+    public function calculateTriviaPoints(bool $isDouble, int $secondsRemaining, int $totalSeconds, int $streak): int
+    {
+        $speedRatio = $totalSeconds > 0 ? $secondsRemaining / $totalSeconds : 0;
+
+        if ($isDouble) {
+            $base        = 1600;
+            $speedBonus  = (int) round(400 * $speedRatio);
+        } else {
+            $base        = 800;
+            $speedBonus  = (int) round(200 * $speedRatio);
+        }
+
+        $streakBonus = $streak >= 2 ? min(200, 50 * ($streak - 1)) : 0;
+
+        return $base + $speedBonus + $streakBonus;
+    }
+
+    // ── Prediction scoring ────────────────────────────────────────────────────
+
+    /**
+     * Score all unresolved predictions against the stored match result.
+     * Idempotent — safe to call multiple times (resolved flag guards re-scoring).
+     */
+    public function scorePredictions(MatchResult $result): int
+    {
+        $predictions = Prediction::where('resolved', false)->with('player')->get();
+
+        foreach ($predictions as $prediction) {
+            $score = $this->calculatePredictionScore($prediction, $result);
+
+            DB::transaction(function () use ($prediction, $score) {
+                $prediction->update(['prediction_score' => $score, 'resolved' => true]);
+                $prediction->player->update(['prediction_score' => $score]);
+            });
+        }
+
+        return $predictions->count();
+    }
+
+    /**
+     * Points stack independently per outcome category.
+     *
+     * Exact scoreline          500 pts
+     * Correct winner / draw    200 pts  (wrong exact score)
+     * Correct first goalscorer 300 pts
+     * Correct POTM             200 pts
+     */
+    public function calculatePredictionScore(Prediction $prediction, MatchResult $result): int
+    {
+        $score = 0;
+
+        // Exact scoreline
+        if ($prediction->score_home === $result->score_home && $prediction->score_away === $result->score_away) {
+            $score += 500;
+        } else {
+            // Correct winner / draw (but wrong exact score)
+            $predictedOutcome = $this->matchOutcome($prediction->score_home, $prediction->score_away);
+            $actualOutcome    = $this->matchOutcome($result->score_home, $result->score_away);
+            if ($predictedOutcome === $actualOutcome) {
+                $score += 200;
+            }
+        }
+
+        // A deliberate "No goal" pick wins this category only for a genuine 0–0.
+        // A missing scorer on a match with goals remains unresolved/operator-incomplete.
+        $predictedNoGoal = strtolower(trim($prediction->first_scorer)) === 'no goal / n/a';
+        $isGoalless = $result->score_home === 0 && $result->score_away === 0;
+        if (($predictedNoGoal && $isGoalless)
+            || ($result->scorer && strtolower(trim($prediction->first_scorer)) === strtolower(trim($result->scorer)))) {
+            $score += 300;
+        }
+
+        // Player of the Match — skip if not yet resolved
+        if ($result->potm && strtolower(trim($prediction->potm)) === strtolower(trim($result->potm))) {
+            $score += 200;
+        }
+
+        return $score;
+    }
+
+    // ── Leaderboard ───────────────────────────────────────────────────────────
+
+    /**
+     * Tie-break order:
+     *  1. Highest total trivia score
+     *  2. Highest correct-answer count
+     *  3. Fastest average response time (correct answers only)
+     *  4. Most double-points questions answered correctly
+     */
+    public function triviaLeaderboard(int $limit = 10): array
+    {
+        return Player::select('id', 'nickname', 'phone', 'trivia_score', 'trivia_correct_count', 'trivia_double_correct')
+            ->selectSub(
+                Answer::selectRaw('AVG(response_time_ms)')
+                    ->whereColumn('player_id', 'players.id')
+                    ->where('is_correct', true),
+                'avg_response_ms'
+            )
+            ->orderByDesc('trivia_score')
+            ->orderByDesc('trivia_correct_count')
+            ->orderBy('avg_response_ms')
+            ->orderByDesc('trivia_double_correct')
+            ->limit($limit)
+            ->get()
+            ->map(fn ($p, $i) => [
+                'id'             => $p->id,
+                'rank'           => $i + 1,
+                'nickname'       => $p->nickname,
+                'phone_last4'    => substr($p->phone, -4),
+                'trivia_score'   => $p->trivia_score,
+                'correct_count'  => $p->trivia_correct_count,
+            ])
+            ->toArray();
+    }
+
+    public function predictionLeaderboard(int $limit = 10): array
+    {
+        return Player::select('id', 'nickname', 'phone', 'prediction_score')
+            ->orderByDesc('prediction_score')
+            ->limit($limit)
+            ->get()
+            ->map(fn ($p, $i) => [
+                'id'               => $p->id,
+                'rank'             => $i + 1,
+                'nickname'         => $p->nickname,
+                'phone_last4'      => substr($p->phone, -4),
+                'prediction_score' => $p->prediction_score,
+            ])
+            ->toArray();
+    }
+
+    // ── Helpers ───────────────────────────────────────────────────────────────
+
+    private function matchOutcome(int $home, int $away): string
+    {
+        return match(true) {
+            $home > $away => 'home',
+            $away > $home => 'away',
+            default       => 'draw',
+        };
+    }
+}

@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 300" role="img" aria-label="FIFA World Cup 2026">
+  <!-- Black rounded badge background -->
+  <rect x="0" y="0" width="260" height="300" rx="32" ry="32" fill="#111111"/>
+
+  <!-- "26" — large, bold, white -->
+  <text x="130" y="188"
+    font-family="'Arial Black', 'Helvetica Neue', Arial, sans-serif"
+    font-weight="900"
+    font-size="200"
+    fill="white"
+    text-anchor="middle"
+    letter-spacing="-8">26</text>
+
+  <!-- Trophy silhouette — simple gold shape in the "0" gap -->
+  <g transform="translate(98, 60)" fill="#C9A84C">
+    <!-- Base -->
+    <rect x="20" y="95" width="24" height="6" rx="2"/>
+    <rect x="16" y="100" width="32" height="5" rx="2"/>
+    <!-- Stem -->
+    <rect x="26" y="72" width="12" height="24"/>
+    <!-- Cup body -->
+    <ellipse cx="32" cy="52" rx="22" ry="28"/>
+    <ellipse cx="32" cy="30" rx="18" ry="12" fill="#111111"/>
+    <!-- Handles -->
+    <path d="M10 42 Q-2 42 -2 54 Q-2 66 10 66" stroke="#C9A84C" stroke-width="5" fill="none" stroke-linecap="round"/>
+    <path d="M54 42 Q66 42 66 54 Q66 66 54 66" stroke="#C9A84C" stroke-width="5" fill="none" stroke-linecap="round"/>
+  </g>
+
+  <!-- "FIFA WORLD CUP" small text -->
+  <text x="130" y="240"
+    font-family="'Arial', 'Helvetica Neue', sans-serif"
+    font-weight="700"
+    font-size="16"
+    fill="white"
+    text-anchor="middle"
+    letter-spacing="3"
+    opacity="0.75">WORLD CUP</text>
+
+  <!-- "FIFA" prominent text -->
+  <text x="130" y="272"
+    font-family="'Arial Black', 'Helvetica Neue', Arial, sans-serif"
+    font-weight="900"
+    font-size="38"
+    fill="white"
+    text-anchor="middle"
+    letter-spacing="6">FIFA</text>
+
+  <!-- ™ trademark -->
+  <text x="245" y="295"
+    font-family="Arial, sans-serif"
+    font-size="12"
+    fill="white"
+    opacity="0.5">™</text>
+</svg>

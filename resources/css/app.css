@@ -1,0 +1,146 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Self-hosted variable font (100–900) — no external requests at event time */
+@font-face {
+  font-family: 'Outfit';
+  src: url('/fonts/outfit-var.woff2') format('woff2-variations');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  color-scheme: dark;
+}
+
+/* Admin panel is light-themed — without this, unstyled form controls
+   inherit the dark color-scheme and render dark inputs on white cards */
+.admin-light {
+  color-scheme: light;
+}
+
+:root {
+  --sf-green: #00a651;
+  --sf-green-bright: #35d06f;
+  --sf-green-deep: #004b2a;
+  --sf-ink: #06130d;
+  --sf-surface: #0b1c14;
+  --sf-line: rgba(255, 255, 255, 0.12);
+}
+
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  font-family: 'Outfit', Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-weight: 350;
+  background: var(--sf-ink);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+button, input, select { font: inherit; }
+button, a { -webkit-tap-highlight-color: transparent; }
+
+*:focus-visible {
+  outline: 3px solid rgba(53, 208, 111, .55);
+  outline-offset: 3px;
+}
+
+@layer components {
+  .event-surface {
+    position: relative;
+    isolation: isolate;
+    background-color: var(--sf-ink);
+    background-image:
+      linear-gradient(180deg, rgba(2, 20, 11, .9), rgba(2, 20, 11, .82)),
+      url('/images/backgrounds/event-portrait.webp');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+  }
+
+  .event-surface::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background: radial-gradient(circle at 50% 12%, rgba(0, 166, 81, .16), transparent 38%);
+  }
+
+  .glass-card {
+    background: linear-gradient(145deg, rgba(15, 37, 26, .94), rgba(7, 24, 15, .96));
+    border: 1px solid var(--sf-line);
+    box-shadow: 0 28px 70px rgba(0, 0, 0, .34);
+    backdrop-filter: blur(16px);
+  }
+
+  .brand-kicker {
+    color: var(--sf-green-bright);
+    font-size: .75rem;
+    font-weight: 550;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+  }
+
+  .field-control {
+    width: 100%;
+    border: 1px solid rgba(255,255,255,.14);
+    border-radius: .875rem;
+    background: rgba(0,0,0,.25);
+    color: #fff;
+    transition: border-color .2s, box-shadow .2s, background .2s;
+  }
+
+  .field-control:hover { border-color: rgba(255,255,255,.24); }
+  .field-control:focus {
+    outline: none;
+    border-color: var(--sf-green-bright);
+    background: rgba(0,0,0,.38);
+    box-shadow: 0 0 0 4px rgba(0,166,81,.13);
+  }
+}
+
+@media (min-width: 900px) {
+  .event-surface {
+    background-image:
+      linear-gradient(90deg, rgba(1, 18, 10, .9) 0%, rgba(1, 18, 10, .76) 48%, rgba(1, 18, 10, .25) 100%),
+      url('/images/backgrounds/event-landscape.webp');
+    background-position: center;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}
+
+/* ── Safe-area helpers (iPhone notch / Dynamic Island) ─────────────────────── */
+@layer utilities {
+  .pt-safe  { padding-top:    max(env(safe-area-inset-top),    0px); }
+  .pb-safe  { padding-bottom: max(env(safe-area-inset-bottom), 0px); }
+  .pl-safe  { padding-left:   max(env(safe-area-inset-left),   0px); }
+  .pr-safe  { padding-right:  max(env(safe-area-inset-right),  0px); }
+
+  /* Dynamic viewport height — avoids collapsing address bar issue on mobile */
+  .min-h-dvh { min-height: 100dvh; }
+  .h-dvh     { height: 100dvh; }
+}
+
+/* ── Smooth leaderboard re-ordering ────────────────────────────────────────── */
+.leaderboard-move {
+  transition: transform 0.4s ease;
+}
+
+/* ── Screen-view: prevent any rubber-band scroll on TV browsers ─────────────── */
+.screen-root {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+}
