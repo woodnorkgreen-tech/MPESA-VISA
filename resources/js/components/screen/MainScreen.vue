@@ -40,10 +40,6 @@
           <div class="flex flex-col items-center flex-shrink-0">
             <div class="bg-white p-4 lg:p-5 rounded-3xl shadow-2xl">
               <canvas ref="qrCanvas" :width="qrSize" :height="qrSize"></canvas>
-              <p class="text-gray-700 font-bold text-center mt-2 tabular-nums"
-                style="font-size: clamp(0.7rem, 1.1vw, 1.2rem)">
-                {{ joinUrlDisplay }}
-              </p>
             </div>
             <p class="font-black text-white leading-tight mt-4"
               style="font-size: clamp(1.3rem, 2.4vw, 3.2rem)">
@@ -335,8 +331,6 @@ const qrCanvas = ref(null)
 // may be a dev hostname that venue phones cannot resolve — never encode it in the QR.
 const appUrl   = window.location.origin
 const screenUrl = `${window.location.origin}/screen`
-// Shown under the QR so guests can type the address if scanning fails
-const joinUrlDisplay = appUrl.replace(/^https?:\/\//, '')
 const isFullscreen = ref(!!document.fullscreenElement)
 const linkMessage = ref('')
 const predictionFeed = ref([])
