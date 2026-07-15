@@ -258,8 +258,6 @@
     ══════════════════════════════════════════════════════════════════════ -->
     <template v-else-if="['match_ended', 'prediction_reveal'].includes(phase)">
       <div class="flex-1 flex flex-col items-center justify-center px-8 text-center overflow-hidden">
-        <img src="/images/brand/world-cup-trophy.png" alt="World Cup trophy"
-          class="object-contain drop-shadow-2xl mb-5" style="width: clamp(6rem, 10vw, 12rem); max-height: 24vh" />
         <h2 class="font-black text-visa-gold mb-8"
           style="font-size: clamp(2rem, 5vw, 7rem)">
           PREDICTION CHAMPION

@@ -1,0 +1,25 @@
+<template>
+  <Teleport to="body">
+    <div class="fixed inset-0 z-[100] flex items-end justify-center bg-black/70 backdrop-blur-sm p-0 sm:items-center sm:p-5"
+      @click.self="$emit('dismiss')">
+      <div class="glass-card modal-in w-full max-h-[85dvh] overflow-y-auto rounded-t-3xl p-6 text-center sm:max-w-sm sm:rounded-2xl sm:p-7 pb-safe" role="dialog" aria-modal="true">
+        <slot />
+      </div>
+    </div>
+  </Teleport>
+</template>
+
+<script setup>
+defineEmits(['dismiss'])
+</script>
+
+<style scoped>
+.modal-in { animation: modal-in .3s cubic-bezier(.22, 1, .36, 1) both; }
+@keyframes modal-in {
+  from { opacity: 0; transform: translateY(18px) scale(.97); }
+  to   { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .modal-in { animation: none; }
+}
+</style>

@@ -33,40 +33,68 @@
       </div>
     </div>
 
-    <!-- Question text — grows to fill available space, vertically centred -->
-    <div class="flex-1 flex items-center justify-center py-2 sm:py-4">
-      <p class="text-xl sm:text-2xl md:text-3xl font-semibold text-center leading-relaxed max-w-2xl">
-        {{ question.text }}
-      </p>
+    <template v-if="timeLeft > 0">
+      <!-- Question text — grows to fill available space, vertically centred -->
+      <div class="flex-1 flex items-center justify-center py-2 sm:py-4">
+        <p class="text-xl sm:text-2xl md:text-3xl font-semibold text-center leading-relaxed max-w-2xl">
+          {{ question.text }}
+        </p>
+      </div>
+
+      <!-- Answer options -->
+      <div class="grid gap-3 sm:gap-4 mt-4 mb-4 sm:mb-6"
+        :class="question.options.length === 2 ? 'grid-cols-1 max-w-md mx-auto w-full' : 'grid-cols-2'">
+        <button
+          v-for="(option, idx) in question.options"
+          :key="idx"
+          :disabled="submitting || readOnly"
+          @click="selectAnswer(option)"
+          :class="optionClass(option)"
+          class="relative w-full py-4 sm:py-5 px-4 sm:px-5 rounded-2xl font-semibold text-sm sm:text-base transition-all duration-200 text-left border-2 disabled:cursor-default active:scale-95">
+          <span class="inline-flex items-center justify-center w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-white/10 text-xs font-black mr-2 flex-shrink-0">
+            {{ labels[idx] }}
+          </span>
+          {{ option }}
+        </button>
+      </div>
+
+      <!-- Feedback banner -->
+      <div v-if="answered" class="text-center pb-2 sm:pb-4">
+        <p v-if="submissionError" class="text-visa-gold font-bold text-base sm:text-lg">
+          {{ submissionError }}
+        </p>
+        <p v-else class="text-safaricom-light font-bold text-base sm:text-lg">
+          ✓ Answer saved — tap another choice to change it ({{ timeLeft }}s left)
+        </p>
+      </div>
+    </template>
+
+    <!-- Time's up — question/options are gone so there's nothing stale behind the modal -->
+    <div v-else class="flex-1 flex flex-col items-center justify-center text-center py-6">
+      <div class="text-4xl mb-3" aria-hidden="true">⏱️</div>
+      <p class="text-gray-300 font-bold text-lg mb-1">Time's up!</p>
+      <p class="text-gray-500 text-sm">Waiting for the reveal…</p>
     </div>
 
-    <!-- Answer options -->
-    <div class="grid gap-3 sm:gap-4 mt-4 mb-4 sm:mb-6"
-      :class="question.options.length === 2 ? 'grid-cols-1 max-w-md mx-auto w-full' : 'grid-cols-2'">
-      <button
-        v-for="(option, idx) in question.options"
-        :key="idx"
-        :disabled="submitting || timeLeft === 0 || readOnly"
-        @click="selectAnswer(option)"
-        :class="optionClass(option)"
-        class="relative w-full py-4 sm:py-5 px-4 sm:px-5 rounded-2xl font-semibold text-sm sm:text-base transition-all duration-200 text-left border-2 disabled:cursor-default active:scale-95">
-        <span class="inline-flex items-center justify-center w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-white/10 text-xs font-black mr-2 flex-shrink-0">
-          {{ labels[idx] }}
-        </span>
-        {{ option }}
+    <!-- Time's up modal -->
+    <PlayerModal v-if="showTimeUpModal" @dismiss="showTimeUpModal = false">
+      <div class="text-4xl mb-3" aria-hidden="true">⏱️</div>
+      <h3 class="text-xl font-black text-white mb-2">Time's up!</h3>
+      <template v-if="answered">
+        <p class="text-gray-300 text-sm sm:text-base">
+          Your answer — <strong class="text-white">{{ selected }}</strong> — is locked in.
+        </p>
+        <p class="text-gray-500 text-xs sm:text-sm mt-2">No more changes for this question. Hang tight for the reveal.</p>
+      </template>
+      <template v-else>
+        <p class="text-gray-300 text-sm sm:text-base">No answer recorded.</p>
+        <p class="text-gray-500 text-xs sm:text-sm mt-2">You didn't select an option in time, so this question earns 0 points. Stay sharp for the next one.</p>
+      </template>
+      <button type="button" @click="showTimeUpModal = false"
+        class="mt-6 w-full rounded-xl bg-safaricom px-5 py-3 text-sm font-black text-white transition hover:bg-safaricom-dark">
+        Got it
       </button>
-    </div>
-
-    <!-- Feedback banner -->
-    <div v-if="answered || timeLeft === 0" class="text-center pb-2 sm:pb-4">
-      <p v-if="submissionError" class="text-visa-gold font-bold text-base sm:text-lg">
-        {{ submissionError }}
-      </p>
-      <p v-else-if="answered && timeLeft > 0" class="text-safaricom-light font-bold text-base sm:text-lg">
-        ✓ Answer saved — tap another choice to change it ({{ timeLeft }}s left)
-      </p>
-      <p v-else class="text-gray-500 text-sm sm:text-base">Time's up!</p>
-    </div>
+    </PlayerModal>
 
   </div>
 </template>
@@ -74,6 +102,7 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import axios from 'axios'
+import PlayerModal from './PlayerModal.vue'
 
 const props = defineProps({
   question: { type: Object, required: true },
@@ -91,6 +120,7 @@ const isCorrect     = ref(false)
 const pointsAwarded = ref(0)
 const submissionError = ref('')
 const submitting = ref(false)
+const showTimeUpModal = ref(false)
 
 const timeLeft      = ref(props.question.seconds_remaining ?? props.question.duration_seconds)
 const circumference = 2 * Math.PI * 24
@@ -109,8 +139,12 @@ const startedAt = Date.now()
 let timer = null
 
 onMounted(() => {
+  if (timeLeft.value === 0 && !props.readOnly) showTimeUpModal.value = true
   timer = setInterval(() => {
-    if (timeLeft.value > 0) timeLeft.value--
+    if (timeLeft.value > 0) {
+      timeLeft.value--
+      if (timeLeft.value === 0 && !props.readOnly) showTimeUpModal.value = true
+    }
   }, 1000)
 })
 

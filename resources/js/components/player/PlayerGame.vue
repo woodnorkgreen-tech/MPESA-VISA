@@ -57,23 +57,10 @@
 
       <!-- ── Predictions form ────────────────────────────────────────────── -->
       <PredictionsForm
-        v-else-if="['predictions_open'].includes(phase) && !predictionSubmitted"
+        v-else-if="phase === 'predictions_open'"
         :player-id="playerId"
         :match="match"
-        :read-only="adminPreview"
-        @submitted="predictionSubmitted = true" />
-
-      <!-- ── Predictions locked ──────────────────────────────────────────── -->
-      <div v-else-if="predictionSubmitted && phase === 'predictions_open'"
-        class="flex-1 flex flex-col items-center justify-center p-6 text-center pb-safe">
-        <div class="brand-kicker mb-4">Prediction received</div>
-        <h2 class="text-xl sm:text-2xl font-bold text-safaricom-light mb-2">Predictions locked in!</h2>
-        <p class="text-gray-400 text-base">Wait for kickoff. Trivia starts during the break.</p>
-        <button v-if="!adminPreview" type="button" @click="predictionSubmitted = false"
-          class="mt-6 rounded-xl border border-white/15 bg-white/5 px-5 py-3 text-sm font-bold text-white transition hover:border-safaricom-light hover:bg-safaricom/10">
-          Edit prediction
-        </button>
-      </div>
+        :read-only="adminPreview" />
 
       <!-- ── Trivia live ─────────────────────────────────────────────────── -->
       <TriviaQuestion
@@ -127,6 +114,17 @@
       </div>
 
     </template>
+
+    <!-- Predictions closed notice — fires once when the window shuts while this tab is open -->
+    <PlayerModal v-if="showPredictionsClosedModal" @dismiss="showPredictionsClosedModal = false">
+      <div class="text-4xl mb-3" aria-hidden="true">🔒</div>
+      <h3 class="text-xl font-black text-white mb-2">Predictions are closed</h3>
+      <p class="text-gray-300 text-sm sm:text-base">No more edits — the prediction window for this match has ended.</p>
+      <button type="button" @click="showPredictionsClosedModal = false"
+        class="mt-6 w-full rounded-xl bg-safaricom px-5 py-3 text-sm font-black text-white transition hover:bg-safaricom-dark">
+        Got it
+      </button>
+    </PlayerModal>
   </div>
 </template>
 
@@ -136,6 +134,7 @@ import axios from 'axios'
 import { useEventState } from '../../composables/useEventState'
 import PredictionsForm from './PredictionsForm.vue'
 import TriviaQuestion from './TriviaQuestion.vue'
+import PlayerModal from './PlayerModal.vue'
 import OnIcon from '../brand/OnIcon.vue'
 
 const props = defineProps({ adminPreview: { type: Boolean, default: false } })
@@ -145,11 +144,11 @@ const playerNickname = ref(adminPreview ? 'MC Preview' : (sessionStorage.getItem
 
 const { phase, question, playerCount, match, round, loading } = useEventState()
 
-const predictionSubmitted = ref(!!sessionStorage.getItem('prediction_submitted'))
 const lastAnswerCorrect   = ref(false)
 const lastPoints          = ref(0)
 const answerResultKnown   = ref(false)
 const playerScore         = ref(parseInt(sessionStorage.getItem('player_score') ?? '0'))
+const showPredictionsClosedModal = ref(false)
 
 function onAnswered({ isCorrect, pointsAwarded, totalScore }) {
   answerResultKnown.value = true
@@ -180,6 +179,12 @@ watch([phase, question], ([currentPhase]) => {
   if (currentPhase === 'trivia_live') answerResultKnown.value = false
   if (currentPhase === 'trivia_reveal') loadSavedAnswerResult()
 }, { immediate: true })
+
+watch(phase, (currentPhase, previousPhase) => {
+  if (previousPhase === 'predictions_open' && currentPhase !== 'predictions_open' && !adminPreview) {
+    showPredictionsClosedModal.value = true
+  }
+})
 
 function signOut() {
   sessionStorage.clear()

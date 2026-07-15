@@ -6,25 +6,15 @@
   <div v-if="view === 'landing'" class="landing-root min-h-dvh flex flex-col select-none">
 
     <!-- ── Top logo bar ────────────────────────────────────────────────── -->
-    <header class="relative z-10 flex items-start justify-between px-5 sm:px-8 lg:px-12 pt-safe pt-5 sm:pt-8 pb-2">
+    <header class="relative z-10 flex items-center justify-between px-5 sm:px-8 lg:px-12 pt-safe pt-5 sm:pt-8 pb-2">
 
       <!-- LEFT: M-PESA logo -->
       <img src="/images/mpesa-logo.svg" alt="M-PESA"
-        class="h-9 sm:h-11 md:h-14 object-contain object-left drop-shadow-lg" />
+        class="h-14 sm:h-20 md:h-24 object-contain object-left drop-shadow-lg" />
 
-      <!-- RIGHT: VISA | FIFA badge + "Worldwide Partner" -->
-      <div class="flex flex-col items-end gap-1">
-        <div class="flex items-center gap-2 sm:gap-3">
-          <img src="/images/visa-logo.svg" alt="Visa"
-            class="h-6 sm:h-8 md:h-10 object-contain drop-shadow-lg" />
-          <div class="w-px self-stretch bg-white/40 mx-1"></div>
-          <img src="/images/fifa-badge.svg" alt="FIFA World Cup 2026"
-            class="h-10 sm:h-12 md:h-14 object-contain drop-shadow-lg" />
-        </div>
-        <p class="text-white/70 text-[10px] sm:text-xs font-semibold tracking-widest pr-1">
-          Worldwide Partner
-        </p>
-      </div>
+      <!-- RIGHT: VISA -->
+      <img src="/images/visa-logo.svg" alt="Visa"
+        class="h-6 sm:h-8 md:h-10 object-contain drop-shadow-lg" />
 
     </header>
 
@@ -32,11 +22,15 @@
     <!-- Bottom padding reserves the lower portion for the fans in the bg image -->
     <main class="relative z-10 flex-1 flex flex-col items-center lg:items-start justify-center px-6 sm:px-10 lg:px-16 text-center lg:text-left hero-content">
 
+      <span class="italic font-black inline-flex items-center justify-center lg:justify-start gap-[.24em] mb-4 text-white drop-shadow"
+        style="font-size: clamp(2.1rem, 5vw, 4.5rem)">
+        GAME IKO<OnIcon />
+      </span>
+
       <h1 class="text-white font-black leading-[1.12] mb-5 max-w-3xl tracking-[-0.03em]"
         style="font-size: clamp(1.7rem, 4vw, 4rem); text-shadow: 0 3px 24px rgba(0,0,0,0.5)">
-        Welcome to the FIFA World Cup 2026™<br />
-        <span class="text-safaricom-light">Visa M-PESA GlobalPay Virtual Visa Card</span><br />
-        Semi Final Viewing Event
+        Welcome to <span class="text-safaricom-light">M-PESA GlobalPay Virtual Visa Card</span><br />
+        <span class="italic uppercase">Semi-Final Viewing Event</span>
       </h1>
 
       <p class="max-w-xl text-white/72 text-sm sm:text-base lg:text-lg leading-relaxed mb-8">
@@ -196,6 +190,7 @@
 <script setup>
 import { ref, reactive } from 'vue'
 import axios from 'axios'
+import OnIcon from '../brand/OnIcon.vue'
 
 // ── State machine ─────────────────────────────────────────────────────────────
 const view = ref('landing')   // 'landing' | 'register' | 'login'

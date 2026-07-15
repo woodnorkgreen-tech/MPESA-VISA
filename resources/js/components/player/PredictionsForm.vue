@@ -120,6 +120,31 @@
         </footer>
       </form>
     </div>
+
+    <!-- Prediction saved confirmation -->
+    <PlayerModal v-if="showSavedModal" @dismiss="showSavedModal = false">
+      <div class="text-4xl mb-3" aria-hidden="true">✓</div>
+      <h3 class="text-xl font-black text-white mb-2">Prediction saved</h3>
+      <div class="space-y-2 text-left mb-2">
+        <div class="review-row !min-h-0 !py-2.5">
+          <span class="review-label">Final score</span>
+          <strong class="review-value">{{ form.score_home }} – {{ form.score_away }}</strong>
+        </div>
+        <div class="review-row !min-h-0 !py-2.5">
+          <span class="review-label">First goalscorer</span>
+          <strong class="review-value truncate">{{ form.first_scorer }}</strong>
+        </div>
+        <div class="review-row !min-h-0 !py-2.5">
+          <span class="review-label">Player of the Match</span>
+          <strong class="review-value truncate">{{ form.potm }}</strong>
+        </div>
+      </div>
+      <p class="text-gray-500 text-xs sm:text-sm mb-6">You can edit it any time before predictions close.</p>
+      <button v-if="!readOnly" type="button" @click="showSavedModal = false"
+        class="w-full rounded-xl border border-white/15 bg-white/5 px-5 py-3 text-sm font-bold text-white transition hover:border-safaricom-light hover:bg-safaricom/10">
+        Edit prediction
+      </button>
+    </PlayerModal>
   </div>
 </template>
 
@@ -128,6 +153,7 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import axios from 'axios'
 import PlayerCardPicker from './PlayerCardPicker.vue'
 import ScoreStepper from './ScoreStepper.vue'
+import PlayerModal from './PlayerModal.vue'
 
 const props = defineProps({
   playerId: { type: [String, Number], required: true },
@@ -151,6 +177,7 @@ const submitting = ref(false)
 const loadingSaved = ref(false)
 const hasSavedPrediction = ref(false)
 const errorMsg = ref('')
+const showSavedModal = ref(false)
 
 onMounted(loadSavedPrediction)
 
@@ -167,6 +194,8 @@ async function loadSavedPrediction() {
         potm: data.prediction.potm,
       })
       hasSavedPrediction.value = true
+      showSavedModal.value = true
+      step.value = 4
     }
   } catch (e) {
     errorMsg.value = e.response?.data?.message ?? 'Could not load your saved prediction.'
@@ -197,6 +226,8 @@ async function submit() {
     await axios.post('/api/predictions', { player_id: props.playerId, ...form })
     sessionStorage.setItem('prediction_submitted', '1')
     sessionStorage.setItem('last_prediction', JSON.stringify(form))
+    hasSavedPrediction.value = true
+    showSavedModal.value = true
     emit('submitted')
   } catch (e) {
     errorMsg.value = e.response?.data?.message ?? 'Could not save predictions. Check your connection and try again.'
