@@ -49,26 +49,37 @@
     </div>
   </section>
 
-  <!-- Full variant: dedicated leaderboard screens. A single panel — champion showcase
-       (winner on top, brand mark anchored to the foot) on the left, full standings
-       table on the right filling the height (min 10 rows, rest on scroll). -->
+  <!-- Full variant: dedicated leaderboard screens. -->
   <section v-else class="leaderboard-columns grid h-full w-full overflow-hidden rounded-3xl border border-white/10 bg-white/[.025]" aria-live="polite">
-    <div class="flex min-h-0 flex-col items-center border-b border-white/10 px-6 py-6 text-center lg:border-b-0 lg:border-r lg:px-8 lg:py-8">
+    <div class="flex min-h-0 flex-col items-center justify-center border-b border-white/10 px-5 py-5 text-center lg:border-b-0 lg:border-r lg:px-7 lg:py-6">
       <div v-if="winner" class="flex shrink-0 flex-col items-center">
+        <div class="visa-winner-card" aria-label="Visa Final Whistle winner card">
+          <span class="visa-card-orbit visa-card-orbit-one"></span>
+          <span class="visa-card-orbit visa-card-orbit-two"></span>
+          <div class="relative z-10 flex h-full flex-col justify-between text-left">
+            <div class="flex items-start justify-between gap-4">
+              <span class="visa-card-chip" aria-hidden="true"></span>
+              <img src="/images/visa-logo.svg" alt="Visa" class="w-[30%] min-w-16 object-contain" />
+            </div>
+            <div>
+              <p class="text-[clamp(.5rem,.7vw,.72rem)] font-black uppercase tracking-[.24em] text-white/55">Final Whistle</p>
+              <div class="mt-1 flex items-end justify-between gap-3">
+                <p class="truncate text-[clamp(.85rem,1.25vw,1.3rem)] font-black uppercase tracking-[.08em] text-white">Winner</p>
+                <span class="text-[clamp(.8rem,1.3vw,1.4rem)]" aria-hidden="true">🏆</span>
+              </div>
+            </div>
+          </div>
+        </div>
         <p class="font-bold uppercase tracking-[.3em] text-gray-500" style="font-size: clamp(.6rem,.9vw,.9rem)">
           Champion
         </p>
-        <div class="my-3 flex shrink-0 items-center justify-center rounded-full border border-visa-gold/30 bg-visa-gold/10 lg:my-4"
-          style="width: clamp(3.5rem,6vw,5.5rem); height: clamp(3.5rem,6vw,5.5rem)">
-          <span style="font-size: clamp(1.5rem,2.6vw,2.6rem)">🏆</span>
-        </div>
-        <p class="max-w-full truncate font-black text-white" style="font-size: clamp(1.4rem,2.6vw,3rem)">
+        <p class="mt-2 max-w-full truncate font-black text-white" style="font-size: clamp(1.35rem,2.4vw,2.8rem)">
           {{ winner.nickname }}
         </p>
-        <p class="mt-2 font-black leading-none tabular-nums text-visa-gold" style="font-size: clamp(2rem,3.6vw,4.2rem)">
+        <p class="mt-1 font-black leading-none tabular-nums text-visa-gold" style="font-size: clamp(1.8rem,3.2vw,3.8rem)">
           {{ score(winner).toLocaleString() }}
         </p>
-        <p class="mt-2 font-bold uppercase tracking-widest text-gray-500" style="font-size: clamp(.55rem,.8vw,.85rem)">
+        <p class="mt-1 font-bold uppercase tracking-widest text-gray-500" style="font-size: clamp(.55rem,.8vw,.85rem)">
           points
         </p>
       </div>
@@ -77,40 +88,36 @@
         Scores will appear here
       </div>
 
-      <div class="mt-6 min-h-0 w-full flex-1 lg:mt-8" style="max-width: clamp(7rem, 11vw, 11.5rem)">
-        <img src="/images/brand/mpesa-visa-hero.png" alt="M-PESA GlobalPay Visa card"
-          class="h-full w-full rounded-xl object-contain opacity-95 shadow-xl" />
-      </div>
     </div>
 
-    <div class="flex min-h-0 flex-col px-6 py-6 lg:px-8 lg:py-8">
+    <div class="flex min-h-0 flex-col px-4 py-4 lg:px-6 lg:py-5">
       <div class="mb-2 flex flex-shrink-0 items-center justify-between gap-4 border-b border-white/10 pb-3 lg:mb-3">
         <span class="flex items-center gap-2 font-bold uppercase tracking-widest text-gray-500"
           style="font-size: clamp(.6rem,.85vw,.85rem)">
-          <span class="h-2 w-2 rounded-full bg-safaricom-light"></span> Live standings
+          <span class="h-2 w-2 rounded-full bg-visa-gold"></span> Live standings
         </span>
         <span class="font-bold text-gray-600" style="font-size: clamp(.55rem,.8vw,.8rem)">
-          Top {{ entries.length }}
+          {{ entries.length }} ranked players
         </span>
       </div>
 
       <TransitionGroup v-if="entries.length" name="leaderboard" tag="div"
         class="leaderboard-scroll min-h-0 flex-1 overflow-y-auto pr-1"
-        style="min-height: calc(10 * clamp(2.6rem, 4.4vh, 3.6rem))">
+        style="min-height: calc(12 * clamp(2.15rem, 3.45vh, 3rem))">
         <article v-for="entry in entries" :key="entryKey(entry)"
-          class="flex min-w-0 items-center gap-4 border-b border-white/5 last:border-b-0"
-          style="min-height: clamp(2.6rem, 4.4vh, 3.6rem)">
+          class="flex min-w-0 items-center gap-3 border-b border-white/5 px-1 last:border-b-0"
+          style="min-height: clamp(2.15rem, 3.45vh, 3rem)">
           <span class="w-8 shrink-0 text-center font-black tabular-nums" :class="rankColor(entry.rank)"
-            style="font-size: clamp(.85rem,1.3vw,1.35rem)">
+            style="font-size: clamp(.75rem,1.05vw,1.1rem)">
             {{ entry.rank }}
           </span>
           <div class="min-w-0 flex-1">
-            <p class="truncate font-bold text-white" style="font-size: clamp(.8rem,1.35vw,1.45rem)">
+            <p class="truncate font-bold text-white" style="font-size: clamp(.72rem,1.05vw,1.15rem)">
               {{ entry.nickname }}
             </p>
           </div>
           <span class="shrink-0 font-black tabular-nums text-visa-gold"
-            style="font-size: clamp(.85rem,1.5vw,1.7rem)">{{ score(entry).toLocaleString() }}</span>
+            style="font-size: clamp(.75rem,1.15vw,1.25rem)">{{ score(entry).toLocaleString() }}</span>
         </article>
       </TransitionGroup>
 
@@ -161,6 +168,31 @@ function rankColor(rank) {
 .leaderboard-enter-from { opacity: 0; transform: translateY(12px) scale(.98); }
 .leaderboard-leave-to { opacity: 0; transform: translateY(-8px); }
 .leaderboard-columns { grid-template-columns: minmax(13rem, 30%) 1fr; }
+.visa-winner-card {
+  position: relative;
+  width: clamp(11rem, 19vw, 18rem);
+  aspect-ratio: 1.586 / 1;
+  margin-bottom: clamp(.75rem, 1.5vh, 1.25rem);
+  overflow: hidden;
+  border: 1px solid rgba(247,182,0,.48);
+  border-radius: clamp(1rem, 1.5vw, 1.4rem);
+  padding: clamp(.85rem, 1.4vw, 1.35rem);
+  background: linear-gradient(145deg, #1434cb 0%, #1a1f71 54%, #080d43 100%);
+  box-shadow: 0 22px 55px rgba(0,0,0,.38), 0 0 34px rgba(247,182,0,.1);
+  transform: perspective(700px) rotateX(2deg);
+}
+.visa-card-chip {
+  display: block;
+  width: 17%;
+  aspect-ratio: 1.25;
+  border: 1px solid rgba(255,255,255,.38);
+  border-radius: .3rem;
+  background: linear-gradient(135deg, #ffe59a, #c99a24 48%, #f7d66a);
+  box-shadow: inset 0 0 0 1px rgba(80,55,0,.18);
+}
+.visa-card-orbit { position: absolute; border: 1px solid rgba(247,182,0,.2); border-radius: 999px; }
+.visa-card-orbit-one { width: 80%; aspect-ratio: 1; right: -34%; top: -42%; }
+.visa-card-orbit-two { width: 66%; aspect-ratio: 1; right: -25%; top: -27%; }
 .leaderboard-scroll { scrollbar-width: thin; scrollbar-color: rgba(247,182,0,.5) rgba(255,255,255,.06); }
 .leaderboard-scroll::-webkit-scrollbar { width: 7px; }
 .leaderboard-scroll::-webkit-scrollbar-track { background: rgba(255,255,255,.05); border-radius: 999px; }

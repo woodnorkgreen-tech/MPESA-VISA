@@ -1,30 +1,30 @@
 <template>
-  <div class="flex min-h-0 flex-1 items-start justify-center overflow-y-auto px-3 py-4 pb-safe sm:px-6 sm:py-8">
-    <div class="my-auto w-full max-w-xl">
-      <header class="mb-4 text-center sm:mb-6">
-        <p class="brand-kicker mb-1.5">Before kick-off</p>
-        <h2 class="text-2xl font-extrabold text-white sm:text-3xl">Make your prediction</h2>
-        <p class="mt-1 text-sm text-gray-400">Six quick steps. You can edit it until predictions close.</p>
-        <p class="mx-auto mt-2 max-w-md rounded-full border border-visa-gold/20 bg-visa-gold/10 px-3 py-1.5 text-[11px] font-semibold text-visa-gold">
+  <div class="flex min-h-0 flex-1 justify-center overflow-hidden px-3 py-2 pb-safe sm:px-6 sm:py-4">
+    <div class="flex h-full min-h-0 w-full max-w-xl flex-col justify-center">
+      <header class="mb-2 shrink-0 text-center sm:mb-3">
+        <p class="brand-kicker mb-1.5">Tap In with Visa</p>
+        <h2 class="text-xl font-extrabold text-white sm:text-2xl">Predict the Final</h2>
+        <p class="mt-0.5 text-xs text-gray-400 sm:text-sm">Six quick steps. You can edit until predictions close.</p>
+        <p class="mx-auto mt-1.5 max-w-md rounded-full border border-visa-gold/20 bg-visa-gold/10 px-3 py-1 text-[10px] font-semibold text-visa-gold sm:text-[11px]">
           Score predictions use 90 minutes + stoppage time. Extra time and penalties do not count.
         </p>
       </header>
 
-      <form @submit.prevent="submit" class="glass-card overflow-hidden rounded-2xl">
-        <div class="border-b border-white/10 px-4 pb-3 pt-4 sm:px-7 sm:pt-6">
-          <div class="mb-2 flex items-center justify-between text-xs font-bold">
-            <span class="uppercase tracking-widest text-safaricom-light">Step {{ step }} of 6</span>
+      <form @submit.prevent="submit" class="glass-card flex min-h-0 flex-col overflow-hidden rounded-2xl">
+        <div class="shrink-0 border-b border-white/10 px-4 py-2.5 sm:px-6 sm:py-3">
+          <div class="mb-1.5 flex items-center justify-between text-[11px] font-bold sm:text-xs">
+            <span class="uppercase tracking-widest text-visa-gold">Step {{ step }} of 6</span>
             <span class="text-gray-500">{{ stepTitles[step - 1] }}</span>
           </div>
           <div class="grid grid-cols-6 gap-1.5" aria-label="Prediction progress">
             <button v-for="number in 6" :key="number" type="button" @click="goToCompletedStep(number)"
               :aria-label="`Go to step ${number}: ${stepTitles[number - 1]}`"
               class="h-1.5 rounded-full transition"
-              :class="number <= step ? 'bg-safaricom-light' : 'bg-white/10'" />
+              :class="number <= step ? 'bg-visa-gold' : 'bg-white/10'" />
           </div>
         </div>
 
-        <div class="px-4 py-5 sm:px-7 sm:py-7">
+        <div class="prediction-body min-h-0 flex-1 px-4 py-3 sm:px-6 sm:py-4">
           <div v-if="readOnly" class="mb-4 rounded-xl border border-purple-400/30 bg-purple-500/10 px-4 py-3 text-center text-sm font-bold text-purple-200">
             MC preview — interaction is disabled
           </div>
@@ -35,7 +35,7 @@
 
           <!-- Step 1: large, thumb-friendly score controls. -->
           <section v-else-if="step === 1" class="prediction-step" aria-labelledby="score-title">
-            <div class="mb-5 text-center">
+            <div class="mb-3 text-center">
               <h3 id="score-title" class="text-lg font-black text-white sm:text-xl">What will the final score be?</h3>
               <p class="mt-1 text-xs text-gray-500">Use + and − or tap a common score below.</p>
             </div>
@@ -44,33 +44,33 @@
               <span class="pt-9 text-2xl font-black text-gray-600 sm:text-3xl">–</span>
               <ScoreStepper v-model="form.score_away" :team="match.away_team" :flag="teamFlag(match.away_team)" />
             </div>
-            <div class="mt-5">
-              <p class="mb-2 text-center text-[11px] font-bold uppercase tracking-widest text-gray-600">Quick picks</p>
+            <div class="mt-3">
+              <p class="mb-1.5 text-center text-[10px] font-bold uppercase tracking-widest text-gray-600">Quick picks</p>
               <div class="grid grid-cols-4 gap-2">
                 <button v-for="score in quickScores" :key="score.join('-')" type="button" @click="setScore(score)"
-                  class="min-h-11 rounded-xl border text-sm font-black transition active:scale-95"
-                  :class="isScore(score) ? 'border-safaricom-light bg-safaricom/20 text-white' : 'border-white/10 bg-white/5 text-gray-400 hover:border-white/25'">
+                  class="min-h-9 rounded-lg border text-xs font-black transition active:scale-95 sm:min-h-10 sm:text-sm"
+                  :class="isScore(score) ? 'border-visa-gold bg-visa/20 text-white' : 'border-white/10 bg-white/5 text-gray-400 hover:border-white/25'">
                   {{ score[0] }}–{{ score[1] }}
                 </button>
               </div>
             </div>
-            <div class="mt-4 rounded-xl border border-safaricom/20 bg-safaricom/10 px-4 py-3 text-center">
+            <div class="mt-3 rounded-xl border border-visa/20 bg-visa/10 px-4 py-2 text-center">
               <p class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Full-time winner · derived from your score</p>
-              <div class="mt-2 flex justify-center">
+              <div class="mt-1 flex justify-center">
                 <img v-if="outcomeFlag(fulltimeWinner)" :src="outcomeFlag(fulltimeWinner)" :alt="outcomeLabel(fulltimeWinner)"
-                  class="h-9 w-14 rounded object-cover shadow ring-2 ring-safaricom-light/40" />
-                <p v-else class="font-black text-safaricom-light">Draw</p>
+                  class="h-7 w-11 rounded object-cover shadow ring-2 ring-visa-gold/40" />
+                <p v-else class="font-black text-visa-gold">Draw</p>
               </div>
             </div>
           </section>
 
           <!-- Step 2 -->
           <section v-else-if="step === 2" class="prediction-step" aria-labelledby="scorer-title">
-            <div class="mb-4 text-center">
+            <div class="mb-3 text-center">
               <h3 id="scorer-title" class="text-lg font-black text-white sm:text-xl">Which team scores first?</h3>
               <p class="mt-1 text-xs text-gray-500">Choose the first team on the scoresheet.</p>
             </div>
-            <div class="grid gap-3 sm:grid-cols-2">
+            <div class="grid gap-2 sm:grid-cols-2">
               <button v-for="choice in teamChoices" :key="choice.value" type="button" @click="form.first_scoring_team = choice.value"
                 :disabled="!teamCanScore(choice.value)"
                 class="choice-card disabled:cursor-not-allowed disabled:opacity-30" :class="form.first_scoring_team === choice.value ? 'choice-card-active' : ''">
@@ -85,11 +85,11 @@
 
           <!-- Step 3: first player, constrained to the selected team -->
           <section v-else-if="step === 3" class="prediction-step" aria-labelledby="halftime-title">
-            <div class="mb-4 text-center">
+            <div class="mb-3 text-center">
               <h3 class="text-lg font-black text-white sm:text-xl">Which player scores first?</h3>
               <p class="mt-1 text-xs text-gray-500">Only players from your selected first-scoring team are shown.</p>
             </div>
-            <div v-if="form.first_scoring_team === 'none'" class="rounded-2xl border border-safaricom/20 bg-safaricom/10 px-5 py-8 text-center">
+            <div v-if="form.first_scoring_team === 'none'" class="rounded-2xl border border-visa/20 bg-visa/10 px-5 py-8 text-center">
               <p class="text-2xl">✓</p>
               <p class="mt-2 font-black text-white">No goalscorer</p>
               <p class="mt-1 text-xs text-gray-400">Your predicted score is 0–0.</p>
@@ -100,11 +100,11 @@
 
           <!-- Step 4: half-time outcome -->
           <section v-else-if="step === 4" class="prediction-step" aria-labelledby="halftime-title">
-            <div class="mb-4 text-center">
+            <div class="mb-3 text-center">
               <h3 id="halftime-title" class="text-lg font-black text-white sm:text-xl">Who leads at half-time?</h3>
               <p class="mt-1 text-xs text-gray-500">A level score at half-time counts as a draw.</p>
             </div>
-            <div class="grid gap-3">
+            <div class="grid gap-2">
               <button v-for="choice in outcomeChoices" :key="choice.value" type="button" @click="form.halftime_winner = choice.value"
                 :disabled="!halftimeOutcomePossible(choice.value)"
                 class="choice-card disabled:cursor-not-allowed disabled:opacity-30" :class="form.halftime_winner === choice.value ? 'choice-card-active' : ''">
@@ -116,7 +116,7 @@
 
           <!-- Step 5 -->
           <section v-else-if="step === 5" class="prediction-step" aria-labelledby="potm-title">
-            <div class="mb-4 text-center">
+            <div class="mb-3 text-center">
               <h3 id="potm-title" class="text-lg font-black text-white sm:text-xl">Who will be Player of the Match?</h3>
               <p class="mt-1 text-xs text-gray-500">Choose the player you expect to stand out.</p>
             </div>
@@ -126,32 +126,32 @@
 
           <!-- Step 6: explicit review prevents accidental submissions. -->
           <section v-else class="prediction-step" aria-labelledby="review-title">
-            <div class="mb-4 text-center">
+            <div class="mb-2 text-center">
               <h3 id="review-title" class="text-lg font-black text-white sm:text-xl">Review your prediction</h3>
               <p class="mt-1 text-xs text-gray-500">Check everything before saving.</p>
             </div>
-            <div class="space-y-2.5">
+            <div class="grid grid-cols-2 gap-2">
               <button type="button" @click="step = 1" class="review-row">
                 <span><span class="review-label">Final score</span><strong class="review-value">{{ form.score_home }} – {{ form.score_away }}</strong></span>
-                <span class="text-xs font-bold text-safaricom-light">Edit</span>
+                <span class="text-xs font-bold text-visa-gold">Edit</span>
               </button>
               <button type="button" @click="step = 2" class="review-row">
                 <span class="min-w-0"><span class="review-label">First team to score</span>
                   <img v-if="outcomeFlag(form.first_scoring_team)" :src="outcomeFlag(form.first_scoring_team)" :alt="firstTeamLabel" class="mt-1 h-7 w-11 rounded object-cover ring-1 ring-white/20" />
                   <strong v-else class="review-value truncate">{{ firstTeamLabel }}</strong>
                 </span>
-                <span class="text-xs font-bold text-safaricom-light">Edit</span>
+                <span class="text-xs font-bold text-visa-gold">Edit</span>
               </button>
               <button type="button" @click="step = 3" class="review-row">
                 <span class="min-w-0"><span class="review-label">First goalscorer</span><strong class="review-value truncate">{{ form.first_scorer }}</strong></span>
-                <span class="text-xs font-bold text-safaricom-light">Edit</span>
+                <span class="text-xs font-bold text-visa-gold">Edit</span>
               </button>
               <button type="button" @click="step = 4" class="review-row">
                 <span class="min-w-0"><span class="review-label">Half-time winner</span>
                   <img v-if="outcomeFlag(form.halftime_winner)" :src="outcomeFlag(form.halftime_winner)" :alt="outcomeLabel(form.halftime_winner)" class="mt-1 h-7 w-11 rounded object-cover ring-1 ring-white/20" />
                   <strong v-else class="review-value truncate">Draw</strong>
                 </span>
-                <span class="text-xs font-bold text-safaricom-light">Edit</span>
+                <span class="text-xs font-bold text-visa-gold">Edit</span>
               </button>
               <div class="review-row">
                 <span class="min-w-0"><span class="review-label">Full-time winner</span>
@@ -162,24 +162,24 @@
               </div>
               <button type="button" @click="step = 5" class="review-row">
                 <span class="min-w-0"><span class="review-label">Player of the Match</span><strong class="review-value truncate">{{ form.potm }}</strong></span>
-                <span class="text-xs font-bold text-safaricom-light">Edit</span>
+                <span class="text-xs font-bold text-visa-gold">Edit</span>
               </button>
             </div>
-            <div v-if="hasSavedPrediction" class="mt-4 rounded-xl border border-safaricom/20 bg-safaricom/10 px-4 py-3 text-xs text-gray-300">
+            <div v-if="hasSavedPrediction" class="mt-2 rounded-xl border border-visa/20 bg-visa/10 px-3 py-2 text-xs text-gray-300">
               This will update your previously saved prediction.
             </div>
           </section>
 
-          <p v-if="errorMsg" role="alert" class="mt-4 rounded-xl border border-mpesa/30 bg-mpesa/10 px-3 py-2 text-center text-sm text-red-300">{{ errorMsg }}</p>
+          <p v-if="errorMsg" role="alert" class="mt-4 rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-center text-sm text-red-300">{{ errorMsg }}</p>
         </div>
 
-        <footer v-if="!loadingSaved && configReady" class="sticky bottom-0 flex gap-2 border-t border-white/10 bg-[#091c12]/95 px-4 py-3 backdrop-blur sm:px-7 sm:py-4">
+        <footer v-if="!loadingSaved && configReady" class="shrink-0 flex gap-2 border-t border-white/10 bg-[#070b2a]/95 px-4 py-2.5 backdrop-blur sm:px-6 sm:py-3">
           <button v-if="step > 1" type="button" @click="step--" :disabled="submitting"
             class="min-h-12 rounded-xl border border-white/15 px-5 font-bold text-gray-300 transition hover:border-white/30 disabled:opacity-50">
             Back
           </button>
           <button v-if="step < 6" type="button" @click="nextStep" :disabled="readOnly"
-            class="min-h-12 flex-1 rounded-xl bg-safaricom px-5 font-black text-white transition hover:bg-safaricom-dark disabled:opacity-50">
+            class="min-h-12 flex-1 rounded-xl bg-visa px-5 font-black text-white transition hover:bg-visa disabled:opacity-50">
             Continue →
           </button>
           <button v-else type="submit" :disabled="submitting || readOnly"
@@ -210,7 +210,7 @@
       </div>
       <p class="text-gray-500 text-xs sm:text-sm mb-6">You can edit it any time before predictions close.</p>
       <button v-if="!readOnly" type="button" @click="showSavedModal = false"
-        class="w-full rounded-xl border border-white/15 bg-white/5 px-5 py-3 text-sm font-bold text-white transition hover:border-safaricom-light hover:bg-safaricom/10">
+        class="w-full rounded-xl border border-white/15 bg-white/5 px-5 py-3 text-sm font-bold text-white transition hover:border-visa-gold hover:bg-visa/10">
         Edit prediction
       </button>
     </PlayerModal>
@@ -325,7 +325,7 @@ watch(() => form.first_scoring_team, (team, previous) => {
 })
 
 function teamFlag(team) {
-  return ({ england: '/images/flags/england.svg', argentina: '/images/flags/argentina.svg' })[String(team ?? '').trim().toLowerCase()] ?? ''
+  return ({ argentina: '/images/flags/argentina.svg', spain: '/images/flags/spain.svg' })[String(team ?? '').trim().toLowerCase()] ?? ''
 }
 
 async function submit() {
@@ -351,13 +351,20 @@ async function submit() {
 </script>
 
 <style scoped>
-.prediction-step { animation: prediction-step-in .25s ease both; }
-.review-row { display:flex; width:100%; min-height:4rem; align-items:center; justify-content:space-between; gap:1rem; border:1px solid rgba(255,255,255,.1); border-radius:.9rem; background:rgba(255,255,255,.04); padding:.75rem 1rem; text-align:left; }
+.prediction-step { height:100%; animation: prediction-step-in .25s ease both; }
+.review-row { display:flex; width:100%; min-height:3.15rem; align-items:center; justify-content:space-between; gap:.6rem; border:1px solid rgba(255,255,255,.1); border-radius:.75rem; background:rgba(255,255,255,.04); padding:.45rem .7rem; text-align:left; }
 .review-label { display:block; color:#6b7280; font-size:.7rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; }
-.review-value { display:block; margin-top:.15rem; color:#fff; font-size:1rem; }
-.choice-card { display:flex; min-height:4rem; align-items:center; justify-content:center; gap:.75rem; border:1px solid rgba(255,255,255,.1); border-radius:1rem; background:rgba(255,255,255,.04); padding:.8rem 1rem; color:#d1d5db; transition:.2s; }
+.review-value { display:block; margin-top:.1rem; color:#fff; font-size:.875rem; }
+.choice-card { display:flex; min-height:3.35rem; align-items:center; justify-content:center; gap:.75rem; border:1px solid rgba(255,255,255,.1); border-radius:.85rem; background:rgba(255,255,255,.04); padding:.55rem .8rem; color:#d1d5db; transition:.2s; }
 .choice-card:hover { border-color:rgba(255,255,255,.25); }
 .choice-card-active { border-color:#35d06f; background:rgba(0,166,81,.18); color:#fff; box-shadow:0 0 0 1px rgba(53,208,111,.18); }
 @keyframes prediction-step-in { from { opacity:0; transform:translateX(10px); } to { opacity:1; transform:none; } }
+@media (max-height: 700px) {
+  .prediction-body { padding-top:.55rem; padding-bottom:.55rem; }
+  .review-row { min-height:2.65rem; padding:.3rem .6rem; }
+  .review-label { font-size:.6rem; }
+  .review-value { font-size:.78rem; }
+  .choice-card { min-height:2.9rem; }
+}
 @media (prefers-reduced-motion: reduce) { .prediction-step { animation:none; } }
 </style>

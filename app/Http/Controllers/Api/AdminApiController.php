@@ -441,7 +441,7 @@ class AdminApiController extends Controller
             'order_index'      => 'required|integer',
             'type'             => 'required|in:multiple_choice,true_false',
             'text'             => 'required|string',
-            'category'         => 'required|in:general_knowledge,fifa_world_cup,visa,mpesa,campaign',
+            'category'         => 'required|in:general_knowledge,fifa_world_cup,visa',
             'options'          => 'required|array|min:2|max:4',
             'options.*'        => 'required|string|max:255|distinct',
             'correct_answer'   => ['required', 'string', Rule::in($request->input('options', []))],
@@ -457,10 +457,9 @@ class AdminApiController extends Controller
         if ($question->status === 'live') {
             return response()->json(['message' => 'Cannot edit a live question.'], 422);
         }
-
         $data = $request->validate([
             'order_index'      => 'integer',
-            'category'         => 'in:general_knowledge,fifa_world_cup,visa,mpesa,campaign',
+            'category'         => 'in:general_knowledge,fifa_world_cup,visa',
             'type'             => 'in:multiple_choice,true_false',
             'text'             => 'string',
             'options'          => 'array|min:2|max:4',

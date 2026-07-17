@@ -16,8 +16,6 @@ return new class extends Migration
                 'general_knowledge',
                 'fifa_world_cup',
                 'visa',
-                'mpesa',
-                'campaign',
             ])->default('general_knowledge')->after('order_index');
         });
     }

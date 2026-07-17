@@ -27,7 +27,7 @@
             style="transition: stroke-dashoffset 1s linear" />
         </svg>
         <span class="absolute inset-0 flex items-center justify-center font-black text-lg sm:text-xl md:text-2xl"
-          :class="timeLeft <= 5 ? 'text-mpesa animate-pulse' : 'text-white'">
+          :class="timeLeft <= 5 ? 'text-red-400 animate-pulse' : 'text-white'">
           {{ timeLeft }}
         </span>
       </div>
@@ -63,7 +63,7 @@
         <p v-if="submissionError" class="text-visa-gold font-bold text-base sm:text-lg">
           {{ submissionError }}
         </p>
-        <p v-else class="text-safaricom-light font-bold text-base sm:text-lg">
+        <p v-else class="text-visa-gold font-bold text-base sm:text-lg">
           ✓ Answer saved — tap another choice to change it ({{ timeLeft }}s left)
         </p>
       </div>
@@ -91,7 +91,7 @@
         <p class="text-gray-500 text-xs sm:text-sm mt-2">You didn't select an option in time, so this question earns 0 points. Stay sharp for the next one.</p>
       </template>
       <button type="button" @click="showTimeUpModal = false"
-        class="mt-6 w-full rounded-xl bg-safaricom px-5 py-3 text-sm font-black text-white transition hover:bg-safaricom-dark">
+        class="mt-6 w-full rounded-xl bg-visa px-5 py-3 text-sm font-black text-white transition hover:bg-visa">
         Got it
       </button>
     </PlayerModal>
@@ -130,7 +130,7 @@ const dashOffset = computed(() =>
 )
 const timerColor = computed(() => {
   const ratio = timeLeft.value / props.question.duration_seconds
-  if (ratio > 0.5) return '#00C65A'
+  if (ratio > 0.5) return '#F7B600'
   if (ratio > 0.25) return '#F7B600'
   return '#C8102E'
 })
@@ -161,7 +161,7 @@ watch(
 
 function optionClass(option) {
   if (option === selected.value) {
-    return 'bg-safaricom/25 border-safaricom-light text-white ring-2 ring-safaricom-light/30'
+    return 'bg-visa/25 border-visa-gold text-white ring-2 ring-visa-gold/30'
   }
   return 'bg-gray-800 border-gray-700 hover:bg-gray-700 hover:border-gray-500 text-white'
 }

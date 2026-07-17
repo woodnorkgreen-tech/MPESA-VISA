@@ -638,7 +638,7 @@ class EventReliabilityTest extends TestCase
             ->assertJsonPath('leaderboard.0.prediction_score', 750);
     }
 
-    public function test_expired_countdown_locks_and_reveals_the_answer_without_mc_action(): void
+    public function test_expired_countdown_automatically_closes_and_reveals_without_mc_action(): void
     {
         [$player, $token] = $this->player();
         $question = $this->liveQuestion([
@@ -655,9 +655,16 @@ class EventReliabilityTest extends TestCase
         ]);
 
         $this->getJson('/api/state')->assertOk()
-            ->assertJsonPath('phase', 'trivia_live')
+            ->assertJsonPath('phase', 'trivia_reveal')
             ->assertJsonPath('question.seconds_remaining', 0)
+            ->assertJsonPath('question.status', 'closed')
             ->assertJsonPath('question.correct_answer', 'Nairobi');
+
+        $this->assertSame('closed', $question->fresh()->status);
+        $this->assertDatabaseHas('event_audits', [
+            'action' => 'question.auto_revealed',
+            'subject_id' => $question->id,
+        ]);
 
         $this->withHeader('X-Player-Token', $token)
             ->getJson("/api/answers/result?player_id={$player->id}&question_id={$question->id}")

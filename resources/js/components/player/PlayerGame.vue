@@ -5,7 +5,7 @@
     <div v-if="!playerId" class="flex-1 flex items-center justify-center p-6 text-center">
       <div>
         <p class="text-gray-400 mb-4">Session expired or not registered.</p>
-        <a href="/" class="text-safaricom-light underline text-lg">Register / Login →</a>
+        <a href="/" class="text-visa-gold underline text-lg">Register / Login →</a>
       </div>
     </div>
 
@@ -34,14 +34,14 @@
         class="flex-1 flex flex-col items-center justify-center p-6 sm:p-10 text-center pb-safe">
         <div class="lobby-card glass-card w-full max-w-sm rounded-3xl px-7 py-10 sm:px-10 sm:py-12">
 
-          <span class="inline-flex items-center gap-2 rounded-full bg-safaricom/15 border border-safaricom/30 px-3 py-1 mb-7">
-            <span class="h-1.5 w-1.5 rounded-full bg-safaricom-light animate-pulse" aria-hidden="true"></span>
+          <span class="inline-flex items-center gap-2 rounded-full bg-visa/15 border border-visa/30 px-3 py-1 mb-7">
+            <span class="h-1.5 w-1.5 rounded-full bg-visa-gold animate-pulse" aria-hidden="true"></span>
             <span class="brand-kicker">Event lobby</span>
           </span>
 
           <div class="relative w-20 h-20 mx-auto mb-7" aria-hidden="true">
             <div class="absolute inset-0 rounded-full border-4 border-white/10"></div>
-            <div class="absolute inset-0 rounded-full border-4 border-transparent border-t-safaricom-light animate-spin"></div>
+            <div class="absolute inset-0 rounded-full border-4 border-transparent border-t-visa-gold animate-spin"></div>
             <span class="absolute inset-0 flex items-center justify-center text-3xl">⚽</span>
           </div>
 
@@ -49,7 +49,7 @@
           <p class="text-gray-300 text-base sm:text-lg leading-relaxed">The game starts soon. Watch the big screen.</p>
 
           <div class="mt-7 inline-flex items-center gap-2 rounded-full bg-white/5 border border-white/10 px-4 py-2">
-            <span class="h-2 w-2 rounded-full bg-safaricom-light animate-pulse" aria-hidden="true"></span>
+            <span class="h-2 w-2 rounded-full bg-visa-gold animate-pulse" aria-hidden="true"></span>
             <span class="text-sm text-gray-300"><strong class="text-white font-bold">{{ playerCount }}</strong> players joined</span>
           </div>
         </div>
@@ -78,18 +78,18 @@
         <div v-if="answerResultLoading" class="text-gray-400 text-lg">Checking your answer…</div>
         <div v-else class="glass-card w-full max-w-lg rounded-3xl p-6 sm:p-9">
           <div v-if="answerResultKnown" class="text-5xl sm:text-6xl mb-3" aria-hidden="true">{{ lastAnswerCorrect ? '✓' : '×' }}</div>
-          <p v-if="answerResultKnown && lastAnswerCorrect" class="text-safaricom-light text-2xl sm:text-3xl font-black">Correct!</p>
-          <p v-else-if="answerResultKnown" class="text-mpesa text-2xl sm:text-3xl font-black">Incorrect</p>
+          <p v-if="answerResultKnown && lastAnswerCorrect" class="text-visa-gold text-2xl sm:text-3xl font-black">Correct!</p>
+          <p v-else-if="answerResultKnown" class="text-red-400 text-2xl sm:text-3xl font-black">Incorrect</p>
           <p v-else class="text-gray-300 text-xl sm:text-2xl font-bold">No answer recorded</p>
 
           <div class="mt-6 space-y-3 text-left">
             <div v-if="answerResultKnown" class="rounded-xl border px-4 py-3"
-              :class="lastAnswerCorrect ? 'border-safaricom-light/40 bg-safaricom/15' : 'border-mpesa/35 bg-mpesa/10'">
+              :class="lastAnswerCorrect ? 'border-visa-gold/40 bg-visa/15' : 'border-red-500/35 bg-red-500/10'">
               <p class="text-xs font-bold uppercase tracking-widest text-gray-500">Your choice</p>
               <p class="mt-1 font-bold text-white">{{ lastSelectedAnswer }}</p>
             </div>
-            <div class="rounded-xl border border-safaricom-light/40 bg-safaricom/15 px-4 py-3">
-              <p class="text-xs font-bold uppercase tracking-widest text-safaricom-light">Correct answer</p>
+            <div class="rounded-xl border border-visa-gold/40 bg-visa/15 px-4 py-3">
+              <p class="text-xs font-bold uppercase tracking-widest text-visa-gold">Correct answer</p>
               <p class="mt-1 font-black text-white">{{ question.correct_answer }}</p>
             </div>
           </div>
@@ -133,7 +133,7 @@
       <h3 class="text-xl font-black text-white mb-2">Predictions are closed</h3>
       <p class="text-gray-300 text-sm sm:text-base">No more edits — the prediction window for this match has ended.</p>
       <button type="button" @click="showPredictionsClosedModal = false"
-        class="mt-6 w-full rounded-xl bg-safaricom px-5 py-3 text-sm font-black text-white transition hover:bg-safaricom-dark">
+        class="mt-6 w-full rounded-xl bg-visa px-5 py-3 text-sm font-black text-white transition hover:bg-visa">
         Got it
       </button>
     </PlayerModal>
@@ -225,13 +225,13 @@ function signOut() {
 .lobby-bg {
   background-image:
     linear-gradient(180deg, rgba(2, 20, 11, .32) 0%, rgba(2, 20, 11, .16) 45%, rgba(2, 20, 11, .6) 100%),
-    url('/images/backgrounds/event-portrait.webp');
+    url('/images/backgrounds/event-portrait-visa.png');
 }
 @media (min-width: 900px) {
   .lobby-bg {
     background-image:
       linear-gradient(90deg, rgba(1, 18, 10, .58) 0%, rgba(1, 18, 10, .28) 48%, rgba(1, 18, 10, .1) 100%),
-      url('/images/backgrounds/event-landscape.webp');
+      url('/images/backgrounds/event-landscape-visa.png');
   }
 }
 

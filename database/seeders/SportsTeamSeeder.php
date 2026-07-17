@@ -11,14 +11,14 @@ class SportsTeamSeeder extends Seeder
     public function run(): void
     {
         $teams = [
-            ['name' => 'England', 'code' => 'ENG', 'country_code' => 'GB', 'players' => [
-                ['Jordan Pickford', 'GK', 1], ['Ezri Konsa', 'DF', 2], ["Nico O'Reilly", 'DF', 3], ['Declan Rice', 'MF', 4],
-                ['John Stones', 'DF', 5], ['Marc Guehi', 'DF', 6], ['Bukayo Saka', 'FW', 7], ['Elliot Anderson', 'MF', 8],
-                ['Harry Kane', 'FW', 9], ['Jude Bellingham', 'MF', 10], ['Marcus Rashford', 'FW', 11], ['Trevoh Chalobah', 'DF', 12],
-                ['Dean Henderson', 'GK', 13], ['Jordan Henderson', 'MF', 14], ['Dan Burn', 'DF', 15], ['Kobbie Mainoo', 'MF', 16],
-                ['Morgan Rogers', 'MF', 17], ['Anthony Gordon', 'FW', 18], ['Ollie Watkins', 'FW', 19], ['Noni Madueke', 'FW', 20],
-                ['Eberechi Eze', 'MF', 21], ['Ivan Toney', 'FW', 22], ['James Trafford', 'GK', 23], ['Reece James', 'DF', 24],
-                ['Djed Spence', 'DF', 25], ['Jarell Quansah', 'DF', 26],
+            ['name' => 'Spain', 'code' => 'ESP', 'country_code' => 'ES', 'players' => [
+                ['David Raya', 'GK', 1], ['Marc Pubill', 'DF', 2], ['Alex Grimaldo', 'DF', 3], ['Eric Garcia', 'DF', 4],
+                ['Marcos Llorente', 'DF', 5], ['Mikel Merino', 'MF', 6], ['Ferran Torres', 'FW', 7], ['Fabian Ruiz', 'MF', 8],
+                ['Gavi', 'MF', 9], ['Dani Olmo', 'FW', 10], ['Yeremy Pino', 'FW', 11], ['Pedro Porro', 'DF', 12],
+                ['Joan Garcia', 'GK', 13], ['Aymeric Laporte', 'DF', 14], ['Alex Baena', 'MF', 15], ['Rodri', 'MF', 16],
+                ['Nico Williams', 'FW', 17], ['Martin Zubimendi', 'MF', 18], ['Lamine Yamal', 'FW', 19], ['Pedri', 'MF', 20],
+                ['Mikel Oyarzabal', 'FW', 21], ['Pau Cubarsi', 'DF', 22], ['Unai Simon', 'GK', 23], ['Marc Cucurella', 'DF', 24],
+                ['Victor Munoz', 'FW', 25], ['Borja Iglesias', 'FW', 26],
             ]],
             ['name' => 'Argentina', 'code' => 'ARG', 'country_code' => 'AR', 'players' => [
                 ['Juan Musso', 'GK', 1], ['Marcos Senesi', 'DF', 2], ['Nicolas Tagliafico', 'DF', 3], ['Gonzalo Montiel', 'DF', 4],
@@ -30,6 +30,9 @@ class SportsTeamSeeder extends Seeder
                 ['Facundo Medina', 'DF', 25], ['Nahuel Molina', 'DF', 26],
             ]],
         ];
+
+        // This event is dedicated to the final; remove squads left over from earlier rounds.
+        SportsTeam::whereNotIn('code', ['ARG', 'ESP'])->delete();
 
         foreach ($teams as $teamData) {
             $players = $teamData['players'];
@@ -44,17 +47,17 @@ class SportsTeamSeeder extends Seeder
             }
         }
 
-        $england = SportsTeam::where('code', 'ENG')->with('players')->firstOrFail();
+        $spain = SportsTeam::where('code', 'ESP')->with('players')->firstOrFail();
         $argentina = SportsTeam::where('code', 'ARG')->with('players')->firstOrFail();
 
         MatchConfig::current()->update([
-            'home_team' => 'England',
-            'away_team' => 'Argentina',
-            'home_squad' => $england->players->pluck('name')->values()->all(),
-            'away_squad' => $argentina->players->pluck('name')->values()->all(),
-            // The application timezone is Nairobi; FIFA lists 15:00 Atlanta / 22:00 Nairobi.
-            'kickoff_at' => '2026-07-15 22:00:00',
-            'venue' => 'Atlanta Stadium',
+            'home_team' => 'Argentina',
+            'away_team' => 'Spain',
+            'home_squad' => $argentina->players->pluck('name')->values()->all(),
+            'away_squad' => $spain->players->pluck('name')->values()->all(),
+            // The application timezone is Nairobi; 15:00 New York is 22:00 Nairobi.
+            'kickoff_at' => '2026-07-19 22:00:00',
+            'venue' => 'New York New Jersey Stadium',
         ]);
     }
 }

@@ -5,11 +5,11 @@
     <div class="fixed right-3 top-3 z-50 flex items-center gap-2 print:hidden">
       <span v-if="linkMessage" class="rounded-full bg-black/70 px-3 py-2 text-xs font-bold text-white backdrop-blur">{{ linkMessage }}</span>
       <button type="button" @click="copyScreenLink" title="Copy public Main Screen link"
-        class="rounded-full border border-white/15 bg-black/55 px-3 py-2 text-xs font-bold text-white backdrop-blur hover:bg-black/75 focus:outline-none focus:ring-2 focus:ring-safaricom-light">
+        class="rounded-full border border-white/15 bg-black/55 px-3 py-2 text-xs font-bold text-white backdrop-blur hover:bg-black/75 focus:outline-none focus:ring-2 focus:ring-visa-gold">
         🔗 <span class="hidden sm:inline">Public link</span>
       </button>
       <button type="button" @click="toggleFullscreen" :title="isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'"
-        class="rounded-full border border-white/15 bg-black/55 px-3 py-2 text-xs font-bold text-white backdrop-blur hover:bg-black/75 focus:outline-none focus:ring-2 focus:ring-safaricom-light">
+        class="rounded-full border border-white/15 bg-black/55 px-3 py-2 text-xs font-bold text-white backdrop-blur hover:bg-black/75 focus:outline-none focus:ring-2 focus:ring-visa-gold">
         {{ isFullscreen ? '✕' : '⛶' }} <span class="hidden sm:inline">{{ isFullscreen ? 'Exit' : 'Fullscreen' }}</span>
       </button>
     </div>
@@ -21,17 +21,14 @@
       <div class="flex-1 flex flex-col items-center justify-center px-8 lg:px-16 text-center">
 
         <!-- Title — clamp scales from small monitors to 4K -->
-        <h1 class="font-black italic text-white tracking-tight leading-none mb-3 flex items-center justify-center gap-[.24em]"
+        <h1 class="font-black italic uppercase text-white tracking-tight leading-none mb-3"
           style="font-size: clamp(3rem, 7vw, 9rem)">
-          <span>GAME IKO</span><OnIcon />
+          <span>Final Whistle</span>
         </h1>
         <div class="flex items-center justify-center gap-5 lg:gap-8 mb-8 lg:mb-12">
-          <span class="text-gray-300" style="font-size: clamp(0.9rem, 1.6vw, 2rem)">Powered by</span>
-          <img src="/images/mpesa-logo.svg" alt="M-PESA GlobalPay"
-            class="object-contain drop-shadow-lg" style="height: clamp(2.2rem, 4.5vw, 5.5rem)" />
-          <span class="w-px bg-white/30 self-stretch"></span>
+          <span class="text-gray-300" style="font-size: clamp(0.9rem, 1.6vw, 2rem)">Tap In with</span>
           <img src="/images/visa-logo.svg" alt="Visa"
-            class="object-contain drop-shadow-lg" style="height: clamp(1.4rem, 3vw, 3.6rem)" />
+            class="object-contain drop-shadow-lg" style="height: clamp(1.8rem, 3.8vw, 4.6rem)" />
         </div>
 
         <!-- Broadcast layout: join left, event status centre, recent activity right -->
@@ -53,9 +50,9 @@
           <!-- CENTRE: kick-off and prediction state remain on the screen axis -->
           <div class="flex-1 flex flex-col items-center text-center">
             <div class="rounded-2xl border px-6 py-3"
-              :class="phase === 'predictions_closed' ? 'border-orange-400/30 bg-orange-400/10' : 'border-safaricom-light/30 bg-safaricom/10'">
+              :class="phase === 'predictions_closed' ? 'border-orange-400/30 bg-orange-400/10' : 'border-visa-gold/30 bg-visa/20'">
               <p class="font-black uppercase tracking-widest"
-                :class="phase === 'predictions_closed' ? 'text-orange-400' : 'text-safaricom-light'"
+                :class="phase === 'predictions_closed' ? 'text-orange-400' : 'text-visa-gold'"
                 style="font-size: clamp(.65rem, 1vw, 1rem)">
                 {{ phase === 'predictions_closed' ? '🔒 Predictions closed' : '● Predictions open' }}
               </p>
@@ -84,12 +81,12 @@
                 <p class="font-black uppercase tracking-widest text-white" style="font-size: clamp(.65rem,1vw,1rem)">Latest locked in</p>
                 <p class="mt-0.5 text-gray-500" style="font-size: clamp(.55rem,.8vw,.8rem)">{{ predictionFeed.length }} players · newest first</p>
               </div>
-              <span class="h-2.5 w-2.5 shrink-0 animate-pulse rounded-full bg-safaricom-light"></span>
+              <span class="h-2.5 w-2.5 shrink-0 animate-pulse rounded-full bg-visa-gold"></span>
             </div>
             <TransitionGroup v-if="predictionFeed.length" name="ticker" tag="ol" class="prediction-feed-scroll max-h-[42vh] space-y-2 overflow-y-auto overscroll-contain pr-1">
               <li v-for="(entry, idx) in predictionFeed" :key="entry.id"
                 class="flex min-w-0 items-center gap-3 rounded-xl border border-white/5 bg-white/5 px-3 py-2.5">
-                <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-safaricom/20 text-xs font-black text-safaricom-light">{{ idx + 1 }}</span>
+                <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-visa/30 text-xs font-black text-visa-gold">{{ idx + 1 }}</span>
                 <div class="min-w-0">
                   <p class="truncate font-bold text-white" style="font-size: clamp(.75rem,1.2vw,1.3rem)">{{ entry.nickname }}</p>
                   <p class="text-gray-500" style="font-size: clamp(.55rem,.75vw,.75rem)">Prediction locked ✓</p>
@@ -133,7 +130,7 @@
           <div class="flex items-center gap-4 lg:gap-7">
             <div class="text-right">
               <Transition name="count" mode="out-in">
-                <p :key="question.answer_count" class="font-black text-safaricom-light tabular-nums" style="font-size: clamp(1.4rem, 3vw, 3.5rem)">{{ question.answer_count ?? 0 }}</p>
+                <p :key="question.answer_count" class="font-black text-visa-gold tabular-nums" style="font-size: clamp(1.4rem, 3vw, 3.5rem)">{{ question.answer_count ?? 0 }}</p>
               </Transition>
               <p class="text-gray-500 uppercase tracking-wider" style="font-size: clamp(.55rem, .9vw, .9rem)">Answers live</p>
             </div>
@@ -149,7 +146,7 @@
                 style="transition: stroke-dashoffset 1s linear;" />
             </svg>
             <span class="absolute inset-0 flex items-center justify-center font-black"
-              :class="timeLeft <= 5 ? 'text-mpesa animate-pulse' : 'text-white'"
+              :class="timeLeft <= 5 ? 'text-red-400 animate-pulse' : 'text-white'"
               style="font-size: clamp(1.5rem, 4vw, 5rem)">
               {{ timeLeft }}
             </span>
@@ -203,7 +200,7 @@
           :class="question.options.length === 2 ? 'grid-cols-2' : 'grid-cols-2'">
           <div v-for="(opt, idx) in question.options" :key="idx"
             :class="opt === question.correct_answer
-              ? 'bg-safaricom-light/30 border-safaricom-light text-white'
+              ? 'bg-visa-gold/30 border-visa-gold text-white'
               : 'bg-white/5 border-white/10 text-gray-500'"
             class="border-2 rounded-2xl flex items-center gap-4 px-5 lg:px-8 py-4 lg:py-5 transition-all">
             <span class="text-2xl lg:text-3xl flex-shrink-0">
@@ -215,7 +212,7 @@
               {{ opt }}
             </span>
             <div class="ml-auto shrink-0 text-right">
-              <p class="font-black tabular-nums" :class="opt === question.correct_answer ? 'text-safaricom-light' : 'text-gray-500'"
+              <p class="font-black tabular-nums" :class="opt === question.correct_answer ? 'text-visa-gold' : 'text-gray-500'"
                 style="font-size: clamp(.8rem, 1.5vw, 1.7rem)">{{ optionCount(opt) }}</p>
               <p class="text-gray-600" style="font-size: clamp(.55rem, .8vw, .8rem)">{{ optionPercent(opt) }}%</p>
             </div>
@@ -263,8 +260,8 @@
     ══════════════════════════════════════════════════════════════════════ -->
     <template v-else>
       <div class="flex-1 flex items-center justify-center">
-        <p class="text-white font-black italic flex items-center gap-[.24em]" style="font-size: clamp(1.5rem, 4vw, 5rem)">
-          <span>GAME IKO</span><OnIcon />
+        <p class="text-white font-black italic uppercase" style="font-size: clamp(1.5rem, 4vw, 5rem)">
+          <span>Visa Final Whistle</span>
         </p>
       </div>
     </template>
@@ -272,22 +269,19 @@
     <!-- ══════════════════════════════════════════════════════════════════════
          BOTTOM BRAND STRIP
     ══════════════════════════════════════════════════════════════════════ -->
-    <div class="flex-shrink-0 bg-gradient-to-r from-safaricom-light/80 via-mpesa/80 to-visa/80
+    <div class="flex-shrink-0 bg-gradient-to-r from-visa via-[#1434CB] to-visa
                 flex items-center justify-center gap-6 lg:gap-12 px-8"
       style="height: clamp(2.5rem, 4vh, 5rem)">
-      <img src="/images/mpesa-logo.svg" alt="M-PESA GlobalPay"
-        class="object-contain opacity-90" style="height: clamp(1.4rem, 2.6vh, 3rem)" />
-      <span class="text-white/30">·</span>
       <img src="/images/visa-logo.svg" alt="Visa"
-        class="object-contain opacity-90" style="height: clamp(0.9rem, 1.8vh, 2rem)" />
+        class="object-contain opacity-100" style="height: clamp(1rem, 2vh, 2.2rem)" />
       <span class="text-white/30">·</span>
       <span class="text-white font-semibold tracking-widest opacity-80"
-        style="font-size: clamp(0.6rem, 1.2vw, 1.2rem)">SAFARICOM</span>
+        style="font-size: clamp(0.6rem, 1.2vw, 1.2rem)">ARGENTINA vs SPAIN · FINAL</span>
     </div>
 
     <!-- Connection error -->
     <div v-if="error"
-      class="fixed bottom-20 right-4 bg-mpesa text-white text-xs px-3 py-1.5 rounded-full opacity-80">
+      class="fixed bottom-20 right-4 bg-red-600 text-white text-xs px-3 py-1.5 rounded-full opacity-80">
       {{ error }}
     </div>
 
@@ -300,7 +294,6 @@ import QRCode from 'qrcode'
 import axios from 'axios'
 import { useEventState } from '../../composables/useEventState'
 import Leaderboard from './Leaderboard.vue'
-import OnIcon from '../brand/OnIcon.vue'
 import LiveLeaderboardStrip from './LiveLeaderboardStrip.vue'
 
 const { phase, question, leaderboard, playerCount, predictionCount, recentPredictions, match, round, error } = useEventState(1500)
@@ -397,7 +390,7 @@ const dashOffset = computed(() => {
 const timerColor = computed(() => {
   const total = question.value?.duration_seconds ?? 1
   const ratio = timeLeft.value / total
-  if (ratio > 0.5) return '#00C65A'
+  if (ratio > 0.5) return '#F7B600'
   if (ratio > 0.25) return '#F7B600'
   return '#C8102E'
 })
@@ -432,7 +425,7 @@ onUnmounted(() => {
   background-color: #03130b;
   background-image:
     linear-gradient(90deg, rgba(2, 18, 10, .92), rgba(2, 18, 10, .78) 55%, rgba(2, 18, 10, .44)),
-    url('/images/backgrounds/event-landscape.webp');
+    url('/images/backgrounds/event-landscape-visa.png');
   background-size: cover;
   background-position: center;
 }

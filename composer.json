@@ -1,6 +1,6 @@
 {
-    "name": "mpesa-visa/game-iko-on",
-    "description": "Game Iko On — Safaricom M-PESA & Visa Watch Party Platform",
+    "name": "visa/final-whistle",
+    "description": "Visa Final Whistle — live football prediction and trivia platform",
     "keywords": ["laravel", "event", "trivia", "predictions"],
     "license": "MIT",
     "require": {

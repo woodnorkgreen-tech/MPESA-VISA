@@ -8,10 +8,6 @@ export default {
     theme: {
         extend: {
             colors: {
-                // Safaricom green
-                safaricom: { DEFAULT: '#00A651', dark: '#007A3D', light: '#35D06F' },
-                // M-PESA red
-                mpesa:     { DEFAULT: '#C8102E', dark: '#9B0D22' },
                 // Visa navy/gold
                 visa:      { DEFAULT: '#1A1F71', gold: '#F7B600' },
             },

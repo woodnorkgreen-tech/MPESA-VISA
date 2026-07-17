@@ -28,7 +28,7 @@ class EventStateController extends Controller
 
     private function buildPayload(ScoringService $scoring): array
     {
-        $state    = EventState::current();
+        $state    = $this->closeExpiredQuestion(EventState::current());
         $matchConfig = MatchConfig::current();
         $question = null;
         $round = ['current' => 0, 'total' => 0, 'completed' => 0];
@@ -44,10 +44,7 @@ class EventStateController extends Controller
             $q = Question::find($state->current_question_id);
             if ($q) {
                 $round['current'] = $roundQuestions->search(fn ($candidate) => $candidate->id === $q->id) + 1;
-                // Expiry is a server-authoritative lock. Reveal immediately when
-                // the timer reaches zero even if the MC has not clicked Close yet.
-                $hasExpired = $q->status === 'live' && $q->secondsRemaining() <= 0;
-                $canRevealAnswers = in_array($state->phase, ['trivia_reveal', 'trivia_complete']) || $hasExpired;
+                $canRevealAnswers = in_array($state->phase, ['trivia_reveal', 'trivia_complete']);
                 $question = [
                     'id'              => $q->id,
                     'order_index'     => $q->order_index,
@@ -56,7 +53,7 @@ class EventStateController extends Controller
                     'options'         => $q->options,
                     'duration_seconds'=> $q->duration_seconds,
                     'is_double_points'=> $q->is_double_points,
-                    'seconds_remaining' => $q->secondsRemaining(),
+                    'seconds_remaining' => $q->status === 'live' ? $q->secondsRemaining() : 0,
                     'status'          => $q->status,
                     'answer_count'    => $q->answers()->count(),
                     'answer_distribution' => $canRevealAnswers
@@ -87,9 +84,10 @@ class EventStateController extends Controller
             'round'               => $round,
             'question'            => $question,
             'show_phone_on_screen'=> (bool) $state->show_phone_on_screen,
+            // The main screen can scroll a deep field; do not cap it to a top ten.
             'leaderboard'         => in_array($state->phase, ['match_ended', 'prediction_reveal'])
-                ? $scoring->predictionLeaderboard(10)
-                : $scoring->triviaLeaderboard(10),
+                ? $scoring->predictionLeaderboard(100)
+                : $scoring->triviaLeaderboard(100),
             'player_count'        => Player::count(),
             'prediction_count'    => Prediction::count(),
             'recent_predictions'  => $recentPredictions,
@@ -102,6 +100,36 @@ class EventStateController extends Controller
                 'venue' => $matchConfig->venue,
             ],
         ];
+    }
+
+    /** Persist countdown expiry so the admin, player devices and screen agree. */
+    private function closeExpiredQuestion(EventState $state): EventState
+    {
+        if ($state->phase !== 'trivia_live' || !$state->current_question_id) {
+            return $state;
+        }
+
+        return DB::transaction(function () use ($state) {
+            $lockedState = EventState::whereKey($state->id)->lockForUpdate()->firstOrFail();
+            if ($lockedState->phase !== 'trivia_live' || !$lockedState->current_question_id) {
+                return $lockedState->fresh();
+            }
+
+            $question = Question::whereKey($lockedState->current_question_id)->lockForUpdate()->first();
+            if (!$question || $question->status !== 'live' || $question->secondsRemaining() > 0) {
+                return $lockedState->fresh();
+            }
+
+            $question->update(['status' => 'closed']);
+            $lockedState->update(['phase' => 'trivia_reveal']);
+            EventAudit::record('question.auto_revealed', $question, [
+                'correct_answer' => $question->correct_answer,
+                'reason' => 'countdown_expired',
+            ]);
+            Cache::forget('public-event-state-v3');
+
+            return $lockedState->fresh();
+        });
     }
 
     public function togglePhone(Request $request): JsonResponse

@@ -1,4 +1,4 @@
-# MPESA–VISA Event Readiness Runbook
+# Visa Final Whistle Event Readiness Runbook
 
 This document separates what is safe today from work that should be completed before a high-attendance production event.
 
@@ -27,7 +27,7 @@ The predicted score and correct-outcome points use the score after **90 minutes 
 
 ## Mandatory preflight (T-60 minutes)
 
-- Confirm the public URL and QR code work on Safaricom and a second mobile network.
+- Confirm the public URL and QR code work on at least two mobile networks.
 - Confirm HTTPS, server time, timezone, database space, and application logs.
 - Open `/screen` on the actual display computer, select fullscreen, and disable sleep/notifications.
 - Log into admin on a separate laptop and confirm the session remains active.

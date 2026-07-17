@@ -2,7 +2,7 @@
   <Teleport to="body">
     <div class="fixed inset-0 z-[100] flex items-end justify-center bg-black/70 backdrop-blur-sm p-0 sm:items-center sm:p-5"
       @click.self="$emit('dismiss')">
-      <div class="glass-card modal-in w-full max-h-[85dvh] overflow-y-auto rounded-t-3xl p-6 text-center sm:max-w-sm sm:rounded-2xl sm:p-7 pb-safe" role="dialog" aria-modal="true">
+      <div class="glass-card modal-in w-full max-h-[calc(100dvh-1rem)] overflow-hidden rounded-t-3xl p-5 text-center sm:max-w-sm sm:rounded-2xl sm:p-7 pb-safe" role="dialog" aria-modal="true">
         <slot />
       </div>
     </div>

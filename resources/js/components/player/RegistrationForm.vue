@@ -8,13 +8,10 @@
     <!-- ── Top logo bar ────────────────────────────────────────────────── -->
     <header class="relative z-10 flex items-center justify-between px-5 sm:px-8 lg:px-12 pt-safe pt-5 sm:pt-8 pb-2">
 
-      <!-- LEFT: M-PESA logo -->
-      <img src="/images/mpesa-logo.svg" alt="M-PESA"
-        class="h-14 sm:h-20 md:h-24 object-contain object-left drop-shadow-lg" />
+      <span class="text-xs font-black uppercase tracking-[.25em] text-white/70 sm:text-sm">FIFA World Cup Final 2026</span>
 
-      <!-- RIGHT: VISA -->
       <img src="/images/visa-logo.svg" alt="Visa"
-        class="h-6 sm:h-8 md:h-10 object-contain drop-shadow-lg" />
+        class="h-7 sm:h-9 md:h-11 object-contain drop-shadow-lg" />
 
     </header>
 
@@ -22,19 +19,17 @@
     <!-- Bottom padding reserves the lower portion for the fans in the bg image -->
     <main class="relative z-10 flex-1 flex flex-col items-center lg:items-start justify-center px-6 sm:px-10 lg:px-16 text-center lg:text-left hero-content">
 
-      <span class="italic font-black inline-flex items-center justify-center lg:justify-start gap-[.24em] mb-4 text-white drop-shadow"
-        style="font-size: clamp(2.1rem, 5vw, 4.5rem)">
-        GAME IKO<OnIcon />
-      </span>
+      <span class="font-black uppercase tracking-[.08em] text-visa-gold drop-shadow mb-4"
+        style="font-size: clamp(1rem, 2vw, 1.5rem)">Visa Final Whistle</span>
 
       <h1 class="text-white font-black leading-[1.12] mb-5 max-w-3xl tracking-[-0.03em]"
         style="font-size: clamp(1.7rem, 4vw, 4rem); text-shadow: 0 3px 24px rgba(0,0,0,0.5)">
-        Welcome to <span class="text-safaricom-light">M-PESA GlobalPay Virtual Visa Card</span><br />
-        <span class="italic uppercase">Semi-Final Viewing Event</span>
+        Tap into the action.<br />
+        <span class="italic uppercase text-visa-gold">Predict the Final. Win with Visa.</span>
       </h1>
 
       <p class="max-w-xl text-white/72 text-sm sm:text-base lg:text-lg leading-relaxed mb-8">
-        Join the live M-PESA GlobalPay and Visa fan experience. Predict the score, test your football knowledge and climb the leaderboard.
+        Join the live Visa fan experience for Argentina vs Spain. Predict the score, test your Visa and football knowledge, and climb the leaderboard.
       </p>
 
       <button @click="view = 'register'"
@@ -72,9 +67,9 @@
           <input v-model="loginForm.pin" type="password" inputmode="numeric" pattern="[0-9]{4}" minlength="4" maxlength="4" required autocomplete="current-password"
             placeholder="••••" class="field-control px-4 py-3.5 text-center text-xl tracking-[.5em] placeholder-white/30" />
         </div>
-        <p v-if="errorMsg" class="text-center text-sm text-mpesa">{{ errorMsg }}</p>
+        <p v-if="errorMsg" class="text-center text-sm text-red-400">{{ errorMsg }}</p>
         <button type="submit" :disabled="submitting"
-          class="w-full rounded-xl bg-safaricom py-4 text-base font-bold text-white transition hover:bg-safaricom-dark disabled:opacity-50">
+          class="w-full rounded-xl bg-visa py-4 text-base font-bold text-white transition hover:bg-visa/80 disabled:opacity-50">
           {{ submitting ? 'Signing in…' : 'Sign in →' }}
         </button>
         <button type="button" @click="view = 'register'; errorMsg = ''" class="w-full text-sm text-gray-400 hover:text-white">
@@ -103,13 +98,13 @@
       </div>
 
       <!-- Success state -->
-      <div v-if="registered" class="bg-safaricom/10 border border-safaricom rounded-2xl p-8 text-center">
+      <div v-if="registered" class="bg-visa/20 border border-visa-gold/40 rounded-2xl p-8 text-center">
         <div class="text-5xl mb-4">🎉</div>
-        <h2 class="text-2xl font-bold text-safaricom mb-2">You're in!</h2>
+        <h2 class="text-2xl font-bold text-visa-gold mb-2">You're in!</h2>
         <p class="text-gray-300 mb-1">Welcome, <strong>{{ nickname }}</strong></p>
         <p class="text-gray-400 text-sm mb-6">Watch the big screen for predictions and trivia rounds.</p>
         <button @click="goToPlay"
-          class="w-full bg-safaricom hover:bg-safaricom-dark text-white font-bold py-4 rounded-xl transition text-base">
+          class="w-full bg-visa hover:bg-visa/80 text-white font-bold py-4 rounded-xl transition text-base">
           Go to Game →
         </button>
       </div>
@@ -140,22 +135,22 @@
           <input v-model="form.has_visa_card" type="checkbox"
             class="mt-0.5 w-5 h-5 rounded accent-visa flex-shrink-0" />
           <span class="text-sm sm:text-base text-gray-300 leading-snug">
-            I have an <span class="text-visa-gold font-semibold">M-PESA GlobalPay Virtual Visa Card</span>
+            I have a <span class="text-visa-gold font-semibold">Visa card</span>
           </span>
         </label>
 
         <label class="flex items-start gap-3 cursor-pointer">
           <input v-model="form.consent" type="checkbox" required
-            class="mt-0.5 w-5 h-5 rounded accent-safaricom flex-shrink-0" />
+            class="mt-0.5 w-5 h-5 rounded accent-visa flex-shrink-0" />
           <span class="text-sm text-gray-400 leading-snug">
             I agree to take part in this event's games and accept the event rules *
           </span>
         </label>
 
-        <p v-if="errorMsg" class="text-mpesa text-sm text-center">{{ errorMsg }}</p>
+        <p v-if="errorMsg" class="text-red-400 text-sm text-center">{{ errorMsg }}</p>
 
         <button type="submit" :disabled="submitting"
-          class="w-full bg-safaricom hover:bg-safaricom-dark disabled:opacity-50 text-white font-bold py-4 rounded-xl transition text-base sm:text-lg">
+          class="w-full bg-visa hover:bg-visa/80 disabled:opacity-50 text-white font-bold py-4 rounded-xl transition text-base sm:text-lg">
           {{ submitting ? 'Creating your profile…' : 'Create profile →' }}
         </button>
 
@@ -172,7 +167,6 @@
 <script setup>
 import { ref, reactive } from 'vue'
 import axios from 'axios'
-import OnIcon from '../brand/OnIcon.vue'
 
 // ── State machine ─────────────────────────────────────────────────────────────
 const view = ref('landing')   // 'landing' | 'register' | 'login'
@@ -249,7 +243,7 @@ function goToPlay() {
   background-color: #001A0D;
   background-image:
     linear-gradient(to bottom, rgba(0, 8, 4, .5), rgba(0, 10, 5, .12) 44%, rgba(0, 4, 2, .6)),
-    url('/images/backgrounds/event-portrait.webp');
+    url('/images/backgrounds/event-portrait-visa.png');
 
   /* Portrait phones (primary): fill the screen, anchor to the top so
      the stadium shows at the top and fans peek up from the bottom     */
@@ -287,7 +281,7 @@ function goToPlay() {
   .landing-root {
     background-image:
       linear-gradient(90deg, rgba(0, 12, 7, .84) 0%, rgba(0, 12, 7, .58) 48%, rgba(0, 8, 4, .08) 100%),
-      url('/images/backgrounds/event-landscape.webp');
+      url('/images/backgrounds/event-landscape-visa.png');
     background-size: cover;
     background-position: center;
   }
@@ -304,11 +298,11 @@ function goToPlay() {
   }
 }
 
-/* ── Play button — bright Safaricom green pill ──────────────────────────── */
+/* ── Play button — bright Visa call-to-action ──────────────────────────── */
 .play-btn {
-  background: linear-gradient(135deg, #00C65A 0%, #00A550 100%);
-  box-shadow: 0 12px 32px rgba(0, 198, 90, 0.3), 0 2px 8px rgba(0,0,0,0.35);
-  color: #002815;
+  background: linear-gradient(135deg, #f7b600 0%, #ffcf40 100%);
+  box-shadow: 0 12px 32px rgba(247, 182, 0, 0.3), 0 2px 8px rgba(0,0,0,0.35);
+  color: #070b2a;
 }
 .play-btn:hover {
   background: linear-gradient(135deg, #00D966 0%, #00B558 100%);

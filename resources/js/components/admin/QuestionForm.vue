@@ -14,8 +14,6 @@
           <option value="general_knowledge">General knowledge</option>
           <option value="fifa_world_cup">FIFA World Cup</option>
           <option value="visa">Visa</option>
-          <option value="mpesa">M-PESA</option>
-          <option value="campaign">Campaign</option>
         </select>
       </div>
       <div>
@@ -43,7 +41,7 @@
             class="flex-1 border rounded-xl px-3 py-2 text-sm focus:outline-none disabled:bg-gray-50 disabled:text-gray-400" />
           <input type="radio" :value="form.options[idx]" v-model="form.correct_answer"
             :title="`Mark '${form.options[idx]}' as correct`"
-            class="accent-safaricom w-4 h-4" />
+            class="accent-visa w-4 h-4" />
         </div>
       </div>
       <p class="text-xs text-gray-400 mt-1">Select the radio button next to the correct answer.</p>
@@ -68,7 +66,7 @@
         Cancel
       </button>
       <button type="submit" :disabled="saving"
-        class="flex-1 bg-safaricom text-white py-2 rounded-xl text-sm font-semibold hover:bg-safaricom-dark disabled:opacity-50 transition">
+        class="flex-1 bg-visa text-white py-2 rounded-xl text-sm font-semibold hover:bg-visa/80 disabled:opacity-50 transition">
         {{ saving ? 'Saving…' : 'Save Question' }}
       </button>
     </div>
