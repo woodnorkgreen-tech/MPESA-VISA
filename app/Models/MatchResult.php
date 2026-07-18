@@ -10,11 +10,12 @@ class MatchResult extends Model
 
     protected $fillable = [
         'score_home', 'score_away', 'halftime_score_home', 'halftime_score_away',
-        'scorer', 'first_scoring_team', 'potm', 'resolved',
+        'scorer', 'first_scoring_team', 'first_goal_minute', 'potm', 'resolved',
     ];
 
     protected $casts = [
         'resolved' => 'boolean',
+        'first_goal_minute' => 'integer',
     ];
 
     /**

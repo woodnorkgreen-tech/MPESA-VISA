@@ -8,8 +8,8 @@ export default {
     theme: {
         extend: {
             colors: {
-                // Visa navy/gold
-                visa:      { DEFAULT: '#1A1F71', gold: '#F7B600' },
+                // Visa blue/gold
+                visa:      { DEFAULT: '#1434CB', gold: '#F7B600' },
             },
             fontFamily: {
                 display: ['Outfit', 'Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],

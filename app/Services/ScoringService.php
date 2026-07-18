@@ -115,9 +115,14 @@ class ScoringService
 
         foreach ($predictions as $prediction) {
             $score = $this->calculatePredictionScore($prediction, $result);
+            $firstGoalMinuteDistance = $this->firstGoalMinuteDistance($prediction, $result);
 
-            DB::transaction(function () use ($prediction, $score) {
-                $prediction->update(['prediction_score' => $score, 'resolved' => true]);
+            DB::transaction(function () use ($prediction, $score, $firstGoalMinuteDistance) {
+                $prediction->update([
+                    'prediction_score' => $score,
+                    'first_goal_minute_distance' => $firstGoalMinuteDistance,
+                    'resolved' => true,
+                ]);
                 $prediction->player->update(['prediction_score' => $score]);
             });
         }
@@ -132,8 +137,8 @@ class ScoringService
      * Correct full-time result 200 pts
      * Correct first team       200 pts
      * Correct first scorer     300 pts
+     * First goal minute        10 / 7 / 5 / 2 pts
      * Correct half-time result 200 pts
-     * Correct POTM             200 pts
      */
     public function calculatePredictionScore(Prediction $prediction, MatchResult $result): int
     {
@@ -166,13 +171,10 @@ class ScoringService
             $score += 300;
         }
 
+        $score += $this->firstGoalMinutePoints($prediction, $result);
+
         if ($prediction->halftime_winner && $result->halftime_score_home !== null && $result->halftime_score_away !== null
             && $prediction->halftime_winner === $this->matchOutcome($result->halftime_score_home, $result->halftime_score_away)) {
-            $score += 200;
-        }
-
-        // Player of the Match — skip if not yet resolved
-        if ($result->potm && strtolower(trim($prediction->potm)) === strtolower(trim($result->potm))) {
             $score += 200;
         }
 
@@ -218,6 +220,7 @@ class ScoringService
         return Prediction::query()
             ->with('player:id,nickname,prediction_score')
             ->orderByDesc('prediction_score')
+            ->orderByRaw('COALESCE(first_goal_minute_distance, 999) ASC')
             ->orderBy('created_at')
             ->orderBy('id')
             ->limit($limit)
@@ -227,6 +230,8 @@ class ScoringService
                 'rank'             => $i + 1,
                 'nickname'         => $prediction->player->nickname,
                 'prediction_score' => $prediction->prediction_score,
+                'first_goal_minute' => $prediction->first_goal_minute,
+                'first_goal_minute_distance' => $prediction->first_goal_minute_distance,
                 'predicted_score'  => "{$prediction->score_home}–{$prediction->score_away}",
                 'submitted_at'     => $prediction->created_at?->toIso8601String(),
             ])
@@ -242,5 +247,40 @@ class ScoringService
             $away > $home => 'away',
             default       => 'draw',
         };
+    }
+
+    private function firstGoalMinutePoints(Prediction $prediction, MatchResult $result): int
+    {
+        $isGoalless = $result->score_home === 0 && $result->score_away === 0;
+        if ($isGoalless) {
+            return $prediction->first_scoring_team === 'none' ? 10 : 0;
+        }
+
+        $distance = $this->firstGoalMinuteDistance($prediction, $result);
+        if ($distance === null) {
+            return 0;
+        }
+
+        return match (true) {
+            $distance === 0 => 10,
+            $distance <= 2 => 7,
+            $distance <= 5 => 5,
+            $distance <= 10 => 2,
+            default => 0,
+        };
+    }
+
+    private function firstGoalMinuteDistance(Prediction $prediction, MatchResult $result): ?int
+    {
+        $isGoalless = $result->score_home === 0 && $result->score_away === 0;
+        if ($isGoalless) {
+            return $prediction->first_scoring_team === 'none' ? 0 : 999;
+        }
+
+        if (!$prediction->first_goal_minute || !$result->first_goal_minute) {
+            return null;
+        }
+
+        return abs((int) $prediction->first_goal_minute - (int) $result->first_goal_minute);
     }
 }

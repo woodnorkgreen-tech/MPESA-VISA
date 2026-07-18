@@ -240,7 +240,7 @@ class EventReliabilityTest extends TestCase
         $service = app(ScoringService::class);
         $this->assertSame(1, $service->scorePredictions($result));
         $firstScore = $player->fresh()->prediction_score;
-        $this->assertSame(1200, $firstScore);
+        $this->assertSame(1000, $firstScore);
 
         $this->assertSame(0, $service->scorePredictions($result));
         $this->assertSame($firstScore, $player->fresh()->prediction_score);
@@ -270,6 +270,54 @@ class EventReliabilityTest extends TestCase
         $this->assertSame(500, $service->calculatePredictionScore($prediction, $wrongOutcomeWithNoGoals));
     }
 
+    public function test_first_goal_minute_adds_scaled_points_and_breaks_prediction_ties(): void
+    {
+        [$player] = $this->player();
+        $prediction = Prediction::create([
+            'player_id' => $player->id,
+            'score_home' => 2,
+            'score_away' => 1,
+            'first_scorer' => 'Player One',
+            'first_scoring_team' => 'home',
+            'first_goal_minute' => 24,
+            'fulltime_winner' => 'home',
+            'potm' => 'TBD',
+        ]);
+        $result = MatchResult::create([
+            'score_home' => 2,
+            'score_away' => 1,
+            'first_scoring_team' => 'home',
+            'first_goal_minute' => 26,
+            'scorer' => 'Player One',
+            'potm' => null,
+            'resolved' => true,
+        ]);
+
+        $service = app(ScoringService::class);
+        $this->assertSame(1207, $service->calculatePredictionScore($prediction, $result));
+        $this->assertSame(1, $service->scorePredictions($result));
+        $this->assertSame(2, $prediction->fresh()->first_goal_minute_distance);
+
+        $closer = Player::create(['nickname' => 'Closer Fan', 'consent' => true]);
+        $farther = Player::create(['nickname' => 'Farther Fan', 'consent' => true]);
+        Prediction::create([
+            'player_id' => $closer->id, 'score_home' => 1, 'score_away' => 0,
+            'first_scorer' => 'Player One', 'first_scoring_team' => 'home',
+            'halftime_winner' => 'draw', 'fulltime_winner' => 'home', 'potm' => 'TBD',
+            'prediction_score' => 1300, 'first_goal_minute_distance' => 1, 'resolved' => true,
+        ]);
+        Prediction::create([
+            'player_id' => $farther->id, 'score_home' => 1, 'score_away' => 0,
+            'first_scorer' => 'Player One', 'first_scoring_team' => 'home',
+            'halftime_winner' => 'draw', 'fulltime_winner' => 'home', 'potm' => 'TBD',
+            'prediction_score' => 1300, 'first_goal_minute_distance' => 6, 'resolved' => true,
+        ]);
+
+        $leaderboard = $service->predictionLeaderboard(2);
+        $this->assertSame('Closer Fan', $leaderboard[0]['nickname']);
+        $this->assertSame(1, $leaderboard[0]['first_goal_minute_distance']);
+    }
+
     public function test_correcting_the_match_result_rescores_predictions(): void
     {
         // Reproduce a reset that advanced auto-increment: the singleton must
@@ -296,14 +344,14 @@ class EventReliabilityTest extends TestCase
         ])->assertOk();
         $this->assertSame(0, $player->fresh()->prediction_score);
 
-        // Corrected entry — exact 500 + FT 200 + first team 300 + HT 200 + POTM 200
+        // Corrected entry: exact 500 + FT 200 + first team 200 + first scorer 300 + HT 200
         $admin->postJson('/api/admin/match-result', [
             'score_home' => 1, 'score_away' => 2,
             'halftime_score_home' => 0, 'halftime_score_away' => 0,
             'first_scoring_team' => 'away', 'scorer' => 'Lionel Messi', 'potm' => 'Lionel Messi',
         ])->assertOk();
 
-        $this->assertSame(1600, $player->fresh()->prediction_score);
+        $this->assertSame(1400, $player->fresh()->prediction_score);
         $this->assertSame(1, MatchResult::count());
     }
 

@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Visa Final Whistle – Main Screen')
+@section('title', 'FIFA World Cup 2026™ watch party - Main Screen')
 @section('body-class', 'bg-black text-white min-h-screen overflow-hidden')
 
 @section('content')

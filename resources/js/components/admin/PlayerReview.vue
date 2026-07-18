@@ -71,9 +71,9 @@
           <div><p class="text-xs text-gray-400">Prediction points</p><p class="font-bold">{{ selectedPlayer.prediction.prediction_score.toLocaleString() }}</p></div>
           <div><p class="text-xs text-gray-400">First team to score</p><p class="font-semibold">{{ predictionOutcome(selectedPlayer.prediction.first_scoring_team, true) }}</p></div>
           <div><p class="text-xs text-gray-400">First goalscorer</p><p class="font-semibold">{{ selectedPlayer.prediction.first_scorer }}</p></div>
+          <div><p class="text-xs text-gray-400">First goal minute</p><p class="font-semibold">{{ selectedPlayer.prediction.first_goal_minute ? `${selectedPlayer.prediction.first_goal_minute}'` : 'No goal / not set' }}</p></div>
           <div><p class="text-xs text-gray-400">Half-time result</p><p class="font-semibold">{{ predictionOutcome(selectedPlayer.prediction.halftime_winner) }}</p></div>
           <div><p class="text-xs text-gray-400">Full-time result</p><p class="font-semibold">{{ predictionOutcome(selectedPlayer.prediction.fulltime_winner) }}</p></div>
-          <div><p class="text-xs text-gray-400">Player of match</p><p class="font-semibold">{{ selectedPlayer.prediction.potm }}</p></div>
         </div>
         <p v-else class="rounded-xl bg-gray-50 p-4 text-sm text-gray-400">No prediction submitted.</p>
       </div>

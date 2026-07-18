@@ -182,14 +182,13 @@ class PlayerApiController extends Controller
             'score_home'   => 'required|integer|min:0|max:20',
             'score_away'   => 'required|integer|min:0|max:20',
             'first_scoring_team' => 'required|in:home,away,none',
+            'first_goal_minute' => 'nullable|integer|min:1|max:120',
             'first_scorer' => 'required|string|max:100',
             'halftime_winner' => 'required|in:home,away,draw',
-            'potm'         => 'required|string|max:100',
         ]);
 
         $request->validate([
             'first_scorer' => ['required', Rule::in(array_merge($matchConfig->players(), ['No goal / N/A']))],
-            'potm' => ['required', Rule::in(array_merge($matchConfig->players(), ['TBD']))],
         ]);
 
         $fulltimeWinner = $this->matchOutcome($data['score_home'], $data['score_away']);
@@ -211,6 +210,9 @@ class PlayerApiController extends Controller
         if ($data['first_scoring_team'] === 'none' && $data['first_scorer'] !== 'No goal / N/A') {
             return response()->json(['message' => 'A no-goal prediction cannot have a first goalscorer.'], 422);
         }
+        if ($data['first_scoring_team'] === 'none' && !empty($data['first_goal_minute'])) {
+            return response()->json(['message' => 'A no-goal prediction cannot have a first goal minute.'], 422);
+        }
         if ($data['first_scoring_team'] !== 'none' && !in_array($data['first_scorer'], $expectedSquad, true)) {
             return response()->json(['message' => 'The first goalscorer must belong to the selected first-scoring team.'], 422);
         }
@@ -230,9 +232,10 @@ class PlayerApiController extends Controller
                 'score_away'   => $data['score_away'],
                 'first_scorer' => $data['first_scorer'],
                 'first_scoring_team' => $data['first_scoring_team'],
+                'first_goal_minute' => $data['first_scoring_team'] === 'none' ? null : ($data['first_goal_minute'] ?? null),
                 'halftime_winner' => $data['halftime_winner'],
                 'fulltime_winner' => $fulltimeWinner,
-                'potm'         => $data['potm'],
+                'potm'         => 'TBD',
                 'resolved'     => false,
             ]
         );
@@ -277,10 +280,10 @@ class PlayerApiController extends Controller
                 'score_home' => $prediction->score_home,
                 'score_away' => $prediction->score_away,
                 'first_scoring_team' => $prediction->first_scoring_team,
+                'first_goal_minute' => $prediction->first_goal_minute,
                 'first_scorer' => $prediction->first_scorer,
                 'halftime_winner' => $prediction->halftime_winner,
                 'fulltime_winner' => $prediction->fulltime_winner,
-                'potm' => $prediction->potm,
                 'updated_at' => $prediction->updated_at?->toIso8601String(),
             ] : null,
         ]);

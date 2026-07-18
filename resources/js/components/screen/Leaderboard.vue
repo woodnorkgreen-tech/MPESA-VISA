@@ -8,7 +8,7 @@
       </h3>
       <p class="rounded-full border border-white/10 bg-black/20 px-3 py-1 font-bold text-gray-500"
         style="font-size: clamp(.55rem,.8vw,.8rem)">
-        Top {{ entries.length }} · Live
+        {{ entries.length }} live
       </p>
     </div>
 
@@ -45,7 +45,7 @@
     </TransitionGroup>
 
     <div v-if="!entries.length" class="flex flex-1 items-center justify-center rounded-2xl border border-dashed border-white/10 text-gray-600">
-      Scores will appear here
+      Standings will appear here
     </div>
   </section>
 
@@ -53,25 +53,25 @@
   <section v-else class="leaderboard-columns grid h-full w-full overflow-hidden rounded-3xl border border-white/10 bg-white/[.025]" aria-live="polite">
     <div class="flex min-h-0 flex-col items-center justify-center border-b border-white/10 px-5 py-5 text-center lg:border-b-0 lg:border-r lg:px-7 lg:py-6">
       <div v-if="winner" class="flex shrink-0 flex-col items-center">
-        <div class="visa-winner-card" aria-label="Visa Final Whistle winner card">
+        <div class="visa-winner-card" aria-label="Visa FIFA World Cup 2026 top scorer card">
           <span class="visa-card-orbit visa-card-orbit-one"></span>
           <span class="visa-card-orbit visa-card-orbit-two"></span>
           <div class="relative z-10 flex h-full flex-col justify-between text-left">
             <div class="flex items-start justify-between gap-4">
               <span class="visa-card-chip" aria-hidden="true"></span>
-              <img src="/images/visa-logo.svg" alt="Visa" class="w-[30%] min-w-16 object-contain" />
+              <img src="/images/visa-fwc2026-lockup-white.png" alt="Visa FIFA World Cup 2026" class="w-[62%] min-w-24 object-contain" />
             </div>
             <div>
-              <p class="text-[clamp(.5rem,.7vw,.72rem)] font-black uppercase tracking-[.24em] text-white/55">Final Whistle</p>
+              <p class="text-[clamp(.5rem,.7vw,.72rem)] font-black uppercase tracking-[.2em] text-white/55">Watch party</p>
               <div class="mt-1 flex items-end justify-between gap-3">
-                <p class="truncate text-[clamp(.85rem,1.25vw,1.3rem)] font-black uppercase tracking-[.08em] text-white">Winner</p>
-                <span class="text-[clamp(.8rem,1.3vw,1.4rem)]" aria-hidden="true">🏆</span>
+                <p class="truncate text-[clamp(.85rem,1.25vw,1.3rem)] font-black uppercase tracking-[.08em] text-white">Top scorer</p>
+                <span class="text-[clamp(.8rem,1.3vw,1.4rem)] text-visa-gold" aria-hidden="true">★</span>
               </div>
             </div>
           </div>
         </div>
         <p class="font-bold uppercase tracking-[.3em] text-gray-500" style="font-size: clamp(.6rem,.9vw,.9rem)">
-          Champion
+          Current leader
         </p>
         <p class="mt-2 max-w-full truncate font-black text-white" style="font-size: clamp(1.35rem,2.4vw,2.8rem)">
           {{ winner.nickname }}
@@ -85,7 +85,7 @@
       </div>
 
       <div v-else class="flex shrink-0 items-center justify-center text-center text-gray-600">
-        Scores will appear here
+        Standings will appear here
       </div>
 
     </div>
@@ -122,7 +122,7 @@
       </TransitionGroup>
 
       <div v-else class="flex flex-1 items-center justify-center text-gray-600">
-        Scores will appear here
+        Standings will appear here
       </div>
     </div>
   </section>
@@ -140,7 +140,7 @@ const props = defineProps({
 const podium = computed(() => props.entries.slice(0, 3))
 const standings = computed(() => props.entries.slice(3, 10))
 // No entry has been scored yet (e.g. predictions before the match result is
-// submitted) — don't crown a "champion" out of players who all sit at 0.
+// submitted) — don't present a leader out of players who all sit at 0.
 const winner = computed(() => {
   const top = props.entries[0]
   return top && score(top) > 0 ? top : null
@@ -148,7 +148,7 @@ const winner = computed(() => {
 
 function entryKey(entry) { return entry.id ?? `${entry.nickname}-${entry.rank}` }
 function score(entry) { return Number(entry.trivia_score ?? entry.prediction_score ?? 0) }
-function medal(rank) { return ['🥇', '🥈', '🥉'][rank - 1] ?? rank }
+function medal(rank) { return ['1', '2', '3'][rank - 1] ?? rank }
 function podiumClass(rank) {
   if (rank === 1) return 'border-visa-gold/50 bg-gradient-to-b from-visa-gold/20 to-white/5 shadow-[0_0_35px_rgba(247,182,0,.12)]'
   if (rank === 2) return 'border-white/20 bg-gradient-to-b from-white/15 to-white/5'
@@ -177,7 +177,7 @@ function rankColor(rank) {
   border: 1px solid rgba(247,182,0,.48);
   border-radius: clamp(1rem, 1.5vw, 1.4rem);
   padding: clamp(.85rem, 1.4vw, 1.35rem);
-  background: linear-gradient(145deg, #1434cb 0%, #1a1f71 54%, #080d43 100%);
+  background: linear-gradient(145deg, #1434cb 0%, #1234bf 56%, #0f2d9f 100%);
   box-shadow: 0 22px 55px rgba(0,0,0,.38), 0 0 34px rgba(247,182,0,.1);
   transform: perspective(700px) rotateX(2deg);
 }

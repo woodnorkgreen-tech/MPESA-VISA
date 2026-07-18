@@ -10,7 +10,9 @@
       <div v-for="entry in topEntries" :key="entry.id ?? entry.nickname"
         class="flex min-w-0 items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2 transition-colors"
         :class="changedScores.has(entryKey(entry)) ? 'score-flash' : ''">
-        <span class="shrink-0 text-[clamp(1rem,2vw,2rem)]">{{ medals[entry.rank - 1] ?? entry.rank }}</span>
+        <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-visa/30 text-[clamp(.75rem,1vw,1rem)] font-black text-visa-gold">
+          {{ entry.rank }}
+        </span>
         <div class="min-w-0 flex-1">
           <p class="truncate text-[clamp(.7rem,1.3vw,1.35rem)] font-bold text-white">
             {{ entry.nickname }}
@@ -36,7 +38,6 @@ const rankChanges = ref(new Map())
 const previousScores = ref(new Map())
 const changedScores = ref(new Set())
 const topEntries = computed(() => props.entries.slice(0, 3))
-const medals = ['🥇', '🥈', '🥉']
 let flashTimer
 
 function entryKey(entry) { return entry.id ?? entry.nickname }
@@ -59,5 +60,5 @@ watch(() => props.entries, entries => {
 <style scoped>
 .rank-move { transition: transform .45s ease; }
 .score-flash { animation: score-flash .85s ease; }
-@keyframes score-flash { 0%, 100% { background: rgba(255,255,255,.05); } 35% { background: rgba(0,198,90,.24); border-color: rgba(0,198,90,.55); } }
+@keyframes score-flash { 0%, 100% { background: rgba(255,255,255,.05); } 35% { background: rgba(247,182,0,.2); border-color: rgba(247,182,0,.55); } }
 </style>

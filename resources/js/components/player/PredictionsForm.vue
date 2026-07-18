@@ -13,11 +13,11 @@
       <form @submit.prevent="submit" class="glass-card flex min-h-0 flex-col overflow-hidden rounded-2xl">
         <div class="shrink-0 border-b border-white/10 px-4 py-2.5 sm:px-6 sm:py-3">
           <div class="mb-1.5 flex items-center justify-between text-[11px] font-bold sm:text-xs">
-            <span class="uppercase tracking-widest text-visa-gold">Step {{ step }} of 6</span>
+            <span class="uppercase tracking-widest text-visa-gold">Step {{ step }} of {{ totalSteps }}</span>
             <span class="text-gray-500">{{ stepTitles[step - 1] }}</span>
           </div>
           <div class="grid grid-cols-6 gap-1.5" aria-label="Prediction progress">
-            <button v-for="number in 6" :key="number" type="button" @click="goToCompletedStep(number)"
+            <button v-for="number in totalSteps" :key="number" type="button" @click="goToCompletedStep(number)"
               :aria-label="`Go to step ${number}: ${stepTitles[number - 1]}`"
               class="h-1.5 rounded-full transition"
               :class="number <= step ? 'bg-visa-gold' : 'bg-white/10'" />
@@ -98,8 +98,35 @@
               fallback-value="No goal / N/A" fallback-label="No goalscorer" :show-fallback="false" />
           </section>
 
-          <!-- Step 4: half-time outcome -->
+          <!-- Step 4: first goal minute -->
           <section v-else-if="step === 4" class="prediction-step" aria-labelledby="halftime-title">
+            <div class="mb-3 text-center">
+              <h3 class="text-lg font-black text-white sm:text-xl">When is the first goal?</h3>
+              <p class="mt-1 text-xs text-gray-500">Closest guesses help break prediction ties.</p>
+            </div>
+            <div v-if="form.first_scoring_team === 'none'" class="rounded-2xl border border-visa/20 bg-visa/10 px-5 py-8 text-center">
+              <p class="text-2xl">0-0</p>
+              <p class="mt-2 font-black text-white">No first goal minute</p>
+              <p class="mt-1 text-xs text-gray-400">Your no-goal prediction is the tie-break answer.</p>
+            </div>
+            <div v-else class="space-y-3">
+              <label class="block rounded-2xl border border-white/10 bg-white/5 px-5 py-4 text-center">
+                <span class="review-label">Minute</span>
+                <input v-model.number="form.first_goal_minute" type="number" min="1" max="120" inputmode="numeric"
+                  class="mt-2 w-full rounded-xl border border-white/10 bg-black/25 px-4 py-3 text-center text-3xl font-black text-white outline-none transition focus:border-visa-gold" />
+              </label>
+              <div class="grid grid-cols-5 gap-2">
+                <button v-for="minute in quickMinutes" :key="minute" type="button" @click="form.first_goal_minute = minute"
+                  class="min-h-9 rounded-lg border text-xs font-black transition active:scale-95"
+                  :class="form.first_goal_minute === minute ? 'border-visa-gold bg-visa/25 text-white' : 'border-white/10 bg-white/5 text-gray-400 hover:border-white/25'">
+                  {{ minute }}'
+                </button>
+              </div>
+            </div>
+          </section>
+
+          <!-- Step 5: half-time outcome -->
+          <section v-else-if="step === 5" class="prediction-step" aria-labelledby="halftime-title">
             <div class="mb-3 text-center">
               <h3 id="halftime-title" class="text-lg font-black text-white sm:text-xl">Who leads at half-time?</h3>
               <p class="mt-1 text-xs text-gray-500">A level score at half-time counts as a draw.</p>
@@ -112,16 +139,6 @@
                 <span :class="choice.flag ? 'sr-only' : 'font-black'">{{ choice.label }}</span>
               </button>
             </div>
-          </section>
-
-          <!-- Step 5 -->
-          <section v-else-if="step === 5" class="prediction-step" aria-labelledby="potm-title">
-            <div class="mb-3 text-center">
-              <h3 id="potm-title" class="text-lg font-black text-white sm:text-xl">Who will be Player of the Match?</h3>
-              <p class="mt-1 text-xs text-gray-500">Choose the player you expect to stand out.</p>
-            </div>
-            <PlayerCardPicker v-model="form.potm" label="Player of the match" :groups="playerGroups"
-              fallback-value="TBD" fallback-label="Skip — no Player of the Match pick (0 pts)" />
           </section>
 
           <!-- Step 6: explicit review prevents accidental submissions. -->
@@ -147,6 +164,10 @@
                 <span class="text-xs font-bold text-visa-gold">Edit</span>
               </button>
               <button type="button" @click="step = 4" class="review-row">
+                <span class="min-w-0"><span class="review-label">First goal minute</span><strong class="review-value truncate">{{ firstGoalMinuteLabel }}</strong></span>
+                <span class="text-xs font-bold text-visa-gold">Edit</span>
+              </button>
+              <button type="button" @click="step = 5" class="review-row">
                 <span class="min-w-0"><span class="review-label">Half-time winner</span>
                   <img v-if="outcomeFlag(form.halftime_winner)" :src="outcomeFlag(form.halftime_winner)" :alt="outcomeLabel(form.halftime_winner)" class="mt-1 h-7 w-11 rounded object-cover ring-1 ring-white/20" />
                   <strong v-else class="review-value truncate">Draw</strong>
@@ -160,10 +181,6 @@
                 </span>
                 <span class="text-[10px] font-bold text-gray-500">From score</span>
               </div>
-              <button type="button" @click="step = 5" class="review-row">
-                <span class="min-w-0"><span class="review-label">Player of the Match</span><strong class="review-value truncate">{{ form.potm }}</strong></span>
-                <span class="text-xs font-bold text-visa-gold">Edit</span>
-              </button>
             </div>
             <div v-if="hasSavedPrediction" class="mt-2 rounded-xl border border-visa/20 bg-visa/10 px-3 py-2 text-xs text-gray-300">
               This will update your previously saved prediction.
@@ -178,7 +195,7 @@
             class="min-h-12 rounded-xl border border-white/15 px-5 font-bold text-gray-300 transition hover:border-white/30 disabled:opacity-50">
             Back
           </button>
-          <button v-if="step < 6" type="button" @click="nextStep" :disabled="readOnly"
+          <button v-if="step < totalSteps" type="button" @click="nextStep" :disabled="readOnly"
             class="min-h-12 flex-1 rounded-xl bg-visa px-5 font-black text-white transition hover:bg-visa disabled:opacity-50">
             Continue →
           </button>
@@ -204,8 +221,8 @@
           <strong class="review-value truncate">{{ form.first_scorer }}</strong>
         </div>
         <div class="review-row !min-h-0 !py-2.5">
-          <span class="review-label">Player of the Match</span>
-          <strong class="review-value truncate">{{ form.potm }}</strong>
+          <span class="review-label">First goal minute</span>
+          <strong class="review-value truncate">{{ firstGoalMinuteLabel }}</strong>
         </div>
       </div>
       <p class="text-gray-500 text-xs sm:text-sm mb-6">You can edit it any time before predictions close.</p>
@@ -232,8 +249,10 @@ const props = defineProps({
 const emit = defineEmits(['submitted'])
 
 const step = ref(1)
-const stepTitles = ['Score & full-time result', 'First team to score', 'First goalscorer', 'Half-time result', 'Player of the Match', 'Review']
+const totalSteps = 6
+const stepTitles = ['Score & full-time result', 'First team to score', 'First goalscorer', 'First goal minute', 'Half-time result', 'Review']
 const quickScores = [[0, 0], [1, 0], [1, 1], [2, 0], [2, 1], [2, 2], [3, 1], [3, 2]]
+const quickMinutes = [5, 10, 15, 20, 25, 30, 35, 40, 45, 60]
 const scorerOptions = computed(() => [...(props.match.home_squad ?? []), ...(props.match.away_squad ?? [])])
 const playerGroups = computed(() => [
   { name: props.match.home_team, flag: teamFlag(props.match.home_team), players: props.match.home_squad ?? [] },
@@ -250,8 +269,9 @@ const teamChoices = computed(() => [
 const outcomeChoices = computed(() => [...teamChoices.value, { value: 'draw', label: 'Draw at half-time', flag: '' }])
 const fulltimeWinner = computed(() => form.score_home > form.score_away ? 'home' : form.score_away > form.score_home ? 'away' : 'draw')
 const firstTeamLabel = computed(() => form.first_scoring_team === 'none' ? 'No team scores' : outcomeLabel(form.first_scoring_team))
+const firstGoalMinuteLabel = computed(() => form.first_scoring_team === 'none' ? 'No goal' : form.first_goal_minute ? `${form.first_goal_minute}'` : 'Not set')
 
-const form = reactive({ score_home: 0, score_away: 0, first_scoring_team: 'none', first_scorer: 'No goal / N/A', halftime_winner: '', potm: '' })
+const form = reactive({ score_home: 0, score_away: 0, first_scoring_team: 'none', first_scorer: 'No goal / N/A', first_goal_minute: null, halftime_winner: '' })
 const submitting = ref(false)
 const loadingSaved = ref(false)
 const hasSavedPrediction = ref(false)
@@ -271,8 +291,8 @@ async function loadSavedPrediction() {
         score_away: data.prediction.score_away,
         first_scoring_team: data.prediction.first_scoring_team ?? '',
         first_scorer: data.prediction.first_scorer ?? '',
+        first_goal_minute: data.prediction.first_goal_minute ?? null,
         halftime_winner: data.prediction.halftime_winner ?? '',
-        potm: data.prediction.potm,
       })
       hasSavedPrediction.value = true
       showSavedModal.value = true
@@ -289,9 +309,9 @@ function nextStep() {
   errorMsg.value = ''
   if (step.value === 2 && !form.first_scoring_team) return errorMsg.value = 'Choose which team scores first.'
   if (step.value === 3 && !form.first_scorer) return errorMsg.value = 'Choose the player who scores first.'
-  if (step.value === 4 && !form.halftime_winner) return errorMsg.value = 'Choose the half-time result.'
-  if (step.value === 5 && !form.potm) return errorMsg.value = 'Choose a Player of the Match or use the skip option.'
-  step.value = Math.min(6, step.value + 1)
+  if (step.value === 4 && form.first_scoring_team !== 'none' && !validFirstGoalMinute()) return errorMsg.value = 'Enter the first goal minute from 1 to 120.'
+  if (step.value === 5 && !form.halftime_winner) return errorMsg.value = 'Choose the half-time result.'
+  step.value = Math.min(totalSteps, step.value + 1)
 }
 function goToCompletedStep(number) { if (number <= step.value) step.value = number }
 function setScore([home, away]) { form.score_home = home; form.score_away = away }
@@ -301,6 +321,9 @@ function halftimeOutcomePossible(outcome) {
   if (outcome === 'home') return form.score_home > 0
   if (outcome === 'away') return form.score_away > 0
   return true
+}
+function validFirstGoalMinute() {
+  return Number.isInteger(Number(form.first_goal_minute)) && Number(form.first_goal_minute) >= 1 && Number(form.first_goal_minute) <= 120
 }
 function outcomeLabel(value) {
   if (value === 'home') return `${props.match.home_team} win`
@@ -320,7 +343,7 @@ watch(() => [form.score_home, form.score_away], ([home, away]) => {
   if ((form.halftime_winner === 'home' && home === 0) || (form.halftime_winner === 'away' && away === 0)) form.halftime_winner = ''
 })
 watch(() => form.first_scoring_team, (team, previous) => {
-  if (team === 'none') form.first_scorer = 'No goal / N/A'
+  if (team === 'none') { form.first_scorer = 'No goal / N/A'; form.first_goal_minute = null }
   else if (team !== previous) form.first_scorer = ''
 })
 
@@ -330,13 +353,13 @@ function teamFlag(team) {
 
 async function submit() {
   if (props.readOnly || submitting.value) return
-  if (!form.first_scoring_team || !form.first_scorer || !form.halftime_winner || !form.potm) {
-    step.value = !form.first_scoring_team ? 2 : !form.first_scorer ? 3 : !form.halftime_winner ? 4 : 5
+  if (!form.first_scoring_team || !form.first_scorer || (form.first_scoring_team !== 'none' && !validFirstGoalMinute()) || !form.halftime_winner) {
+    step.value = !form.first_scoring_team ? 2 : !form.first_scorer ? 3 : form.first_scoring_team !== 'none' && !validFirstGoalMinute() ? 4 : 5
     errorMsg.value = 'Complete this selection first.'; return
   }
   submitting.value = true; errorMsg.value = ''
   try {
-    await axios.post('/api/predictions', { player_id: props.playerId, ...form })
+    await axios.post('/api/predictions', { player_id: props.playerId, ...form, potm: 'TBD' })
     sessionStorage.setItem('prediction_submitted', '1')
     sessionStorage.setItem('last_prediction', JSON.stringify(form))
     hasSavedPrediction.value = true
@@ -357,7 +380,7 @@ async function submit() {
 .review-value { display:block; margin-top:.1rem; color:#fff; font-size:.875rem; }
 .choice-card { display:flex; min-height:3.35rem; align-items:center; justify-content:center; gap:.75rem; border:1px solid rgba(255,255,255,.1); border-radius:.85rem; background:rgba(255,255,255,.04); padding:.55rem .8rem; color:#d1d5db; transition:.2s; }
 .choice-card:hover { border-color:rgba(255,255,255,.25); }
-.choice-card-active { border-color:#35d06f; background:rgba(0,166,81,.18); color:#fff; box-shadow:0 0 0 1px rgba(53,208,111,.18); }
+.choice-card-active { border-color:#f7b600; background:rgba(20,52,203,.24); color:#fff; box-shadow:0 0 0 1px rgba(247,182,0,.2); }
 @keyframes prediction-step-in { from { opacity:0; transform:translateX(10px); } to { opacity:1; transform:none; } }
 @media (max-height: 700px) {
   .prediction-body { padding-top:.55rem; padding-bottom:.55rem; }

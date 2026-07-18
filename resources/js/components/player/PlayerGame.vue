@@ -12,14 +12,22 @@
     <template v-else>
 
       <!-- ── Sticky player header ──────────────────────────────────────────── -->
-      <header class="flex items-center justify-between px-4 sm:px-6 py-3 bg-[#07170f]/90 backdrop-blur-xl border-b border-white/10 flex-shrink-0 pt-safe">
-        <span class="text-white italic font-black text-sm sm:text-base tracking-tight flex items-center gap-2"><span>GAME IKO</span><OnIcon /></span>
-        <div class="flex items-center gap-3">
-          <span v-if="adminPreview" class="rounded-full bg-purple-500/20 px-2.5 py-1 text-xs font-bold text-purple-200">MC Preview · Read only</span>
-          <span v-else class="text-gray-300 text-sm sm:text-base font-semibold">{{ playerNickname }}</span>
+      <header class="flex items-center justify-between gap-2 bg-visa/95 px-3 py-2 backdrop-blur-xl border-b border-white/10 flex-shrink-0 pt-safe sm:px-6 sm:py-3">
+        <div class="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
+          <img src="/images/visa-logo.svg" alt="Visa" class="h-4 shrink-0 object-contain sm:h-6" />
+          <span class="hidden h-5 w-px bg-white/25 sm:block" aria-hidden="true"></span>
+          <span class="truncate text-[10px] font-black uppercase tracking-[.14em] text-white/80 sm:text-sm sm:tracking-[.18em]">
+            <span class="sm:hidden">FWC 2026™</span>
+            <span class="hidden sm:inline">FIFA World Cup 2026™ watch party</span>
+          </span>
+        </div>
+        <div class="flex min-w-0 shrink-0 items-center gap-1.5 sm:gap-3">
+          <span v-if="adminPreview" class="rounded-full bg-purple-500/20 px-2 py-1 text-[10px] font-bold text-purple-200 sm:px-2.5 sm:text-xs">MC Preview</span>
+          <span v-else class="max-w-[5.5rem] truncate text-xs font-semibold text-white/85 sm:max-w-[12rem] sm:text-base">{{ playerNickname }}</span>
           <button v-if="!adminPreview" @click="signOut"
-            class="text-xs sm:text-sm text-gray-500 hover:text-red-400 border border-gray-700 hover:border-red-500 px-3 py-1.5 rounded-lg transition">
-            Sign Out
+            class="rounded-md border border-black bg-black px-2 py-1.5 text-[10px] font-bold text-white transition hover:border-gray-900 hover:bg-gray-900 sm:rounded-lg sm:px-3 sm:text-sm">
+            <span class="sm:hidden">Out</span>
+            <span class="hidden sm:inline">Sign Out</span>
           </button>
         </div>
       </header>
@@ -36,7 +44,7 @@
 
           <span class="inline-flex items-center gap-2 rounded-full bg-visa/15 border border-visa/30 px-3 py-1 mb-7">
             <span class="h-1.5 w-1.5 rounded-full bg-visa-gold animate-pulse" aria-hidden="true"></span>
-            <span class="brand-kicker">Event lobby</span>
+            <span class="brand-kicker">FIFA World Cup 2026™ watch party</span>
           </span>
 
           <div class="relative w-20 h-20 mx-auto mb-7" aria-hidden="true">
@@ -46,7 +54,7 @@
           </div>
 
           <h2 class="text-2xl sm:text-3xl font-bold text-white mb-2">Hang tight, {{ playerNickname }}!</h2>
-          <p class="text-gray-300 text-base sm:text-lg leading-relaxed">The game starts soon. Watch the big screen.</p>
+          <p class="text-gray-300 text-base sm:text-lg leading-relaxed">The watch party starts soon. Watch the big screen.</p>
 
           <div class="mt-7 inline-flex items-center gap-2 rounded-full bg-white/5 border border-white/10 px-4 py-2">
             <span class="h-2 w-2 rounded-full bg-visa-gold animate-pulse" aria-hidden="true"></span>
@@ -102,13 +110,14 @@
       <!-- ── Trivia complete ─────────────────────────────────────────────── -->
       <div v-else-if="phase === 'trivia_complete'"
         class="flex-1 flex flex-col items-center justify-center p-6 sm:p-10 text-center pb-safe">
-        <img src="/images/brand/football-celebration.webp" alt="Football trivia"
-          class="w-36 sm:w-44 aspect-[4/5] object-cover rounded-2xl mb-5 shadow-2xl" />
-        <h2 class="text-2xl sm:text-3xl font-bold text-visa-gold mb-3">Trivia complete</h2>
+        <img src="/images/visa-fwc2026-lockup-white.png" alt="Visa FIFA World Cup 2026"
+          class="mb-7 h-16 max-w-[80vw] object-contain drop-shadow-2xl sm:h-20" />
+        <p class="brand-kicker mb-2">Watch party round complete</p>
+        <h2 class="text-2xl sm:text-3xl font-bold text-visa-gold mb-3">You're on the board</h2>
         <p class="text-gray-300 text-base sm:text-lg mb-1">
-          Your score: <strong class="text-white text-2xl sm:text-3xl">{{ playerScore }}</strong> pts
+          <strong class="text-white text-3xl sm:text-4xl">{{ playerScore }}</strong> pts
         </p>
-        <p class="text-gray-400 text-sm">Watch the big screen for the Trivia Champion!</p>
+        <p class="text-gray-300 text-sm">Watch the big screen for the live leaderboard.</p>
       </div>
 
       <!-- ── Match ended / prediction reveal ────────────────────────────── -->
@@ -116,8 +125,8 @@
         class="flex-1 flex flex-col items-center justify-center p-6 text-center pb-safe">
         <img src="/images/brand/world-cup-trophy.png" alt="World Cup trophy"
           class="w-32 sm:w-40 max-h-52 object-contain mb-5 drop-shadow-2xl" />
-        <h2 class="text-2xl sm:text-3xl font-bold text-visa-gold mb-2">Match Over!</h2>
-        <p class="text-gray-400 text-base">Watch the big screen for the Prediction Champion!</p>
+        <h2 class="text-2xl sm:text-3xl font-bold text-visa-gold mb-2">Predictions locked</h2>
+        <p class="text-gray-400 text-base">Watch the big screen for the final standings.</p>
       </div>
 
       <!-- ── Fallback ────────────────────────────────────────────────────── -->
@@ -147,7 +156,6 @@ import { useEventState } from '../../composables/useEventState'
 import PredictionsForm from './PredictionsForm.vue'
 import TriviaQuestion from './TriviaQuestion.vue'
 import PlayerModal from './PlayerModal.vue'
-import OnIcon from '../brand/OnIcon.vue'
 
 const props = defineProps({ adminPreview: { type: Boolean, default: false } })
 const adminPreview = props.adminPreview
@@ -221,17 +229,20 @@ function signOut() {
 </script>
 
 <style scoped>
-/* ── Lobby: lighter overlay so the stadium/fan photo actually reads ──────── */
+/* ── Lobby: Visa-blue event background ───────────────────────────────────── */
 .lobby-bg {
+  background-color: #1434CB;
   background-image:
-    linear-gradient(180deg, rgba(2, 20, 11, .32) 0%, rgba(2, 20, 11, .16) 45%, rgba(2, 20, 11, .6) 100%),
-    url('/images/backgrounds/event-portrait-visa.png');
+    linear-gradient(120deg, rgba(255, 255, 255, .12) 0 1px, transparent 1px 84px),
+    linear-gradient(145deg, #1434CB 0%, #0D2AAC 48%, #06165F 100%);
+  background-size: 88px 88px, cover;
 }
 @media (min-width: 900px) {
   .lobby-bg {
     background-image:
-      linear-gradient(90deg, rgba(1, 18, 10, .58) 0%, rgba(1, 18, 10, .28) 48%, rgba(1, 18, 10, .1) 100%),
-      url('/images/backgrounds/event-landscape-visa.png');
+      linear-gradient(120deg, rgba(255, 255, 255, .1) 0 1px, transparent 1px 108px),
+      linear-gradient(110deg, #06165F 0%, #1434CB 42%, #0D2AAC 100%);
+    background-size: 112px 112px, cover;
   }
 }
 

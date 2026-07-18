@@ -192,9 +192,10 @@ class AdminApiController extends Controller
                     'score_away' => $awayScore,
                     'first_scorer' => $firstTeam === 'none' ? 'No goal / N/A' : $firstTeamSquad[array_rand($firstTeamSquad)],
                     'first_scoring_team' => $firstTeam,
+                    'first_goal_minute' => $firstTeam === 'none' ? null : random_int(1, 90),
                     'halftime_winner' => ['home', 'away', 'draw'][array_rand(['home', 'away', 'draw'])],
                     'fulltime_winner' => $homeScore > $awayScore ? 'home' : ($awayScore > $homeScore ? 'away' : 'draw'),
-                    'potm' => $squad[array_rand($squad)],
+                    'potm' => 'TBD',
                 ]);
 
                 $score = 0;
@@ -620,13 +621,12 @@ class AdminApiController extends Controller
             'halftime_score_home' => 'required|integer|min:0|max:20',
             'halftime_score_away' => 'required|integer|min:0|max:20',
             'first_scoring_team' => 'required|in:home,away,none',
+            'first_goal_minute' => 'nullable|integer|min:1|max:120',
             'scorer' => 'nullable|string|max:100',
-            'potm'       => 'nullable|string|max:100',
         ]);
 
         $request->validate([
             'scorer' => ['nullable', Rule::in($players)],
-            'potm' => ['nullable', Rule::in($players)],
         ]);
 
         if ($data['halftime_score_home'] > $data['score_home'] || $data['halftime_score_away'] > $data['score_away']) {
@@ -646,9 +646,13 @@ class AdminApiController extends Controller
         if ($isGoalless && !empty($data['scorer'])) {
             return response()->json(['message' => 'A 0–0 result cannot have a first goalscorer.'], 422);
         }
+        if ($isGoalless && !empty($data['first_goal_minute'])) {
+            return response()->json(['message' => 'A 0-0 result cannot have a first goal minute.'], 422);
+        }
         if (!$isGoalless && (empty($data['scorer']) || !in_array($data['scorer'], $expectedSquad, true))) {
             return response()->json(['message' => 'Select a first goalscorer from the first-scoring team.'], 422);
         }
+        $data['first_goal_minute'] = $isGoalless ? null : ($data['first_goal_minute'] ?? null);
 
         $result = MatchResult::current();
         $result->fill(array_merge($data, ['resolved' => true]))->save();

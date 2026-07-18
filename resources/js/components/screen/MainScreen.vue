@@ -23,12 +23,12 @@
         <!-- Title — clamp scales from small monitors to 4K -->
         <h1 class="font-black italic uppercase text-white tracking-tight leading-none mb-3"
           style="font-size: clamp(3rem, 7vw, 9rem)">
-          <span>Final Whistle</span>
+          <span>FIFA World Cup 2026™</span>
         </h1>
         <div class="flex items-center justify-center gap-5 lg:gap-8 mb-8 lg:mb-12">
-          <span class="text-gray-300" style="font-size: clamp(0.9rem, 1.6vw, 2rem)">Tap In with</span>
-          <img src="/images/visa-logo.svg" alt="Visa"
-            class="object-contain drop-shadow-lg" style="height: clamp(1.8rem, 3.8vw, 4.6rem)" />
+          <span class="text-gray-300" style="font-size: clamp(0.9rem, 1.6vw, 2rem)">Watch party with</span>
+          <img src="/images/visa-fwc2026-lockup-white.png" alt="Visa FIFA World Cup 2026"
+            class="object-contain drop-shadow-lg" style="height: clamp(2.1rem, 4.3vw, 5.2rem)" />
         </div>
 
         <!-- Broadcast layout: join left, event status centre, recent activity right -->
@@ -235,7 +235,7 @@
           TRIVIA LEADERBOARD
         </h2>
         <div class="min-h-0 flex-1">
-          <Leaderboard :entries="leaderboard" title="Trivia leaderboard" />
+          <Leaderboard :entries="leaderboard" title="Trivia standings" />
         </div>
       </div>
     </template>
@@ -250,7 +250,7 @@
           PREDICTIONS LEADERBOARD
         </h2>
         <div class="min-h-0 flex-1">
-          <Leaderboard :entries="leaderboard" title="Prediction leaderboard" />
+          <Leaderboard :entries="leaderboard" title="Prediction standings" />
         </div>
       </div>
     </template>
@@ -261,7 +261,7 @@
     <template v-else>
       <div class="flex-1 flex items-center justify-center">
         <p class="text-white font-black italic uppercase" style="font-size: clamp(1.5rem, 4vw, 5rem)">
-          <span>Visa Final Whistle</span>
+          <span>FIFA World Cup 2026™ watch party</span>
         </p>
       </div>
     </template>
@@ -272,8 +272,8 @@
     <div class="flex-shrink-0 bg-gradient-to-r from-visa via-[#1434CB] to-visa
                 flex items-center justify-center gap-6 lg:gap-12 px-8"
       style="height: clamp(2.5rem, 4vh, 5rem)">
-      <img src="/images/visa-logo.svg" alt="Visa"
-        class="object-contain opacity-100" style="height: clamp(1rem, 2vh, 2.2rem)" />
+      <img src="/images/visa-fwc2026-lockup-white.png" alt="Visa FIFA World Cup 2026"
+        class="object-contain opacity-100" style="height: clamp(1.35rem, 2.8vh, 3rem)" />
       <span class="text-white/30">·</span>
       <span class="text-white font-semibold tracking-widest opacity-80"
         style="font-size: clamp(0.6rem, 1.2vw, 1.2rem)">ARGENTINA vs SPAIN · FINAL</span>
@@ -422,20 +422,20 @@ onUnmounted(() => {
 
 <style scoped>
 .screen-brand-bg {
-  background-color: #03130b;
+  background-color: #1434CB;
   background-image:
-    linear-gradient(90deg, rgba(2, 18, 10, .92), rgba(2, 18, 10, .78) 55%, rgba(2, 18, 10, .44)),
-    url('/images/backgrounds/event-landscape-visa.png');
-  background-size: cover;
+    linear-gradient(120deg, rgba(255, 255, 255, .1) 0 1px, transparent 1px 118px),
+    linear-gradient(110deg, #06165F 0%, #1434CB 44%, #0D2AAC 100%);
+  background-size: 120px 120px, cover;
   background-position: center;
 }
 .ticker-enter-active, .ticker-leave-active { transition: all 0.5s ease; }
 .ticker-enter-from { opacity: 0; transform: translateY(14px); }
 .ticker-leave-to   { opacity: 0; transform: translateY(-14px); }
-.prediction-feed-scroll { scrollbar-width: thin; scrollbar-color: rgba(53,208,111,.65) rgba(255,255,255,.06); }
+.prediction-feed-scroll { scrollbar-width: thin; scrollbar-color: rgba(247,182,0,.65) rgba(255,255,255,.06); }
 .prediction-feed-scroll::-webkit-scrollbar { width: 7px; }
 .prediction-feed-scroll::-webkit-scrollbar-track { background: rgba(255,255,255,.05); border-radius: 999px; }
-.prediction-feed-scroll::-webkit-scrollbar-thumb { background: rgba(53,208,111,.65); border-radius: 999px; }
+.prediction-feed-scroll::-webkit-scrollbar-thumb { background: rgba(247,182,0,.65); border-radius: 999px; }
 .phase-enter { animation: phase-in .45s cubic-bezier(.2,.8,.2,1) both; }
 .count-enter-active, .count-leave-active { transition: all .2s ease; }
 .count-enter-from { opacity: 0; transform: translateY(12px) scale(1.15); }

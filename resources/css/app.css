@@ -22,11 +22,11 @@
 }
 
 :root {
-  --visa-blue: #1a1f71;
-  --visa-blue-bright: #1434cb;
+  --visa-blue: #1434cb;
+  --visa-blue-deep: #0a1f8f;
   --visa-gold: #f7b600;
-  --visa-ink: #070b2a;
-  --visa-surface: #10164d;
+  --visa-ink: #06165f;
+  --visa-surface: #0d2aac;
   --visa-line: rgba(255, 255, 255, 0.12);
 }
 
@@ -52,11 +52,12 @@ button, a { -webkit-tap-highlight-color: transparent; }
   .event-surface {
     position: relative;
     isolation: isolate;
-    background-color: var(--visa-ink);
+    overflow: hidden;
+    background-color: var(--visa-blue);
     background-image:
-      linear-gradient(180deg, rgba(7, 11, 42, .92), rgba(16, 22, 77, .84)),
-      url('/images/backgrounds/event-portrait-visa.png');
-    background-size: cover;
+      linear-gradient(120deg, rgba(255, 255, 255, .16) 0 1px, transparent 1px 88px),
+      linear-gradient(145deg, #1434cb 0%, #0d2aac 48%, #06165f 100%);
+    background-size: 92px 92px, cover;
     background-position: center;
     background-attachment: fixed;
   }
@@ -67,11 +68,14 @@ button, a { -webkit-tap-highlight-color: transparent; }
     inset: 0;
     z-index: -1;
     pointer-events: none;
-    background: radial-gradient(circle at 50% 12%, rgba(20, 52, 203, .25), transparent 38%);
+    background:
+      linear-gradient(105deg, transparent 0 54%, rgba(255, 255, 255, .12) 54% 56%, transparent 56%),
+      linear-gradient(155deg, transparent 0 67%, rgba(247, 182, 0, .16) 67% 68.5%, transparent 68.5%),
+      linear-gradient(18deg, rgba(255, 255, 255, .08), transparent 32%);
   }
 
   .glass-card {
-    background: linear-gradient(145deg, rgba(16, 22, 77, .94), rgba(7, 11, 42, .96));
+    background: linear-gradient(145deg, rgba(13, 42, 172, .9), rgba(6, 22, 95, .96));
     border: 1px solid var(--visa-line);
     box-shadow: 0 28px 70px rgba(0, 0, 0, .34);
     backdrop-filter: blur(16px);
@@ -106,8 +110,9 @@ button, a { -webkit-tap-highlight-color: transparent; }
 @media (min-width: 900px) {
   .event-surface {
     background-image:
-      linear-gradient(90deg, rgba(7, 11, 42, .94) 0%, rgba(16, 22, 77, .8) 48%, rgba(20, 52, 203, .22) 100%),
-      url('/images/backgrounds/event-landscape-visa.png');
+      linear-gradient(120deg, rgba(255, 255, 255, .14) 0 1px, transparent 1px 108px),
+      linear-gradient(110deg, #06165f 0%, #1434cb 42%, #0d2aac 100%);
+    background-size: 112px 112px, cover;
     background-position: center;
   }
 }

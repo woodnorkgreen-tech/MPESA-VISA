@@ -395,12 +395,12 @@
               </select>
             </div>
             <div>
-              <label class="block text-xs text-gray-400 mb-1">Player of the Match</label>
-              <select v-model="result.potm"
-                class="w-full border rounded-xl px-3 py-3 text-sm focus:outline-none focus:border-visa">
-                <option value="">TBD — resolve later</option>
-                <option v-for="p in squadList" :key="p" :value="p">{{ p }}</option>
-              </select>
+              <label class="block text-xs text-gray-400 mb-1">First goal minute</label>
+              <input v-model.number="result.first_goal_minute" type="number" min="1" max="120"
+                :required="result.first_scoring_team !== 'none'"
+                :disabled="!result.first_scoring_team || result.first_scoring_team === 'none'"
+                class="w-full border rounded-xl px-3 py-3 text-sm focus:outline-none focus:border-visa disabled:bg-gray-100 disabled:text-gray-400"
+                placeholder="1-120" />
             </div>
           </div>
 
@@ -890,7 +890,7 @@ const phaseColors = {
   prediction_reveal:  'bg-visa/10 text-visa',
 }
 
-const result           = reactive({ score_home: 0, score_away: 0, halftime_score_home: 0, halftime_score_away: 0, first_scoring_team: 'none', scorer: '', potm: '' })
+const result           = reactive({ score_home: 0, score_away: 0, halftime_score_home: 0, halftime_score_away: 0, first_scoring_team: 'none', first_goal_minute: null, scorer: '' })
 const submittingResult = ref(false)
 const matchResultMsg   = ref('')
 const matchResultSuccess = ref(false)
@@ -917,12 +917,14 @@ watch(liveQuestion, question => {
   if (question) countdownDraft.value = question.duration_seconds
 })
 
-const squadList = computed(() => [...lines(matchForm.home_squad_text), ...lines(matchForm.away_squad_text)])
 const resultScorerList = computed(() => result.first_scoring_team === 'home'
   ? lines(matchForm.home_squad_text)
   : result.first_scoring_team === 'away' ? lines(matchForm.away_squad_text) : [])
 
-watch(() => result.first_scoring_team, () => { result.scorer = '' })
+watch(() => result.first_scoring_team, team => {
+  result.scorer = ''
+  if (team === 'none') result.first_goal_minute = null
+})
 
 onMounted(() => {
   loadQuestions()
@@ -1053,7 +1055,7 @@ async function resetEvent() {
     const summary = data.summary ?? {}
     testTools.message = `${data.message} Cleared ${summary.answers ?? 0} answers and ${summary.predictions ?? 0} predictions.`
     testTools.confirmation = ''; testTools.removePlayers = false
-    Object.assign(result, { score_home: 0, score_away: 0, halftime_score_home: 0, halftime_score_away: 0, first_scoring_team: 'none', scorer: '', potm: '' })
+    Object.assign(result, { score_home: 0, score_away: 0, halftime_score_home: 0, halftime_score_away: 0, first_scoring_team: 'none', first_goal_minute: null, scorer: '' })
     await Promise.all([fetchState(), loadQuestions(), loadAudits(), loadMatchConfig(), loadTestingStatus()])
   } catch (e) {
     testTools.error = true; testTools.message = e.response?.data?.message ?? 'Could not reset the event.'
@@ -1284,8 +1286,8 @@ async function submitMatchResult() {
       halftime_score_home: result.halftime_score_home,
       halftime_score_away: result.halftime_score_away,
       first_scoring_team: result.first_scoring_team,
+      first_goal_minute: result.first_scoring_team === 'none' ? null : result.first_goal_minute,
       scorer: result.scorer || null,
-      potm:       result.potm   || null,
     })
     matchResultMsg.value     = `✅ Scored ${data.predictions_scored} predictions.`
     matchResultSuccess.value = true

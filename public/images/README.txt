@@ -1,12 +1,12 @@
-Drop the following image files into this folder (public/images/).
-The landing page automatically detects each file and shows it when present.
-Without the files the page falls back to CSS-only styling — fully functional.
+Current Visa event assets live in this folder.
+The main event backgrounds are CSS-generated with Visa Blue (#1434CB), so no background image files are required.
 
-FILE                  DESCRIPTION                           IDEAL SIZE
---------------------  ------------------------------------  -------------------------
-visa-logo.png         VISA white logo (transparent bg)      Any width, ~60px tall
-fifa-badge.png        FIFA World Cup 2026 trophy badge       Any, ~100px tall
-fans-hero.png         Fan celebration photo (the 3 people)  600–1200px wide, PNG
-stadium-bg.jpg        Stadium/venue aerial photo            1200px+ wide, dark-toned
+FILE                                DESCRIPTION
+----------------------------------  ------------------------------------
+visa-logo.svg                       Visa logo
+visa-fwc2026-lockup-white.png       White Visa FIFA World Cup 2026 lockup for blue backgrounds
+visa-fwc2026-partner-white.png      White full partner lockup for blue backgrounds
+visa-fwc2026-stacked-partner-white.png White stacked partner mark for the landing screen
+fifa-badge.svg                      FIFA World Cup 2026 badge
 
-All images are optional. The page looks great with just the CSS fallbacks.
+Keep this folder focused on current Visa event assets.

@@ -8,28 +8,36 @@
     <!-- ── Top logo bar ────────────────────────────────────────────────── -->
     <header class="relative z-10 flex items-center justify-between px-5 sm:px-8 lg:px-12 pt-safe pt-5 sm:pt-8 pb-2">
 
-      <span class="text-xs font-black uppercase tracking-[.25em] text-white/70 sm:text-sm">FIFA World Cup Final 2026</span>
+      <span class="text-xs font-black uppercase tracking-[.25em] text-white/70 sm:text-sm">FIFA World Cup 2026™</span>
+
+      <img src="/images/visa-fwc2026-lockup-white.png" alt="Visa FIFA World Cup 2026"
+        class="h-10 max-w-[56vw] object-contain drop-shadow-lg sm:h-12 md:h-14 lg:hidden" />
 
       <img src="/images/visa-logo.svg" alt="Visa"
-        class="h-7 sm:h-9 md:h-11 object-contain drop-shadow-lg" />
+        class="hidden h-8 object-contain drop-shadow-lg lg:block xl:h-9" />
 
     </header>
+
+    <div class="landing-partner-mark hidden lg:flex" aria-label="Visa Worldwide Partner FIFA World Cup 2026">
+      <img src="/images/visa-fwc2026-stacked-partner-white.png" alt="" class="h-full w-full object-contain" />
+      <span class="landing-fifa-label" aria-hidden="true">FIFA</span>
+    </div>
 
     <!-- ── Hero area — vertically centred in the upper ~60% of the screen ── -->
     <!-- Bottom padding reserves the lower portion for the fans in the bg image -->
     <main class="relative z-10 flex-1 flex flex-col items-center lg:items-start justify-center px-6 sm:px-10 lg:px-16 text-center lg:text-left hero-content">
 
       <span class="font-black uppercase tracking-[.08em] text-visa-gold drop-shadow mb-4"
-        style="font-size: clamp(1rem, 2vw, 1.5rem)">Visa Final Whistle</span>
+        style="font-size: clamp(1rem, 2vw, 1.5rem)">FIFA World Cup 2026™ watch party</span>
 
       <h1 class="text-white font-black leading-[1.12] mb-5 max-w-3xl tracking-[-0.03em]"
         style="font-size: clamp(1.7rem, 4vw, 4rem); text-shadow: 0 3px 24px rgba(0,0,0,0.5)">
         Tap into the action.<br />
-        <span class="italic uppercase text-visa-gold">Predict the Final. Win with Visa.</span>
+        <span class="italic uppercase text-visa-gold">Predict. Play. Win with Visa.</span>
       </h1>
 
       <p class="max-w-xl text-white/72 text-sm sm:text-base lg:text-lg leading-relaxed mb-8">
-        Join the live Visa fan experience for Argentina vs Spain. Predict the score, test your Visa and football knowledge, and climb the leaderboard.
+        Join the live Visa watch party for Argentina vs Spain. Predict the score, test your Visa and football knowledge, and climb the leaderboard.
       </p>
 
       <button @click="view = 'register'"
@@ -235,59 +243,88 @@ function goToPlay() {
 </script>
 
 <style scoped>
-/* ── Landing: full-bleed background image ──────────────────────────────────
-   Dark gradient overlay sits on top of the photo to keep text readable.
-   Fallback colour (#001A0D) shows while the image loads or if it's missing.
+/* ── Landing: Visa-blue event background ───────────────────────────────────
+   Uses Visa Blue (#1434CB) with subtle graphic bands.
 ─────────────────────────────────────────────────────────────────────────── */
 .landing-root {
-  background-color: #001A0D;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background-color: #1434CB;
   background-image:
-    linear-gradient(to bottom, rgba(0, 8, 4, .5), rgba(0, 10, 5, .12) 44%, rgba(0, 4, 2, .6)),
-    url('/images/backgrounds/event-portrait-visa.png');
+    linear-gradient(120deg, rgba(255, 255, 255, .09) 0 1px, transparent 1px 76px);
 
-  /* Portrait phones (primary): fill the screen, anchor to the top so
-     the stadium shows at the top and fans peek up from the bottom     */
-  background-size: cover;
-  background-position: center top;
+  background-size: 80px 80px;
+  background-position: center;
   background-repeat: no-repeat;
 }
 
-/* ── Landscape phones (e.g. iPhone rotated) ────────────────────────────────
-   Cover still applies but we shift position to centre the composition       */
+.landing-root::before,
+.landing-root::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.landing-root::before {
+  background:
+    linear-gradient(108deg, transparent 0 48%, rgba(255, 255, 255, .14) 48% 51%, transparent 51%),
+    linear-gradient(153deg, transparent 0 66%, rgba(255, 255, 255, .1) 66% 68%, transparent 68%);
+}
+
+.landing-root::after {
+  background: linear-gradient(180deg, transparent 0%, rgba(6, 22, 95, .16) 100%);
+}
+
+.landing-partner-mark {
+  position: absolute;
+  z-index: 10;
+  top: clamp(11rem, 27vh, 17rem);
+  right: clamp(8rem, 17vw, 18rem);
+  width: clamp(14rem, 21vw, 24rem);
+  aspect-ratio: 900 / 1180;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  filter: drop-shadow(0 20px 42px rgba(0, 0, 0, .16));
+  pointer-events: none;
+}
+
+.landing-fifa-label {
+  position: absolute;
+  left: 50%;
+  top: 77.6%;
+  transform: translate(-50%, -50%);
+  color: #050505;
+  font-size: clamp(1.1rem, 1.85vw, 2rem);
+  font-weight: 900;
+  letter-spacing: .02em;
+  line-height: 1;
+}
+
+/* ── Landscape phones (e.g. iPhone rotated) ──────────────────────────────── */
 @media (orientation: landscape) and (max-height: 500px) {
-  .landing-root {
-    background-position: center center;
-  }
-  /* Push content higher so it doesn't clash with fans area on short screens */
   .hero-content {
     padding-bottom: 0;
   }
 }
 
-/* ── Tablets portrait (768px+) — image is narrower than screen width ────────
-   Switch to auto-height so the image fills height without over-cropping the
-   fans; horizontal edges are filled by the background-color fallback.        */
 @media (min-width: 768px) and (orientation: portrait) {
   .landing-root {
-    background-size: cover;
-    background-position: center top;
+    background-size: 96px 96px, cover;
   }
 }
 
-/* ── Tablets landscape + desktop (768px+ wide, landscape) ──────────────────
-   Image is portrait; cover will crop heavily. Use contain + gradient fill
-   so the full image is visible centred on a green background.                */
 @media (min-width: 768px) and (orientation: landscape) {
   .landing-root {
     background-image:
-      linear-gradient(90deg, rgba(0, 12, 7, .84) 0%, rgba(0, 12, 7, .58) 48%, rgba(0, 8, 4, .08) 100%),
-      url('/images/backgrounds/event-landscape-visa.png');
-    background-size: cover;
-    background-position: center;
+      linear-gradient(120deg, rgba(255, 255, 255, .08) 0 1px, transparent 1px 108px);
+    background-size: 112px 112px;
   }
 }
 
-/* ── Hero area: reserve the lower ~35% of the screen for the fan photo ──── */
 .hero-content {
   padding-bottom: clamp(7rem, 29vh, 15rem);
 }
@@ -305,8 +342,8 @@ function goToPlay() {
   color: #070b2a;
 }
 .play-btn:hover {
-  background: linear-gradient(135deg, #00D966 0%, #00B558 100%);
-  box-shadow: 0 12px 40px rgba(0, 198, 90, 0.65), 0 2px 8px rgba(0,0,0,0.4);
+  background: linear-gradient(135deg, #ffcf40 0%, #f7b600 100%);
+  box-shadow: 0 12px 40px rgba(247, 182, 0, 0.5), 0 2px 8px rgba(0,0,0,0.4);
 }
 .play-btn:active {
   transform: scale(0.96);
