@@ -33,14 +33,14 @@
     <main class="relative z-10 flex-1 flex flex-col items-center lg:items-start justify-center px-6 sm:px-10 lg:px-16 text-center lg:text-left hero-content">
 
       <h1 class="landing-title max-w-4xl">
-        FIFA World Cup 2026<br />
+        FIFA World Cup 2026™<br />
         <span>Final Match</span>
       </h1>
 
       <p class="landing-command">Predict and Win</p>
 
       <p class="max-w-xl text-white/74 text-sm sm:text-base lg:text-lg leading-relaxed mb-7">
-        Join the FIFA World Cup 2026 Final Match for Argentina vs Spain. Predict the score, test your Visa and football knowledge, and climb the leaderboard.
+        Join the FIFA World Cup 2026™ Final Match for Argentina vs Spain. Predict the score, test your Visa and football knowledge, and climb the leaderboard.
       </p>
 
       <button @click="view = 'register'"

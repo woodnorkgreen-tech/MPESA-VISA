@@ -18,7 +18,7 @@
           <span class="hidden h-5 w-px bg-white/25 sm:block" aria-hidden="true"></span>
           <span class="truncate text-[10px] font-black uppercase tracking-[.14em] text-white/80 sm:text-sm sm:tracking-[.18em]">
             <span class="sm:hidden">FWC Final</span>
-            <span class="hidden sm:inline">FIFA World Cup 2026 Final Match</span>
+            <span class="hidden sm:inline">FIFA World Cup 2026™ Final Match</span>
           </span>
         </div>
         <div class="flex min-w-0 shrink-0 items-center gap-1.5 sm:gap-3">

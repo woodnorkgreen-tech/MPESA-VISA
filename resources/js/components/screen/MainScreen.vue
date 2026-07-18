@@ -21,7 +21,7 @@
       <div class="phase-enter flex-1 flex min-h-0 flex-col px-6 pb-20 pt-5 lg:px-14 lg:pb-24 lg:pt-8">
         <header class="screen-lobby-header mx-auto flex w-full max-w-[96rem] items-center justify-between gap-8">
           <div class="min-w-0 text-left">
-            <h1 class="screen-title">FIFA World Cup 2026 Final Match</h1>
+            <h1 class="screen-title">FIFA World Cup 2026™ Final Match</h1>
             <p class="screen-subtitle">Predict and Win</p>
           </div>
           <div class="flex shrink-0 items-center border-l border-white/18 pl-8">
