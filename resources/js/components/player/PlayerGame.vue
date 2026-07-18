@@ -232,18 +232,6 @@ function signOut() {
 /* ── Lobby: Visa-blue event background ───────────────────────────────────── */
 .lobby-bg {
   background-color: #1434CB;
-  background-image:
-    linear-gradient(120deg, rgba(255, 255, 255, .12) 0 1px, transparent 1px 84px),
-    linear-gradient(145deg, #1434CB 0%, #0D2AAC 48%, #06165F 100%);
-  background-size: 88px 88px, cover;
-}
-@media (min-width: 900px) {
-  .lobby-bg {
-    background-image:
-      linear-gradient(120deg, rgba(255, 255, 255, .1) 0 1px, transparent 1px 108px),
-      linear-gradient(110deg, #06165F 0%, #1434CB 42%, #0D2AAC 100%);
-    background-size: 112px 112px, cover;
-  }
 }
 
 .lobby-card {

@@ -2,11 +2,11 @@
   <!-- Compact variant: used inline during trivia reveal, where vertical space is tight. -->
   <section v-if="compact" class="flex h-full w-full flex-col" aria-live="polite">
     <div class="mb-3 flex items-center justify-between gap-4 lg:mb-4">
-      <h3 class="font-black uppercase tracking-[.18em] text-gray-400"
+      <h3 class="font-medium uppercase tracking-[.18em] text-gray-400"
         style="font-size: clamp(0.65rem, 1.2vw, 1.2rem)">
         {{ title }}
       </h3>
-      <p class="rounded-full border border-white/10 bg-black/20 px-3 py-1 font-bold text-gray-500"
+      <p class="rounded-full border border-white/10 bg-black/20 px-3 py-1 font-medium text-gray-500"
         style="font-size: clamp(.55rem,.8vw,.8rem)">
         {{ entries.length }} live
       </p>
@@ -19,10 +19,10 @@
         <div class="mx-auto mb-1 flex h-8 w-8 items-center justify-center rounded-full bg-black/20 text-xl lg:h-11 lg:w-11 lg:text-3xl">
           {{ medal(entry.rank) }}
         </div>
-        <p class="truncate font-black text-white" style="font-size: clamp(.8rem,1.7vw,2rem)">
+        <p class="truncate font-medium text-white" style="font-size: clamp(.8rem,1.7vw,2rem)">
           {{ entry.nickname }}
         </p>
-        <p class="mt-1 font-black tabular-nums text-visa-gold" style="font-size: clamp(1rem,2.2vw,2.7rem)">
+        <p class="mt-1 font-semibold tabular-nums text-visa-gold" style="font-size: clamp(1rem,2.2vw,2.7rem)">
           {{ score(entry).toLocaleString() }} <span class="text-[.45em] uppercase tracking-wider text-white/40">pts</span>
         </p>
       </article>
@@ -32,14 +32,14 @@
       class="mt-2 grid min-h-0 flex-1 grid-cols-2 content-start gap-2 overflow-hidden lg:mt-3 lg:gap-3">
       <article v-for="entry in standings" :key="entryKey(entry)"
         class="flex min-w-0 items-center gap-3 rounded-xl border border-white/10 bg-white/[.055] px-3 py-2 lg:rounded-2xl lg:px-5 lg:py-3">
-        <span class="w-7 shrink-0 text-center font-black tabular-nums text-gray-500"
+        <span class="w-7 shrink-0 text-center font-medium tabular-nums text-gray-500"
           style="font-size: clamp(.8rem,1.3vw,1.4rem)">{{ entry.rank }}</span>
         <div class="min-w-0 flex-1">
-          <p class="truncate font-bold text-white" style="font-size: clamp(.75rem,1.35vw,1.45rem)">
+          <p class="truncate font-medium text-white" style="font-size: clamp(.75rem,1.35vw,1.45rem)">
             {{ entry.nickname }}
           </p>
         </div>
-        <span class="shrink-0 font-black tabular-nums text-visa-gold"
+        <span class="shrink-0 font-semibold tabular-nums text-visa-gold"
           style="font-size: clamp(.8rem,1.45vw,1.6rem)">{{ score(entry).toLocaleString() }}</span>
       </article>
     </TransitionGroup>
@@ -62,24 +62,24 @@
               <img src="/images/visa-fwc2026-lockup-white.png" alt="Visa FIFA World Cup 2026" class="w-[62%] min-w-24 object-contain" />
             </div>
             <div>
-              <p class="text-[clamp(.5rem,.7vw,.72rem)] font-black uppercase tracking-[.2em] text-white/55">Watch party</p>
+              <p class="text-[clamp(.5rem,.7vw,.72rem)] font-medium uppercase tracking-[.2em] text-white/55">Watch party</p>
               <div class="mt-1 flex items-end justify-between gap-3">
-                <p class="truncate text-[clamp(.85rem,1.25vw,1.3rem)] font-black uppercase tracking-[.08em] text-white">Top scorer</p>
+                <p class="truncate text-[clamp(.85rem,1.25vw,1.3rem)] font-medium uppercase tracking-[.08em] text-white">Top scorer</p>
                 <span class="text-[clamp(.8rem,1.3vw,1.4rem)] text-visa-gold" aria-hidden="true">★</span>
               </div>
             </div>
           </div>
         </div>
-        <p class="font-bold uppercase tracking-[.3em] text-gray-500" style="font-size: clamp(.6rem,.9vw,.9rem)">
+        <p class="font-medium uppercase tracking-[.3em] text-gray-500" style="font-size: clamp(.6rem,.9vw,.9rem)">
           Current leader
         </p>
-        <p class="mt-2 max-w-full truncate font-black text-white" style="font-size: clamp(1.35rem,2.4vw,2.8rem)">
+        <p class="mt-2 max-w-full truncate font-medium text-white" style="font-size: clamp(1.35rem,2.4vw,2.8rem)">
           {{ winner.nickname }}
         </p>
-        <p class="mt-1 font-black leading-none tabular-nums text-visa-gold" style="font-size: clamp(1.8rem,3.2vw,3.8rem)">
+        <p class="mt-1 font-semibold leading-none tabular-nums text-visa-gold" style="font-size: clamp(1.8rem,3.2vw,3.8rem)">
           {{ score(winner).toLocaleString() }}
         </p>
-        <p class="mt-1 font-bold uppercase tracking-widest text-gray-500" style="font-size: clamp(.55rem,.8vw,.85rem)">
+        <p class="mt-1 font-medium uppercase tracking-widest text-gray-500" style="font-size: clamp(.55rem,.8vw,.85rem)">
           points
         </p>
       </div>
@@ -92,11 +92,11 @@
 
     <div class="flex min-h-0 flex-col px-4 py-4 lg:px-6 lg:py-5">
       <div class="mb-2 flex flex-shrink-0 items-center justify-between gap-4 border-b border-white/10 pb-3 lg:mb-3">
-        <span class="flex items-center gap-2 font-bold uppercase tracking-widest text-gray-500"
+        <span class="flex items-center gap-2 font-medium uppercase tracking-widest text-gray-500"
           style="font-size: clamp(.6rem,.85vw,.85rem)">
           <span class="h-2 w-2 rounded-full bg-visa-gold"></span> Live standings
         </span>
-        <span class="font-bold text-gray-600" style="font-size: clamp(.55rem,.8vw,.8rem)">
+        <span class="font-medium text-gray-600" style="font-size: clamp(.55rem,.8vw,.8rem)">
           {{ entries.length }} ranked players
         </span>
       </div>
@@ -107,16 +107,16 @@
         <article v-for="entry in entries" :key="entryKey(entry)"
           class="flex min-w-0 items-center gap-3 border-b border-white/5 px-1 last:border-b-0"
           style="min-height: clamp(2.15rem, 3.45vh, 3rem)">
-          <span class="w-8 shrink-0 text-center font-black tabular-nums" :class="rankColor(entry.rank)"
+          <span class="w-8 shrink-0 text-center font-medium tabular-nums" :class="rankColor(entry.rank)"
             style="font-size: clamp(.75rem,1.05vw,1.1rem)">
             {{ entry.rank }}
           </span>
           <div class="min-w-0 flex-1">
-            <p class="truncate font-bold text-white" style="font-size: clamp(.72rem,1.05vw,1.15rem)">
+            <p class="truncate font-medium text-white" style="font-size: clamp(.72rem,1.05vw,1.15rem)">
               {{ entry.nickname }}
             </p>
           </div>
-          <span class="shrink-0 font-black tabular-nums text-visa-gold"
+          <span class="shrink-0 font-semibold tabular-nums text-visa-gold"
             style="font-size: clamp(.75rem,1.15vw,1.25rem)">{{ score(entry).toLocaleString() }}</span>
         </article>
       </TransitionGroup>

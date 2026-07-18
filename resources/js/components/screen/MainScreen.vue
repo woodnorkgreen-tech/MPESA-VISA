@@ -3,13 +3,13 @@
   <div class="screen-root screen-brand-bg text-white font-display select-none flex flex-col">
 
     <div class="fixed right-3 top-3 z-50 flex items-center gap-2 print:hidden">
-      <span v-if="linkMessage" class="rounded-full bg-black/70 px-3 py-2 text-xs font-bold text-white backdrop-blur">{{ linkMessage }}</span>
+      <span v-if="linkMessage" class="rounded-full bg-black/70 px-3 py-2 text-xs font-medium text-white backdrop-blur">{{ linkMessage }}</span>
       <button type="button" @click="copyScreenLink" title="Copy public Main Screen link"
-        class="rounded-full border border-white/15 bg-black/55 px-3 py-2 text-xs font-bold text-white backdrop-blur hover:bg-black/75 focus:outline-none focus:ring-2 focus:ring-visa-gold">
+        class="rounded-full border border-white/15 bg-black/55 px-3 py-2 text-xs font-medium text-white backdrop-blur hover:bg-black/75 focus:outline-none focus:ring-2 focus:ring-visa-gold">
         🔗 <span class="hidden sm:inline">Public link</span>
       </button>
       <button type="button" @click="toggleFullscreen" :title="isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'"
-        class="rounded-full border border-white/15 bg-black/55 px-3 py-2 text-xs font-bold text-white backdrop-blur hover:bg-black/75 focus:outline-none focus:ring-2 focus:ring-visa-gold">
+        class="rounded-full border border-white/15 bg-black/55 px-3 py-2 text-xs font-medium text-white backdrop-blur hover:bg-black/75 focus:outline-none focus:ring-2 focus:ring-visa-gold">
         {{ isFullscreen ? '✕' : '⛶' }} <span class="hidden sm:inline">{{ isFullscreen ? 'Exit' : 'Fullscreen' }}</span>
       </button>
     </div>
@@ -18,106 +18,98 @@
          LOBBY / PREDICTIONS
     ══════════════════════════════════════════════════════════════════════ -->
     <template v-if="['lobby', 'predictions_open', 'predictions_closed'].includes(phase)">
-      <div class="flex-1 flex flex-col items-center justify-center px-8 lg:px-16 text-center">
+      <div class="phase-enter flex-1 flex min-h-0 flex-col px-6 pb-20 pt-5 lg:px-14 lg:pb-24 lg:pt-8">
+        <header class="screen-lobby-header mx-auto flex w-full max-w-[96rem] items-center justify-between gap-8">
+          <div class="min-w-0 text-left">
+            <p class="screen-kicker">Visa presents</p>
+            <h1 class="screen-title">FIFA World Cup 2026™ Watch Party</h1>
+          </div>
+          <div class="flex shrink-0 items-center gap-4 border-l border-white/18 pl-8">
+            <span class="text-white/62" style="font-size: clamp(.8rem, 1vw, 1.1rem)">With</span>
+            <img src="/images/visa-fwc2026-lockup-white.png" alt="Visa FIFA World Cup 2026"
+              class="object-contain drop-shadow-lg" style="height: clamp(2.2rem, 3.2vw, 4.6rem)" />
+          </div>
+        </header>
 
-        <!-- Title — clamp scales from small monitors to 4K -->
-        <h1 class="font-black italic uppercase text-white tracking-tight leading-none mb-3"
-          style="font-size: clamp(3rem, 7vw, 9rem)">
-          <span>FIFA World Cup 2026™</span>
-        </h1>
-        <div class="flex items-center justify-center gap-5 lg:gap-8 mb-8 lg:mb-12">
-          <span class="text-gray-300" style="font-size: clamp(0.9rem, 1.6vw, 2rem)">Watch party with</span>
-          <img src="/images/visa-fwc2026-lockup-white.png" alt="Visa FIFA World Cup 2026"
-            class="object-contain drop-shadow-lg" style="height: clamp(2.1rem, 4.3vw, 5.2rem)" />
-        </div>
-
-        <!-- Broadcast layout: join left, event status centre, recent activity right -->
-        <div class="broadcast-grid mb-6 grid w-full grid-cols-[minmax(12rem,.85fr)_minmax(18rem,1.25fr)_minmax(15rem,1fr)] items-center gap-6 lg:gap-10">
-          <!-- LEFT: QR — large enough to scan from across the room -->
-          <div class="flex flex-col items-center flex-shrink-0">
-            <div class="bg-white p-4 lg:p-5 rounded-3xl shadow-2xl">
+        <div class="broadcast-grid mx-auto grid min-h-0 w-full max-w-[96rem] flex-1 grid-cols-[minmax(15rem,.78fr)_minmax(22rem,1.1fr)_minmax(19rem,.95fr)] items-center gap-6 pt-5 lg:gap-8 lg:pt-8">
+          <div class="screen-panel screen-qr-panel flex flex-col items-center justify-center">
+            <div class="rounded-[1.25rem] bg-white p-3 shadow-2xl lg:p-4">
               <canvas ref="qrCanvas" :width="qrSize" :height="qrSize"></canvas>
             </div>
-            <p class="font-black text-white leading-tight mt-4"
-              style="font-size: clamp(1.3rem, 2.4vw, 3.2rem)">
+            <p class="mt-4 font-medium leading-tight text-white" style="font-size: clamp(1.2rem, 2.1vw, 2.7rem)">
               Scan to play
             </p>
-            <p class="text-gray-400 mt-1" style="font-size: clamp(0.8rem, 1.2vw, 1.6rem)">
+            <p class="mt-1 text-gray-400" style="font-size: clamp(0.8rem, 1.2vw, 1.6rem)">
               Register &amp; make your predictions
+            </p>
+            <p class="mt-5 rounded-full border border-white/12 bg-white/6 px-4 py-2 font-medium text-white/78" style="font-size: clamp(.7rem, .9vw, .95rem)">
+              {{ playerCount }} players registered
             </p>
           </div>
 
-          <!-- CENTRE: kick-off and prediction state remain on the screen axis -->
-          <div class="flex-1 flex flex-col items-center text-center">
-            <div class="rounded-2xl border px-6 py-3"
+          <div class="flex min-w-0 flex-col items-center text-center">
+            <div class="screen-status-card rounded-2xl border px-7 py-5"
               :class="phase === 'predictions_closed' ? 'border-orange-400/30 bg-orange-400/10' : 'border-visa-gold/30 bg-visa/20'">
-              <p class="font-black uppercase tracking-widest"
+              <p class="font-medium uppercase tracking-widest"
                 :class="phase === 'predictions_closed' ? 'text-orange-400' : 'text-visa-gold'"
                 style="font-size: clamp(.65rem, 1vw, 1rem)">
-                {{ phase === 'predictions_closed' ? '🔒 Predictions closed' : '● Predictions open' }}
+                {{ phase === 'predictions_closed' ? 'Predictions closed' : 'Predictions open' }}
               </p>
-              <p class="mt-1 font-black tabular-nums text-white" style="font-size: clamp(1.1rem, 2.1vw, 2.7rem)">
+              <p class="mt-1 font-medium tabular-nums text-white" style="font-size: clamp(1.25rem, 2.2vw, 2.8rem)">
                 {{ predictionCount }} locked in
               </p>
             </div>
-            <div v-if="phase === 'predictions_open'" class="mt-4 max-w-xl rounded-xl border border-visa-gold/25 bg-visa-gold/10 px-4 py-3">
-              <p class="font-black uppercase tracking-widest text-visa-gold" style="font-size: clamp(.6rem,.9vw,.9rem)">Prediction rule</p>
-              <p class="mt-1 font-semibold leading-snug text-white" style="font-size: clamp(.8rem,1.25vw,1.35rem)">
+
+            <div v-if="phase === 'predictions_open'" class="screen-panel mt-4 max-w-xl px-5 py-4">
+              <p class="font-medium uppercase tracking-widest text-visa-gold" style="font-size: clamp(.6rem,.9vw,.9rem)">Prediction rule</p>
+              <p class="mt-1 font-normal leading-snug text-white" style="font-size: clamp(.8rem,1.25vw,1.35rem)">
                 Final score means the score after 90 minutes + stoppage time.
               </p>
               <p class="mt-1 text-gray-400" style="font-size: clamp(.65rem,.95vw,1rem)">Extra time and penalty shootouts do not count.</p>
             </div>
-            <div v-if="match.kickoff_at && kickoffCountdown" class="mt-4 w-full max-w-lg rounded-2xl border border-white/10 bg-black/30 px-6 py-4">
-              <p class="text-gray-500 uppercase tracking-widest" style="font-size: clamp(.6rem, 1vw, 1rem)">Kick-off countdown</p>
-              <p class="font-black tabular-nums text-white" style="font-size: clamp(1.35rem, 2.8vw, 3.6rem)">{{ kickoffCountdown }}</p>
-              <p class="text-gray-500" style="font-size: clamp(.6rem, .9vw, .9rem)">{{ match.venue }}</p>
+
+            <div v-if="match.kickoff_at && kickoffCountdown" class="screen-countdown mt-4 w-full max-w-xl px-7 py-5">
+              <p class="uppercase tracking-widest text-white/45" style="font-size: clamp(.6rem, 1vw, 1rem)">Kick-off countdown</p>
+              <p class="font-medium tabular-nums text-white" style="font-size: clamp(1.45rem, 2.65vw, 3.35rem)">{{ kickoffCountdown }}</p>
+              <p class="text-white/45" style="font-size: clamp(.6rem, .9vw, .9rem)">{{ match.venue }}</p>
             </div>
           </div>
 
-          <!-- RIGHT: latest locked-in entries, newest first -->
-          <aside class="broadcast-latest min-w-0 rounded-2xl border border-white/10 bg-black/30 p-4 text-left lg:p-5">
+          <aside class="broadcast-latest screen-panel min-w-0 p-4 text-left lg:p-5">
             <div class="mb-3 flex items-center justify-between gap-3 border-b border-white/10 pb-3">
               <div>
-                <p class="font-black uppercase tracking-widest text-white" style="font-size: clamp(.65rem,1vw,1rem)">Latest locked in</p>
+                <p class="font-medium uppercase tracking-widest text-white" style="font-size: clamp(.65rem,1vw,1rem)">Latest locked in</p>
                 <p class="mt-0.5 text-gray-500" style="font-size: clamp(.55rem,.8vw,.8rem)">{{ predictionFeed.length }} players · newest first</p>
               </div>
               <span class="h-2.5 w-2.5 shrink-0 animate-pulse rounded-full bg-visa-gold"></span>
             </div>
             <TransitionGroup v-if="predictionFeed.length" name="ticker" tag="ol" class="prediction-feed-scroll max-h-[42vh] space-y-2 overflow-y-auto overscroll-contain pr-1">
               <li v-for="(entry, idx) in predictionFeed" :key="entry.id"
-                class="flex min-w-0 items-center gap-3 rounded-xl border border-white/5 bg-white/5 px-3 py-2.5">
-                <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-visa/30 text-xs font-black text-visa-gold">{{ idx + 1 }}</span>
+                class="flex min-w-0 items-center gap-3 rounded-xl border border-white/8 bg-white/7 px-3 py-2.5">
+                <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-visa/30 text-xs font-medium text-visa-gold">{{ idx + 1 }}</span>
                 <div class="min-w-0">
-                  <p class="truncate font-bold text-white" style="font-size: clamp(.75rem,1.2vw,1.3rem)">{{ entry.nickname }}</p>
-                  <p class="text-gray-500" style="font-size: clamp(.55rem,.75vw,.75rem)">Prediction locked ✓</p>
+                  <p class="truncate font-medium text-white" style="font-size: clamp(.75rem,1.2vw,1.3rem)">{{ entry.nickname }}</p>
+                  <p class="text-gray-500" style="font-size: clamp(.55rem,.75vw,.75rem)">Prediction locked</p>
                 </div>
               </li>
             </TransitionGroup>
-            <p v-else class="py-8 text-center text-sm text-gray-600">Waiting for the first prediction…</p>
+            <p v-else class="py-8 text-center text-sm text-gray-600">Waiting for the first prediction...</p>
           </aside>
         </div>
-
-        <p class="mt-6 text-gray-700" style="font-size: clamp(0.75rem, 1.2vw, 1.5rem)">
-          {{ playerCount }} players registered
-        </p>
       </div>
     </template>
-
-    <!-- ══════════════════════════════════════════════════════════════════════
-         TRIVIA LIVE
-    ══════════════════════════════════════════════════════════════════════ -->
     <template v-else-if="phase === 'trivia_live' && question">
       <div class="phase-enter flex-1 flex flex-col px-8 lg:px-16 pt-6 lg:pt-10 pb-4">
 
         <!-- Top bar: double-points badge + huge countdown -->
         <div class="flex items-center justify-between mb-6 lg:mb-8 flex-shrink-0">
           <div class="flex items-center gap-4">
-          <span class="rounded-full border border-white/10 bg-black/20 px-4 py-2 font-bold uppercase tracking-widest text-gray-300"
+          <span class="rounded-full border border-white/10 bg-black/20 px-4 py-2 font-medium uppercase tracking-widest text-gray-300"
             style="font-size: clamp(0.65rem, 1.1vw, 1.1rem)">
             Round {{ round.current }} / {{ round.total }}
           </span>
           <span v-if="question.is_double_points"
-            class="bg-visa-gold text-black font-black uppercase tracking-widest animate-pulse rounded-full px-5 py-2"
+            class="bg-visa-gold text-black font-semibold uppercase tracking-widest animate-pulse rounded-full px-5 py-2"
             style="font-size: clamp(0.75rem, 1.5vw, 1.5rem)">
             ⚡ DOUBLE POINTS ⚡
           </span>
@@ -130,7 +122,7 @@
           <div class="flex items-center gap-4 lg:gap-7">
             <div class="text-right">
               <Transition name="count" mode="out-in">
-                <p :key="question.answer_count" class="font-black text-visa-gold tabular-nums" style="font-size: clamp(1.4rem, 3vw, 3.5rem)">{{ question.answer_count ?? 0 }}</p>
+                <p :key="question.answer_count" class="font-semibold text-visa-gold tabular-nums" style="font-size: clamp(1.4rem, 3vw, 3.5rem)">{{ question.answer_count ?? 0 }}</p>
               </Transition>
               <p class="text-gray-500 uppercase tracking-wider" style="font-size: clamp(.55rem, .9vw, .9rem)">Answers live</p>
             </div>
@@ -145,7 +137,7 @@
                 :stroke-dashoffset="dashOffset"
                 style="transition: stroke-dashoffset 1s linear;" />
             </svg>
-            <span class="absolute inset-0 flex items-center justify-center font-black"
+            <span class="absolute inset-0 flex items-center justify-center font-semibold"
               :class="timeLeft <= 5 ? 'text-red-400 animate-pulse' : 'text-white'"
               style="font-size: clamp(1.5rem, 4vw, 5rem)">
               {{ timeLeft }}
@@ -155,7 +147,7 @@
         </div>
 
         <!-- Question text — the most important thing on the screen -->
-        <p class="font-bold text-center leading-tight flex-1 flex items-center justify-center"
+        <p class="font-medium text-center leading-tight flex-1 flex items-center justify-center"
           style="font-size: clamp(1.5rem, 3.5vw, 5rem)">
           {{ question.text }}
         </p>
@@ -165,13 +157,13 @@
           :class="question.options.length === 2 ? 'grid-cols-2' : 'grid-cols-2'">
           <div v-for="(opt, idx) in question.options" :key="idx"
             class="bg-white/10 border border-white/20 rounded-2xl flex items-center gap-4 px-5 lg:px-8 py-4 lg:py-6">
-            <span class="rounded-full bg-white/20 font-black flex items-center justify-center flex-shrink-0"
+            <span class="rounded-full bg-white/20 font-semibold flex items-center justify-center flex-shrink-0"
               style="font-size: clamp(0.875rem, 1.8vw, 2rem);
                      width: clamp(2rem, 4vw, 4.5rem);
                      height: clamp(2rem, 4vw, 4.5rem)">
               {{ optLabels[idx] }}
             </span>
-            <span class="font-semibold leading-snug" style="font-size: clamp(0.875rem, 2vw, 2.5rem)">
+            <span class="font-medium leading-snug" style="font-size: clamp(0.875rem, 2vw, 2.5rem)">
               {{ opt }}
             </span>
           </div>
@@ -191,7 +183,7 @@
           style="font-size: clamp(0.875rem, 1.5vw, 1.8rem)">
           Answer Revealed
         </p>
-        <p class="text-center font-bold mb-6 flex-shrink-0"
+        <p class="text-center font-medium mb-6 flex-shrink-0"
           style="font-size: clamp(1.25rem, 2.5vw, 3.5rem)">
           {{ question.text }}
         </p>
@@ -206,13 +198,13 @@
             <span class="text-2xl lg:text-3xl flex-shrink-0">
               {{ opt === question.correct_answer ? '✅' : '' }}
             </span>
-            <span class="font-semibold leading-snug"
-              :class="opt === question.correct_answer ? 'font-black text-white' : ''"
+            <span class="font-medium leading-snug"
+              :class="opt === question.correct_answer ? 'font-semibold text-white' : ''"
               style="font-size: clamp(0.875rem, 2vw, 2.5rem)">
               {{ opt }}
             </span>
             <div class="ml-auto shrink-0 text-right">
-              <p class="font-black tabular-nums" :class="opt === question.correct_answer ? 'text-visa-gold' : 'text-gray-500'"
+              <p class="font-medium tabular-nums" :class="opt === question.correct_answer ? 'text-visa-gold' : 'text-gray-500'"
                 style="font-size: clamp(.8rem, 1.5vw, 1.7rem)">{{ optionCount(opt) }}</p>
               <p class="text-gray-600" style="font-size: clamp(.55rem, .8vw, .8rem)">{{ optionPercent(opt) }}%</p>
             </div>
@@ -260,7 +252,7 @@
     ══════════════════════════════════════════════════════════════════════ -->
     <template v-else>
       <div class="flex-1 flex items-center justify-center">
-        <p class="text-white font-black italic uppercase" style="font-size: clamp(1.5rem, 4vw, 5rem)">
+        <p class="text-white font-medium italic uppercase" style="font-size: clamp(1.5rem, 4vw, 5rem)">
           <span>FIFA World Cup 2026™ watch party</span>
         </p>
       </div>
@@ -269,13 +261,13 @@
     <!-- ══════════════════════════════════════════════════════════════════════
          BOTTOM BRAND STRIP
     ══════════════════════════════════════════════════════════════════════ -->
-    <div class="flex-shrink-0 bg-gradient-to-r from-visa via-[#1434CB] to-visa
+    <div class="screen-footer flex-shrink-0 bg-gradient-to-r from-visa via-[#1434CB] to-visa
                 flex items-center justify-center gap-6 lg:gap-12 px-8"
       style="height: clamp(2.5rem, 4vh, 5rem)">
       <img src="/images/visa-fwc2026-lockup-white.png" alt="Visa FIFA World Cup 2026"
         class="object-contain opacity-100" style="height: clamp(1.35rem, 2.8vh, 3rem)" />
       <span class="text-white/30">·</span>
-      <span class="text-white font-semibold tracking-widest opacity-80"
+      <span class="text-white font-medium tracking-widest opacity-80"
         style="font-size: clamp(0.6rem, 1.2vw, 1.2rem)">ARGENTINA vs SPAIN · FINAL</span>
     </div>
 
@@ -422,12 +414,78 @@ onUnmounted(() => {
 
 <style scoped>
 .screen-brand-bg {
+  position: relative;
+  isolation: isolate;
+  min-height: 100dvh;
   background-color: #1434CB;
   background-image:
-    linear-gradient(120deg, rgba(255, 255, 255, .1) 0 1px, transparent 1px 118px),
-    linear-gradient(110deg, #06165F 0%, #1434CB 44%, #0D2AAC 100%);
-  background-size: 120px 120px, cover;
+    linear-gradient(180deg, rgba(5, 15, 70, .14), rgba(5, 15, 70, .45)),
+    linear-gradient(118deg, transparent 0 58%, rgba(255, 255, 255, .1) 58% 68%, transparent 68%),
+    linear-gradient(120deg, rgba(255, 255, 255, .07) 0 1px, transparent 1px 118px),
+    linear-gradient(108deg, #1434CB 0%, #183AD0 48%, #0A1F8F 100%);
+  background-size: cover, cover, 118px 118px, cover;
   background-position: center;
+}
+.screen-brand-bg::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    linear-gradient(104deg, transparent 0 49%, rgba(255,255,255,.15) 49.2% 51%, transparent 51.2%),
+    linear-gradient(153deg, transparent 0 60%, rgba(255,255,255,.08) 60.1% 61.5%, transparent 61.7%),
+    linear-gradient(18deg, transparent 0 72%, rgba(247,182,0,.28) 72.2% 72.55%, transparent 72.8%),
+    linear-gradient(90deg, rgba(6,22,95,.5) 0%, transparent 42%),
+    linear-gradient(0deg, rgba(3,12,57,.18) 0%, transparent 24%);
+}
+.screen-footer {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 30;
+  box-shadow: 0 -18px 45px rgba(0,0,0,.2);
+}
+.screen-kicker {
+  color: #f7b600;
+  font-size: clamp(.7rem, .95vw, 1rem);
+  font-weight: 550;
+  letter-spacing: .32em;
+  text-transform: uppercase;
+}
+.screen-title {
+  margin-top: .25rem;
+  color: #fff;
+  font-size: clamp(2.15rem, 4.45vw, 5.35rem);
+  font-weight: 520;
+  line-height: 1;
+  letter-spacing: 0;
+  text-shadow: 0 18px 52px rgba(0,0,0,.28);
+}
+.screen-lobby-header {
+  min-height: clamp(4.5rem, 12vh, 8rem);
+}
+.screen-panel {
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 1.25rem;
+  background: linear-gradient(145deg, rgba(6,22,95,.62), rgba(4,12,52,.78));
+  box-shadow: 0 24px 70px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.06);
+  backdrop-filter: blur(14px);
+}
+.screen-qr-panel {
+  min-height: clamp(20rem, 42vh, 31rem);
+  padding: clamp(1.25rem, 2vw, 2rem);
+}
+.screen-status-card,
+.screen-countdown {
+  box-shadow: 0 22px 54px rgba(0,0,0,.24), inset 0 1px 0 rgba(255,255,255,.06);
+  backdrop-filter: blur(14px);
+}
+.screen-countdown {
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 1.25rem;
+  background: linear-gradient(145deg, rgba(6,22,95,.64), rgba(4,12,52,.76));
 }
 .ticker-enter-active, .ticker-leave-active { transition: all 0.5s ease; }
 .ticker-enter-from { opacity: 0; transform: translateY(14px); }
@@ -441,9 +499,56 @@ onUnmounted(() => {
 .count-enter-from { opacity: 0; transform: translateY(12px) scale(1.15); }
 .count-leave-to { opacity: 0; transform: translateY(-10px); }
 @media (max-width: 900px), (orientation: portrait) {
-  .broadcast-grid { grid-template-columns: minmax(11rem,.8fr) minmax(17rem,1.2fr); align-items: center; }
-  .broadcast-latest { grid-column: 1 / -1; }
-  .broadcast-latest ol { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .5rem; }
+  .screen-lobby-header {
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  .screen-title {
+    font-size: clamp(2rem, 6vw, 4.5rem);
+  }
+  .broadcast-grid {
+    grid-template-columns: minmax(12rem,.85fr) minmax(17rem,1.15fr);
+    align-items: center;
+  }
+  .broadcast-latest {
+    grid-column: 1 / -1;
+  }
+  .broadcast-latest ol {
+    display: grid;
+    grid-template-columns: repeat(3,minmax(0,1fr));
+    gap: .5rem;
+  }
+  .screen-qr-panel {
+    min-height: auto;
+    padding: 1rem;
+  }
+}
+@media (max-height: 760px) and (orientation: landscape) {
+  .screen-lobby-header {
+    min-height: 4.25rem;
+  }
+  .screen-title {
+    font-size: clamp(2rem, 4vw, 4.6rem);
+  }
+  .screen-qr-panel {
+    min-height: 18rem;
+  }
+}
+@media (max-width: 640px) {
+  .screen-lobby-header {
+    flex-direction: column;
+  }
+  .screen-lobby-header > div:last-child {
+    border-left: 0;
+    padding-left: 0;
+  }
+  .broadcast-grid {
+    grid-template-columns: 1fr;
+    overflow-y: auto;
+  }
+  .broadcast-latest ol {
+    grid-template-columns: 1fr;
+  }
 }
 @keyframes phase-in {
   from { opacity: 0; transform: translateY(18px) scale(.985); }

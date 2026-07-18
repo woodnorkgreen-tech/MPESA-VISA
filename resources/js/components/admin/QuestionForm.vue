@@ -91,7 +91,7 @@ const form = reactive({
   type:             'multiple_choice',
   options:          ['', '', '', ''],
   correct_answer:   '',
-  duration_seconds: 30,
+  duration_seconds: 15,
   is_double_points: false,
   order_index:      0,
 })

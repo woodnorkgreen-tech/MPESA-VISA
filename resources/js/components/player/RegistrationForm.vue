@@ -5,43 +5,49 @@
   ════════════════════════════════════════════════════════════════════ -->
   <div v-if="view === 'landing'" class="landing-root min-h-dvh flex flex-col select-none">
 
-    <!-- ── Top logo bar ────────────────────────────────────────────────── -->
-    <header class="relative z-10 flex items-center justify-between px-5 sm:px-8 lg:px-12 pt-safe pt-5 sm:pt-8 pb-2">
+    <header class="landing-header relative z-20 flex items-center justify-between px-5 sm:px-8 lg:px-12 pt-safe pt-5 sm:pt-8 pb-2">
 
-      <span class="text-xs font-black uppercase tracking-[.25em] text-white/70 sm:text-sm">FIFA World Cup 2026™</span>
+      <div class="flex items-center gap-3">
+        <span class="landing-header-mark" aria-hidden="true"></span>
+        <span class="text-xs font-black uppercase tracking-[.28em] text-white/78 sm:text-sm">FIFA World Cup 2026™</span>
+      </div>
 
       <img src="/images/visa-fwc2026-lockup-white.png" alt="Visa FIFA World Cup 2026"
         class="h-10 max-w-[56vw] object-contain drop-shadow-lg sm:h-12 md:h-14 lg:hidden" />
 
       <img src="/images/visa-logo.svg" alt="Visa"
-        class="hidden h-8 object-contain drop-shadow-lg lg:block xl:h-9" />
+        class="hidden h-9 object-contain drop-shadow-lg lg:block xl:h-10" />
 
     </header>
 
-    <div class="landing-partner-mark hidden lg:flex" aria-label="Visa Worldwide Partner FIFA World Cup 2026">
-      <img src="/images/visa-fwc2026-stacked-partner-white.png" alt="" class="h-full w-full object-contain" />
-      <span class="landing-fifa-label" aria-hidden="true">FIFA</span>
+    <div class="landing-partner-stage hidden lg:flex" aria-label="Visa Worldwide Partner FIFA World Cup 2026">
+      <span class="landing-stage-line landing-stage-line-one" aria-hidden="true"></span>
+      <span class="landing-stage-line landing-stage-line-two" aria-hidden="true"></span>
+      <div class="landing-partner-mark">
+        <img src="/images/visa-fwc2026-stacked-partner-white.png" alt="" class="h-full w-full object-contain" />
+        <span class="landing-fifa-label" aria-hidden="true">FIFA</span>
+      </div>
     </div>
 
     <!-- ── Hero area — vertically centred in the upper ~60% of the screen ── -->
     <!-- Bottom padding reserves the lower portion for the fans in the bg image -->
     <main class="relative z-10 flex-1 flex flex-col items-center lg:items-start justify-center px-6 sm:px-10 lg:px-16 text-center lg:text-left hero-content">
 
-      <span class="font-black uppercase tracking-[.08em] text-visa-gold drop-shadow mb-4"
-        style="font-size: clamp(1rem, 2vw, 1.5rem)">FIFA World Cup 2026™ watch party</span>
+      <span class="landing-kicker">Visa presents</span>
 
-      <h1 class="text-white font-black leading-[1.12] mb-5 max-w-3xl tracking-[-0.03em]"
-        style="font-size: clamp(1.7rem, 4vw, 4rem); text-shadow: 0 3px 24px rgba(0,0,0,0.5)">
-        Tap into the action.<br />
-        <span class="italic uppercase text-visa-gold">Predict. Play. Win with Visa.</span>
+      <h1 class="landing-title max-w-4xl">
+        FIFA World Cup 2026™<br />
+        <span>Watch Party</span>
       </h1>
 
-      <p class="max-w-xl text-white/72 text-sm sm:text-base lg:text-lg leading-relaxed mb-8">
-        Join the live Visa watch party for Argentina vs Spain. Predict the score, test your Visa and football knowledge, and climb the leaderboard.
+      <p class="landing-command">Predict. Play. Win with Visa.</p>
+
+      <p class="max-w-xl text-white/74 text-sm sm:text-base lg:text-lg leading-relaxed mb-7">
+        Join the live finals watch party for Argentina vs Spain. Predict the score, test your Visa and football knowledge, and climb the leaderboard.
       </p>
 
       <button @click="view = 'register'"
-        class="play-btn w-full max-w-xs py-4 rounded-xl font-extrabold text-base sm:text-lg transition active:scale-95">
+        class="play-btn w-full max-w-xs py-4 font-extrabold text-base sm:text-lg transition active:scale-95">
         Join the game <span aria-hidden="true">→</span>
       </button>
 
@@ -50,6 +56,12 @@
         Already registered? <span class="text-white font-semibold">Sign in</span>
       </button>
     </main>
+
+    <aside class="landing-match-rail relative z-10 mx-5 mb-5 hidden items-center justify-between gap-6 border-t border-white/16 px-1 pt-4 text-white/70 sm:mx-8 lg:mx-16 lg:flex">
+      <span>Argentina vs Spain</span>
+      <span>Finals watch party</span>
+      <span>Live predictions + trivia</span>
+    </aside>
 
   </div>
 
@@ -252,11 +264,12 @@ function goToPlay() {
   overflow: hidden;
   background-color: #1434CB;
   background-image:
-    linear-gradient(120deg, rgba(255, 255, 255, .09) 0 1px, transparent 1px 76px);
-
-  background-size: 80px 80px;
+    linear-gradient(180deg, rgba(5, 15, 70, .18), rgba(5, 15, 70, .48)),
+    linear-gradient(118deg, transparent 0 58%, rgba(255, 255, 255, .11) 58% 68%, transparent 68%),
+    linear-gradient(120deg, rgba(255, 255, 255, .075) 0 1px, transparent 1px 96px),
+    linear-gradient(115deg, #1434CB 0%, #1939D2 45%, #0A1F8F 100%);
+  background-size: cover, cover, 96px 96px, cover;
   background-position: center;
-  background-repeat: no-repeat;
 }
 
 .landing-root::before,
@@ -270,26 +283,119 @@ function goToPlay() {
 
 .landing-root::before {
   background:
-    linear-gradient(108deg, transparent 0 48%, rgba(255, 255, 255, .14) 48% 51%, transparent 51%),
-    linear-gradient(153deg, transparent 0 66%, rgba(255, 255, 255, .1) 66% 68%, transparent 68%);
+    linear-gradient(104deg, transparent 0 49%, rgba(255, 255, 255, .15) 49.2% 51%, transparent 51.2%),
+    linear-gradient(153deg, transparent 0 60%, rgba(255, 255, 255, .08) 60.1% 61.5%, transparent 61.7%),
+    linear-gradient(18deg, transparent 0 72%, rgba(247, 182, 0, .34) 72.2% 72.55%, transparent 72.8%);
 }
 
 .landing-root::after {
-  background: linear-gradient(180deg, transparent 0%, rgba(6, 22, 95, .16) 100%);
+  background:
+    linear-gradient(90deg, rgba(6, 22, 95, .5) 0%, transparent 42%),
+    linear-gradient(0deg, rgba(3, 12, 57, .46) 0%, transparent 36%);
+}
+
+.landing-root .landing-header::before {
+  content: '';
+  position: absolute;
+  left: clamp(1.25rem, 3vw, 3rem);
+  right: clamp(1.25rem, 3vw, 3rem);
+  top: max(env(safe-area-inset-top), 0px);
+  height: 2px;
+  background: linear-gradient(90deg, #f7b600, rgba(247, 182, 0, 0));
+}
+
+.landing-header-mark {
+  width: .18rem;
+  height: 1.1rem;
+  border-radius: 1px;
+  background: #f7b600;
+  box-shadow: 0 0 18px rgba(247, 182, 0, .35);
+}
+
+.landing-kicker {
+  margin-bottom: 1rem;
+  color: #f7b600;
+  font-size: clamp(.78rem, 1.1vw, 1.1rem);
+  font-weight: 850;
+  letter-spacing: .34em;
+  text-transform: uppercase;
+}
+
+.landing-title {
+  margin-bottom: 1rem;
+  color: #fff;
+  font-size: clamp(2.4rem, 5.9vw, 6.7rem);
+  font-weight: 950;
+  line-height: .92;
+  letter-spacing: 0;
+  text-shadow: 0 22px 60px rgba(0, 0, 0, .34);
+}
+
+.landing-title span {
+  color: #fff;
+  font-weight: 650;
+}
+
+.landing-command {
+  margin-bottom: 1.15rem;
+  color: #f7b600;
+  font-size: clamp(1.35rem, 2.75vw, 3.55rem);
+  font-style: italic;
+  font-weight: 950;
+  line-height: 1.05;
+  text-transform: uppercase;
+  text-shadow: 0 14px 36px rgba(0, 0, 0, .28);
+}
+
+.landing-partner-stage {
+  position: absolute;
+  inset: 0;
+  z-index: 8;
+  pointer-events: none;
+}
+
+.landing-partner-stage::before {
+  content: '';
+  position: absolute;
+  right: clamp(8rem, 18vw, 19rem);
+  top: clamp(9rem, 20vh, 13rem);
+  width: clamp(23rem, 34vw, 42rem);
+  height: clamp(23rem, 34vw, 42rem);
+  border-top: 1px solid rgba(255, 255, 255, .14);
+  border-bottom: 1px solid rgba(255, 255, 255, .08);
+  transform: rotate(-14deg) skewX(-8deg);
+}
+
+.landing-stage-line {
+  position: absolute;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .34), transparent);
+}
+
+.landing-stage-line-one {
+  right: clamp(5rem, 11vw, 12rem);
+  top: 30%;
+  width: clamp(20rem, 36vw, 45rem);
+  transform: rotate(-16deg);
+}
+
+.landing-stage-line-two {
+  right: clamp(4rem, 9vw, 10rem);
+  top: 70%;
+  width: clamp(17rem, 30vw, 38rem);
+  transform: rotate(14deg);
 }
 
 .landing-partner-mark {
   position: absolute;
-  z-index: 10;
-  top: clamp(11rem, 27vh, 17rem);
-  right: clamp(8rem, 17vw, 18rem);
-  width: clamp(14rem, 21vw, 24rem);
+  top: clamp(9.5rem, 23vh, 14rem);
+  right: clamp(8rem, 16vw, 18rem);
+  width: clamp(15rem, 21vw, 24rem);
   aspect-ratio: 900 / 1180;
   align-items: center;
   justify-content: center;
   background: transparent;
-  filter: drop-shadow(0 20px 42px rgba(0, 0, 0, .16));
-  pointer-events: none;
+  filter: drop-shadow(0 28px 48px rgba(0, 0, 0, .24));
 }
 
 .landing-fifa-label {
@@ -304,10 +410,34 @@ function goToPlay() {
   line-height: 1;
 }
 
+.landing-match-rail {
+  font-size: clamp(.68rem, .85vw, .9rem);
+  font-weight: 800;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+}
+
 /* ── Landscape phones (e.g. iPhone rotated) ──────────────────────────────── */
 @media (orientation: landscape) and (max-height: 500px) {
+  .landing-root .landing-header {
+    padding-top: .75rem;
+  }
   .hero-content {
+    justify-content: flex-start;
+    padding-top: clamp(.35rem, 3vh, 1rem);
     padding-bottom: 0;
+  }
+  .landing-kicker {
+    margin-bottom: .45rem;
+    font-size: .66rem;
+  }
+  .landing-title {
+    margin-bottom: .45rem;
+    font-size: clamp(1.75rem, 7vw, 2.6rem);
+  }
+  .landing-command {
+    margin-bottom: .55rem;
+    font-size: clamp(1rem, 4.8vw, 1.55rem);
   }
 }
 
@@ -320,8 +450,11 @@ function goToPlay() {
 @media (min-width: 768px) and (orientation: landscape) {
   .landing-root {
     background-image:
-      linear-gradient(120deg, rgba(255, 255, 255, .08) 0 1px, transparent 1px 108px);
-    background-size: 112px 112px;
+      linear-gradient(180deg, rgba(5, 15, 70, .14), rgba(5, 15, 70, .45)),
+      linear-gradient(118deg, transparent 0 58%, rgba(255, 255, 255, .1) 58% 68%, transparent 68%),
+      linear-gradient(120deg, rgba(255, 255, 255, .07) 0 1px, transparent 1px 118px),
+      linear-gradient(108deg, #1434CB 0%, #183AD0 48%, #0A1F8F 100%);
+    background-size: cover, cover, 118px 118px, cover;
   }
 }
 
@@ -330,15 +463,65 @@ function goToPlay() {
 }
 @media (min-width: 1024px) and (orientation: landscape) {
   .hero-content {
-    padding-bottom: 4rem;
-    padding-right: 43%;
+    padding-bottom: 3rem;
+    padding-right: 45%;
+  }
+}
+
+@media (max-width: 640px) {
+  .landing-root {
+    background-image:
+      linear-gradient(180deg, rgba(5, 15, 70, .1), rgba(5, 15, 70, .5)),
+      linear-gradient(118deg, transparent 0 55%, rgba(255, 255, 255, .1) 55% 66%, transparent 66%),
+      linear-gradient(120deg, rgba(255, 255, 255, .06) 0 1px, transparent 1px 78px),
+      linear-gradient(115deg, #1434CB 0%, #1939D2 46%, #0A1F8F 100%);
+    background-size: cover, cover, 78px 78px, cover;
+  }
+  .landing-root::before {
+    background:
+      linear-gradient(106deg, transparent 0 42%, rgba(255, 255, 255, .12) 42.2% 44%, transparent 44.2%),
+      linear-gradient(18deg, transparent 0 73%, rgba(247, 182, 0, .24) 73.15% 73.45%, transparent 73.7%);
+  }
+  .landing-root .landing-header {
+    padding-left: 1.1rem;
+    padding-right: 1.1rem;
+  }
+  .landing-header-mark {
+    height: .95rem;
+  }
+  .hero-content {
+    justify-content: center;
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+    padding-bottom: clamp(2rem, 8vh, 4rem);
+  }
+  .landing-kicker {
+    margin-bottom: .75rem;
+    font-size: .68rem;
+    letter-spacing: .28em;
+  }
+  .landing-title {
+    margin-bottom: .7rem;
+    font-size: clamp(2.2rem, 13vw, 3.45rem);
+    line-height: .96;
+  }
+  .landing-command {
+    margin-bottom: .9rem;
+    font-size: clamp(1.2rem, 8vw, 2rem);
+    line-height: 1.08;
+  }
+  .play-btn {
+    max-width: 18rem;
+    padding-top: .9rem;
+    padding-bottom: .9rem;
   }
 }
 
 /* ── Play button — bright Visa call-to-action ──────────────────────────── */
 .play-btn {
+  border-radius: .5rem;
   background: linear-gradient(135deg, #f7b600 0%, #ffcf40 100%);
-  box-shadow: 0 12px 32px rgba(247, 182, 0, 0.3), 0 2px 8px rgba(0,0,0,0.35);
+  box-shadow: 0 16px 38px rgba(247, 182, 0, 0.34), 0 2px 8px rgba(0,0,0,0.35);
   color: #070b2a;
 }
 .play-btn:hover {

@@ -513,7 +513,11 @@ class AdminApiController extends Controller
     {
         DB::transaction(function () use ($question) {
             Question::where('status', 'live')->where('id', '!=', $question->id)->update(['status' => 'closed']);
-            $question->update(['status' => 'live', 'activated_at' => now()]);
+            $question->update([
+                'duration_seconds' => 15,
+                'status' => 'live',
+                'activated_at' => now(),
+            ]);
             EventState::setCurrent([
                 'phase'               => 'trivia_live',
                 'current_question_id' => $question->id,

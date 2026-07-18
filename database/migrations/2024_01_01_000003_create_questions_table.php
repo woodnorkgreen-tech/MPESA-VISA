@@ -14,7 +14,7 @@ return new class extends Migration {
             $table->text('text');
             $table->json('options');           // array of option strings
             $table->string('correct_answer');  // must match one of options exactly
-            $table->unsignedInteger('duration_seconds')->default(30);
+            $table->unsignedInteger('duration_seconds')->default(15);
             $table->boolean('is_double_points')->default(false);
             $table->enum('status', ['draft', 'live', 'closed', 'skipped'])->default('draft');
             $table->timestamp('activated_at')->nullable(); // when question went live (for speed bonus)

@@ -46,7 +46,7 @@ class QuestionSeeder extends Seeder
         ];
 
         foreach ($questions as $index => $question) {
-            [$category, $text, $options, $answer, $duration, $doublePoints] = array_pad($question, 6, false);
+            [$category, $text, $options, $answer, $_duration, $doublePoints] = array_pad($question, 6, false);
             Question::create([
                 'order_index' => $index + 1,
                 'category' => $category,
@@ -54,7 +54,7 @@ class QuestionSeeder extends Seeder
                 'text' => $text,
                 'options' => $options,
                 'correct_answer' => $answer,
-                'duration_seconds' => $duration,
+                'duration_seconds' => 15,
                 'is_double_points' => $doublePoints ?? false,
                 'status' => 'draft',
                 'activated_at' => null,
