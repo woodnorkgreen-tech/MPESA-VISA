@@ -17,8 +17,8 @@
           <img src="/images/visa-logo.svg" alt="Visa" class="h-4 shrink-0 object-contain sm:h-6" />
           <span class="hidden h-5 w-px bg-white/25 sm:block" aria-hidden="true"></span>
           <span class="truncate text-[10px] font-black uppercase tracking-[.14em] text-white/80 sm:text-sm sm:tracking-[.18em]">
-            <span class="sm:hidden">FWC 2026™</span>
-            <span class="hidden sm:inline">FIFA World Cup 2026™ watch party</span>
+            <span class="sm:hidden">FWC Final</span>
+            <span class="hidden sm:inline">FIFA World Cup 2026 Final Match</span>
           </span>
         </div>
         <div class="flex min-w-0 shrink-0 items-center gap-1.5 sm:gap-3">
@@ -44,7 +44,7 @@
 
           <span class="inline-flex items-center gap-2 rounded-full bg-visa/15 border border-visa/30 px-3 py-1 mb-7">
             <span class="h-1.5 w-1.5 rounded-full bg-visa-gold animate-pulse" aria-hidden="true"></span>
-            <span class="brand-kicker">FIFA World Cup 2026™ watch party</span>
+            <span class="brand-kicker">Predict and Win</span>
           </span>
 
           <div class="relative w-20 h-20 mx-auto mb-7" aria-hidden="true">
@@ -54,7 +54,7 @@
           </div>
 
           <h2 class="text-2xl sm:text-3xl font-bold text-white mb-2">Hang tight, {{ playerNickname }}!</h2>
-          <p class="text-gray-300 text-base sm:text-lg leading-relaxed">The watch party starts soon. Watch the big screen.</p>
+          <p class="text-gray-300 text-base sm:text-lg leading-relaxed">Predict and Win</p>
 
           <div class="mt-7 inline-flex items-center gap-2 rounded-full bg-white/5 border border-white/10 px-4 py-2">
             <span class="h-2 w-2 rounded-full bg-visa-gold animate-pulse" aria-hidden="true"></span>
@@ -110,8 +110,8 @@
       <!-- ── Trivia complete ─────────────────────────────────────────────── -->
       <div v-else-if="phase === 'trivia_complete'"
         class="flex-1 flex flex-col items-center justify-center p-6 sm:p-10 text-center pb-safe">
-        <img src="/images/visa-fwc2026-lockup-white.png" alt="Visa FIFA World Cup 2026"
-          class="mb-7 h-16 max-w-[80vw] object-contain drop-shadow-2xl sm:h-20" />
+        <img src="/images/visa-logo.svg" alt="Visa"
+          class="mb-7 h-10 max-w-[58vw] object-contain drop-shadow-2xl sm:h-12" />
         <p class="brand-kicker mb-2">Watch party round complete</p>
         <h2 class="text-2xl sm:text-3xl font-bold text-visa-gold mb-3">You're on the board</h2>
         <p class="text-gray-300 text-base sm:text-lg mb-1">

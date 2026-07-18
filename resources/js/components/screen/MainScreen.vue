@@ -21,13 +21,12 @@
       <div class="phase-enter flex-1 flex min-h-0 flex-col px-6 pb-20 pt-5 lg:px-14 lg:pb-24 lg:pt-8">
         <header class="screen-lobby-header mx-auto flex w-full max-w-[96rem] items-center justify-between gap-8">
           <div class="min-w-0 text-left">
-            <p class="screen-kicker">Visa presents</p>
-            <h1 class="screen-title">FIFA World Cup 2026™ Watch Party</h1>
+            <h1 class="screen-title">FIFA World Cup 2026 Final Match</h1>
+            <p class="screen-subtitle">Predict and Win</p>
           </div>
-          <div class="flex shrink-0 items-center gap-4 border-l border-white/18 pl-8">
-            <span class="text-white/62" style="font-size: clamp(.8rem, 1vw, 1.1rem)">With</span>
-            <img src="/images/visa-fwc2026-lockup-white.png" alt="Visa FIFA World Cup 2026"
-              class="object-contain drop-shadow-lg" style="height: clamp(2.2rem, 3.2vw, 4.6rem)" />
+          <div class="flex shrink-0 items-center border-l border-white/18 pl-8">
+            <img src="/images/visa-logo.svg" alt="Visa"
+              class="object-contain drop-shadow-lg" style="height: clamp(1.7rem, 2.35vw, 3.2rem)" />
           </div>
         </header>
 
@@ -39,7 +38,7 @@
             <p class="mt-4 font-medium leading-tight text-white" style="font-size: clamp(1.2rem, 2.1vw, 2.7rem)">
               Scan to play
             </p>
-            <p class="mt-1 text-gray-400" style="font-size: clamp(0.8rem, 1.2vw, 1.6rem)">
+            <p class="mt-1 text-white/72" style="font-size: clamp(0.8rem, 1.2vw, 1.6rem)">
               Register &amp; make your predictions
             </p>
             <p class="mt-5 rounded-full border border-white/12 bg-white/6 px-4 py-2 font-medium text-white/78" style="font-size: clamp(.7rem, .9vw, .95rem)">
@@ -65,13 +64,13 @@
               <p class="mt-1 font-normal leading-snug text-white" style="font-size: clamp(.8rem,1.25vw,1.35rem)">
                 Final score means the score after 90 minutes + stoppage time.
               </p>
-              <p class="mt-1 text-gray-400" style="font-size: clamp(.65rem,.95vw,1rem)">Extra time and penalty shootouts do not count.</p>
+              <p class="mt-1 text-white/70" style="font-size: clamp(.65rem,.95vw,1rem)">Extra time and penalty shootouts do not count.</p>
             </div>
 
             <div v-if="match.kickoff_at && kickoffCountdown" class="screen-countdown mt-4 w-full max-w-xl px-7 py-5">
-              <p class="uppercase tracking-widest text-white/45" style="font-size: clamp(.6rem, 1vw, 1rem)">Kick-off countdown</p>
+              <p class="uppercase tracking-widest text-white/68" style="font-size: clamp(.6rem, 1vw, 1rem)">Kick-off countdown</p>
               <p class="font-medium tabular-nums text-white" style="font-size: clamp(1.45rem, 2.65vw, 3.35rem)">{{ kickoffCountdown }}</p>
-              <p class="text-white/45" style="font-size: clamp(.6rem, .9vw, .9rem)">{{ match.venue }}</p>
+              <p class="text-white/68" style="font-size: clamp(.6rem, .9vw, .9rem)">{{ match.venue }}</p>
             </div>
           </div>
 
@@ -79,7 +78,7 @@
             <div class="mb-3 flex items-center justify-between gap-3 border-b border-white/10 pb-3">
               <div>
                 <p class="font-medium uppercase tracking-widest text-white" style="font-size: clamp(.65rem,1vw,1rem)">Latest locked in</p>
-                <p class="mt-0.5 text-gray-500" style="font-size: clamp(.55rem,.8vw,.8rem)">{{ predictionFeed.length }} players · newest first</p>
+                <p class="mt-0.5 text-white/62" style="font-size: clamp(.55rem,.8vw,.8rem)">{{ predictionFeed.length }} players · newest first</p>
               </div>
               <span class="h-2.5 w-2.5 shrink-0 animate-pulse rounded-full bg-visa-gold"></span>
             </div>
@@ -89,11 +88,11 @@
                 <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-visa/30 text-xs font-medium text-visa-gold">{{ idx + 1 }}</span>
                 <div class="min-w-0">
                   <p class="truncate font-medium text-white" style="font-size: clamp(.75rem,1.2vw,1.3rem)">{{ entry.nickname }}</p>
-                  <p class="text-gray-500" style="font-size: clamp(.55rem,.75vw,.75rem)">Prediction locked</p>
+                  <p class="text-white/58" style="font-size: clamp(.55rem,.75vw,.75rem)">Prediction locked</p>
                 </div>
               </li>
             </TransitionGroup>
-            <p v-else class="py-8 text-center text-sm text-gray-600">Waiting for the first prediction...</p>
+            <p v-else class="py-8 text-center text-sm text-white/58">Waiting for the first prediction...</p>
           </aside>
         </div>
       </div>
@@ -113,18 +112,20 @@
             style="font-size: clamp(0.75rem, 1.5vw, 1.5rem)">
             ⚡ DOUBLE POINTS ⚡
           </span>
-          <span v-else class="text-gray-700" style="font-size: clamp(0.75rem, 1.2vw, 1.2rem)">
+          <span v-else class="text-white/62" style="font-size: clamp(0.75rem, 1.2vw, 1.2rem)">
             Question {{ question.order_index }}
           </span>
           </div>
 
           <!-- Countdown ring — viewport-sized so it's always visible from the back row -->
           <div class="flex items-center gap-4 lg:gap-7">
+            <img src="/images/visa-logo.svg" alt="Visa" class="object-contain drop-shadow-lg"
+              style="height: clamp(1.5rem, 2.2vw, 3.2rem)" />
             <div class="text-right">
               <Transition name="count" mode="out-in">
                 <p :key="question.answer_count" class="font-semibold text-visa-gold tabular-nums" style="font-size: clamp(1.4rem, 3vw, 3.5rem)">{{ question.answer_count ?? 0 }}</p>
               </Transition>
-              <p class="text-gray-500 uppercase tracking-wider" style="font-size: clamp(.55rem, .9vw, .9rem)">Answers live</p>
+              <p class="text-white/62 uppercase tracking-wider" style="font-size: clamp(.55rem, .9vw, .9rem)">Answers live</p>
             </div>
           <div class="relative flex-shrink-0" :style="{ width: timerSize, height: timerSize }">
             <svg class="w-full h-full -rotate-90" viewBox="0 0 120 120">
@@ -178,8 +179,10 @@
          TRIVIA REVEAL
     ══════════════════════════════════════════════════════════════════════ -->
     <template v-else-if="phase === 'trivia_reveal' && question">
-      <div class="flex-1 flex flex-col px-8 lg:px-16 pt-8 pb-4">
-        <p class="text-center text-gray-400 mb-4 flex-shrink-0"
+      <div class="relative flex-1 flex flex-col px-8 lg:px-16 pt-8 pb-4">
+        <img src="/images/visa-logo.svg" alt="Visa" class="absolute right-8 top-8 object-contain drop-shadow-lg lg:right-16 lg:top-10"
+          style="height: clamp(1.5rem, 2.2vw, 3.2rem)" />
+        <p class="text-center text-white/70 mb-4 flex-shrink-0"
           style="font-size: clamp(0.875rem, 1.5vw, 1.8rem)">
           Answer Revealed
         </p>
@@ -193,7 +196,7 @@
           <div v-for="(opt, idx) in question.options" :key="idx"
             :class="opt === question.correct_answer
               ? 'bg-visa-gold/30 border-visa-gold text-white'
-              : 'bg-white/5 border-white/10 text-gray-500'"
+              : 'bg-white/5 border-white/10 text-white/58'"
             class="border-2 rounded-2xl flex items-center gap-4 px-5 lg:px-8 py-4 lg:py-5 transition-all">
             <span class="text-2xl lg:text-3xl flex-shrink-0">
               {{ opt === question.correct_answer ? '✅' : '' }}
@@ -204,9 +207,9 @@
               {{ opt }}
             </span>
             <div class="ml-auto shrink-0 text-right">
-              <p class="font-medium tabular-nums" :class="opt === question.correct_answer ? 'text-visa-gold' : 'text-gray-500'"
+              <p class="font-medium tabular-nums" :class="opt === question.correct_answer ? 'text-visa-gold' : 'text-white/58'"
                 style="font-size: clamp(.8rem, 1.5vw, 1.7rem)">{{ optionCount(opt) }}</p>
-              <p class="text-gray-600" style="font-size: clamp(.55rem, .8vw, .8rem)">{{ optionPercent(opt) }}%</p>
+              <p class="text-white/52" style="font-size: clamp(.55rem, .8vw, .8rem)">{{ optionPercent(opt) }}%</p>
             </div>
           </div>
         </div>
@@ -253,7 +256,7 @@
     <template v-else>
       <div class="flex-1 flex items-center justify-center">
         <p class="text-white font-medium italic uppercase" style="font-size: clamp(1.5rem, 4vw, 5rem)">
-          <span>FIFA World Cup 2026™ watch party</span>
+          <span>Predict and Win</span>
         </p>
       </div>
     </template>
@@ -264,8 +267,8 @@
     <div class="screen-footer flex-shrink-0 bg-gradient-to-r from-visa via-[#1434CB] to-visa
                 flex items-center justify-center gap-6 lg:gap-12 px-8"
       style="height: clamp(2.5rem, 4vh, 5rem)">
-      <img src="/images/visa-fwc2026-lockup-white.png" alt="Visa FIFA World Cup 2026"
-        class="object-contain opacity-100" style="height: clamp(1.35rem, 2.8vh, 3rem)" />
+      <img src="/images/visa-logo.svg" alt="Visa"
+        class="object-contain opacity-100" style="height: clamp(1rem, 2.1vh, 2.2rem)" />
       <span class="text-white/30">·</span>
       <span class="text-white font-medium tracking-widest opacity-80"
         style="font-size: clamp(0.6rem, 1.2vw, 1.2rem)">ARGENTINA vs SPAIN · FINAL</span>
@@ -447,13 +450,6 @@ onUnmounted(() => {
   z-index: 30;
   box-shadow: 0 -18px 45px rgba(0,0,0,.2);
 }
-.screen-kicker {
-  color: #f7b600;
-  font-size: clamp(.7rem, .95vw, 1rem);
-  font-weight: 550;
-  letter-spacing: .32em;
-  text-transform: uppercase;
-}
 .screen-title {
   margin-top: .25rem;
   color: #fff;
@@ -462,6 +458,14 @@ onUnmounted(() => {
   line-height: 1;
   letter-spacing: 0;
   text-shadow: 0 18px 52px rgba(0,0,0,.28);
+}
+.screen-subtitle {
+  margin-top: .85rem;
+  color: #f7b600;
+  font-size: clamp(1rem, 1.75vw, 2rem);
+  font-weight: 600;
+  letter-spacing: .08em;
+  text-transform: uppercase;
 }
 .screen-lobby-header {
   min-height: clamp(4.5rem, 12vh, 8rem);

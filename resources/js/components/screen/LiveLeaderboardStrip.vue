@@ -4,7 +4,7 @@
       <p class="text-[clamp(.6rem,1vw,1rem)] font-medium uppercase tracking-[.18em] text-visa-gold">
         <span class="mr-1 inline-block h-2 w-2 animate-pulse rounded-full bg-visa-gold"></span> Live leaderboard
       </p>
-      <p class="text-[clamp(.55rem,.8vw,.8rem)] text-gray-500">Updates automatically</p>
+      <p class="text-[clamp(.55rem,.8vw,.8rem)] text-white/62">Updates automatically</p>
     </div>
     <TransitionGroup name="rank" tag="div" class="grid grid-cols-3 gap-2 lg:gap-4">
       <div v-for="entry in topEntries" :key="entry.id ?? entry.nickname"
@@ -17,7 +17,7 @@
           <p class="truncate text-[clamp(.7rem,1.3vw,1.35rem)] font-medium text-white">
             {{ entry.nickname }}
           </p>
-          <p class="text-[clamp(.55rem,.75vw,.75rem)] font-medium" :class="movement(entry) > 0 ? 'text-visa-gold' : movement(entry) < 0 ? 'text-red-400' : 'text-gray-600'">
+          <p class="text-[clamp(.55rem,.75vw,.75rem)] font-medium" :class="movement(entry) > 0 ? 'text-visa-gold' : movement(entry) < 0 ? 'text-red-400' : 'text-white/52'">
             {{ movement(entry) > 0 ? `▲ ${movement(entry)}` : movement(entry) < 0 ? `▼ ${Math.abs(movement(entry))}` : '—' }}
           </p>
         </div>

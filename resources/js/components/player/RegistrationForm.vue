@@ -9,23 +9,22 @@
 
       <div class="flex items-center gap-3">
         <span class="landing-header-mark" aria-hidden="true"></span>
-        <span class="text-xs font-black uppercase tracking-[.28em] text-white/78 sm:text-sm">FIFA World Cup 2026™</span>
+        <span class="text-xs font-black uppercase tracking-[.28em] text-white/78 sm:text-sm">Predict and Win</span>
       </div>
 
-      <img src="/images/visa-fwc2026-lockup-white.png" alt="Visa FIFA World Cup 2026"
-        class="h-10 max-w-[56vw] object-contain drop-shadow-lg sm:h-12 md:h-14 lg:hidden" />
+      <img src="/images/visa-logo.svg" alt="Visa"
+        class="h-8 max-w-[42vw] object-contain drop-shadow-lg sm:h-10 md:h-11 lg:hidden" />
 
       <img src="/images/visa-logo.svg" alt="Visa"
         class="hidden h-9 object-contain drop-shadow-lg lg:block xl:h-10" />
 
     </header>
 
-    <div class="landing-partner-stage hidden lg:flex" aria-label="Visa Worldwide Partner FIFA World Cup 2026">
+    <div class="landing-partner-stage hidden lg:flex" aria-label="Visa">
       <span class="landing-stage-line landing-stage-line-one" aria-hidden="true"></span>
       <span class="landing-stage-line landing-stage-line-two" aria-hidden="true"></span>
       <div class="landing-partner-mark">
-        <img src="/images/visa-fwc2026-stacked-partner-white.png" alt="" class="h-full w-full object-contain" />
-        <span class="landing-fifa-label" aria-hidden="true">FIFA</span>
+        <img src="/images/visa-logo.svg" alt="" class="h-full w-full object-contain" />
       </div>
     </div>
 
@@ -33,17 +32,15 @@
     <!-- Bottom padding reserves the lower portion for the fans in the bg image -->
     <main class="relative z-10 flex-1 flex flex-col items-center lg:items-start justify-center px-6 sm:px-10 lg:px-16 text-center lg:text-left hero-content">
 
-      <span class="landing-kicker">Visa presents</span>
-
       <h1 class="landing-title max-w-4xl">
-        FIFA World Cup 2026™<br />
-        <span>Watch Party</span>
+        FIFA World Cup 2026<br />
+        <span>Final Match</span>
       </h1>
 
-      <p class="landing-command">Predict. Play. Win with Visa.</p>
+      <p class="landing-command">Predict and Win</p>
 
       <p class="max-w-xl text-white/74 text-sm sm:text-base lg:text-lg leading-relaxed mb-7">
-        Join the live finals watch party for Argentina vs Spain. Predict the score, test your Visa and football knowledge, and climb the leaderboard.
+        Join the FIFA World Cup 2026 Final Match for Argentina vs Spain. Predict the score, test your Visa and football knowledge, and climb the leaderboard.
       </p>
 
       <button @click="view = 'register'"
@@ -52,14 +49,14 @@
       </button>
 
       <button @click="view = 'login'"
-        class="mt-5 text-white/50 text-xs sm:text-sm hover:text-white transition underline-offset-2 hover:underline pb-safe">
-        Already registered? <span class="text-white font-semibold">Sign in</span>
+        class="mt-5 text-sm font-semibold text-white/72 transition hover:text-white underline-offset-2 hover:underline sm:text-base pb-safe">
+        Already registered? <span class="font-bold text-white">Sign in</span>
       </button>
     </main>
 
     <aside class="landing-match-rail relative z-10 mx-5 mb-5 hidden items-center justify-between gap-6 border-t border-white/16 px-1 pt-4 text-white/70 sm:mx-8 lg:mx-16 lg:flex">
       <span>Argentina vs Spain</span>
-      <span>Finals watch party</span>
+      <span>Final Match</span>
       <span>Live predictions + trivia</span>
     </aside>
 

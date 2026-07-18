@@ -1,5 +1,7 @@
 <template>
-  <div class="flex-1 flex flex-col px-4 sm:px-8 pt-4 sm:pt-6 pb-safe">
+  <div class="relative flex-1 flex flex-col px-4 sm:px-8 pt-4 sm:pt-6 pb-safe">
+    <img src="/images/visa-logo.svg" alt="Visa"
+      class="pointer-events-none absolute right-4 top-4 h-5 w-auto object-contain sm:right-8 sm:top-6 sm:h-6" />
 
     <!-- Top bar: double-points badge + countdown ring -->
     <div class="flex items-center justify-between mb-4 sm:mb-6">
@@ -15,7 +17,8 @@
       </div>
 
       <!-- Countdown ring — scales with screen -->
-      <div class="relative w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20">
+      <div class="flex items-center gap-3 sm:gap-4 pr-20 sm:pr-24">
+        <div class="relative w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20">
         <svg class="w-full h-full -rotate-90" viewBox="0 0 56 56">
           <circle cx="28" cy="28" r="24" fill="none" stroke="#374151" stroke-width="4" />
           <circle cx="28" cy="28" r="24" fill="none"
@@ -30,6 +33,7 @@
           :class="timeLeft <= 5 ? 'text-red-400 animate-pulse' : 'text-white'">
           {{ timeLeft }}
         </span>
+        </div>
       </div>
     </div>
 
@@ -78,6 +82,7 @@
 
     <!-- Time's up modal -->
     <PlayerModal v-if="showTimeUpModal" @dismiss="showTimeUpModal = false">
+      <img src="/images/visa-logo.svg" alt="Visa" class="mx-auto mb-4 h-6 w-auto object-contain" />
       <div class="text-4xl mb-3" aria-hidden="true">⏱️</div>
       <h3 class="text-xl font-black text-white mb-2">Time's up!</h3>
       <template v-if="answered">
