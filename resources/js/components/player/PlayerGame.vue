@@ -1,5 +1,5 @@
 <template>
-  <div class="event-surface min-h-dvh text-white flex flex-col" :class="{ 'lobby-bg': ['lobby', 'trivia_ready', 'trivia_loading'].includes(phase) }">
+  <div class="event-surface min-h-dvh text-white flex flex-col" :class="{ 'lobby-bg': ['lobby', 'trivia_ready'].includes(phase) }">
 
     <!-- Not registered guard -->
     <div v-if="!playerId" class="flex-1 flex items-center justify-center p-6 text-center">
@@ -94,24 +94,6 @@
         :read-only="adminPreview" />
 
       <!-- ── Trivia live ─────────────────────────────────────────────────── -->
-      <div v-else-if="phase === 'trivia_loading' || (phase === 'trivia_live' && !question)"
-        class="flex-1 flex flex-col items-center justify-center p-6 sm:p-10 text-center pb-safe">
-        <div class="lobby-card glass-card w-full max-w-sm rounded-3xl px-7 py-10 sm:px-10 sm:py-12">
-          <img src="/images/visa-logo.svg" alt="Visa"
-            class="mx-auto mb-7 h-8 max-w-[52vw] object-contain drop-shadow-2xl sm:h-10" />
-          <p class="brand-kicker mb-2">Round {{ activeRound.number }}</p>
-          <h2 class="text-2xl sm:text-3xl font-bold text-visa-gold mb-3">Loading next question</h2>
-          <p class="-mt-1 mb-4 text-lg font-bold text-white sm:text-xl">{{ activeRound.label }}</p>
-          <p class="text-gray-300 text-base sm:text-lg leading-relaxed">
-            Keep your phone ready. The MC will cue the question.
-          </p>
-          <div class="mt-7 inline-flex items-center gap-2 rounded-full bg-white/5 border border-white/10 px-4 py-2">
-            <span class="h-2 w-2 rounded-full bg-visa-gold animate-pulse" aria-hidden="true"></span>
-            <span class="text-sm text-gray-300">Question coming up</span>
-          </div>
-        </div>
-      </div>
-
       <TriviaQuestion
         v-else-if="phase === 'trivia_live' && question && !question.correct_answer"
         :question="question"
