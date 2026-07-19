@@ -72,7 +72,7 @@
           <p class="brand-kicker mb-2">Trivia starts soon</p>
           <h2 class="text-2xl sm:text-3xl font-bold text-visa-gold mb-3">You're ready</h2>
           <p class="text-gray-300 text-base sm:text-lg leading-relaxed">
-            When a question appears, tap your answer.
+            When a question appears on your phone, tap your answer.
           </p>
           <p class="mt-3 text-sm text-gray-400 sm:text-base">
             The MC will cue each question.

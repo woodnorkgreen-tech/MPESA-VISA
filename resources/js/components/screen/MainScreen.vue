@@ -132,7 +132,7 @@
                   Already registered: sign in
                 </p>
                 <p class="rounded-2xl border border-visa-gold/35 bg-visa-gold/10 px-5 py-4 font-semibold text-white" style="font-size: clamp(.95rem, 1.55vw, 2rem)">
-                  When questions appear, tap your answer on your phone
+                  When a question appears on your phone, tap your answer
                 </p>
                 <p class="px-5 pt-1 font-medium text-white/70" style="font-size: clamp(.75rem, 1.05vw, 1.2rem)">
                   The MC will cue each question.
