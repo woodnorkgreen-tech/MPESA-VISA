@@ -696,6 +696,7 @@ class EventReliabilityTest extends TestCase
             ->assertJsonPath('question.answer_count', 1)
             ->assertJsonPath('round.current', 1)
             ->assertJsonPath('round.total', 1)
+            ->assertJsonCount(0, 'leaderboard')
             ->assertJsonPath('question.answer_distribution', null)
             ->assertJsonPath('question.correct_answer', null);
 
@@ -703,7 +704,8 @@ class EventReliabilityTest extends TestCase
         EventState::setCurrent(['phase' => 'trivia_reveal', 'current_question_id' => $question->id]);
         $this->getJson('/api/state')->assertOk()
             ->assertJsonPath('question.correct_answer', 'Nairobi')
-            ->assertJsonPath('question.answer_distribution.Nairobi', 1);
+            ->assertJsonPath('question.answer_distribution.Nairobi', 1)
+            ->assertJsonPath('leaderboard.0.nickname', 'Test Player');
 
         $player->update(['prediction_score' => 750]);
         Prediction::create([
@@ -1009,6 +1011,9 @@ class EventReliabilityTest extends TestCase
             'points_awarded' => 1000,
             'response_time_ms' => 0,
         ]);
+
+        $question->update(['status' => 'closed']);
+        EventState::setCurrent(['phase' => 'trivia_reveal', 'current_question_id' => $question->id]);
 
         $response = $this->getJson('/api/state')->assertOk()
             ->assertJsonPath('leaderboard.0.nickname', 'Test Player');

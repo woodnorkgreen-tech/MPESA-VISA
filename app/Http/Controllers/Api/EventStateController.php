@@ -129,6 +129,10 @@ class EventStateController extends Controller
     {
         $leaderboards = ['trivia' => [], 'fifa' => [], 'visa' => [], 'prediction' => []];
 
+        if ($phase === 'trivia_live') {
+            return [[], $leaderboards];
+        }
+
         if (in_array($phase, ['match_ended', 'prediction_reveal'], true)) {
             $leaderboards['prediction'] = $scoring->predictionLeaderboard(100);
             return [$leaderboards['prediction'], $leaderboards];
