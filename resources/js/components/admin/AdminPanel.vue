@@ -1199,7 +1199,7 @@ async function confirmQuestionActivation() {
   try {
     await axios.post('/api/admin/phase', { phase: 'trivia_loading' })
     await fetchState()
-    await new Promise(resolve => setTimeout(resolve, 1600))
+    await new Promise(resolve => setTimeout(resolve, 3500))
     await axios.post(`/api/admin/questions/${question.id}/activate`)
     await Promise.all([loadQuestions(), fetchState(), loadAudits()])
     Object.assign(questionDialog, { open: false, question: null, saving: false, error: '' })
