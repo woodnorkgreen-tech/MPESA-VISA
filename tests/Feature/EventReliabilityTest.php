@@ -686,6 +686,28 @@ class EventReliabilityTest extends TestCase
             ->assertJsonPath('leaderboard.0.prediction_score', 750);
     }
 
+    public function test_public_round_count_excludes_hidden_general_knowledge_questions(): void
+    {
+        Question::create([
+            'order_index' => 1,
+            'category' => 'general_knowledge',
+            'type' => 'multiple_choice',
+            'text' => 'Hidden bank question?',
+            'options' => ['Yes', 'No'],
+            'correct_answer' => 'Yes',
+            'duration_seconds' => 30,
+        ]);
+
+        $this->liveQuestion([
+            'order_index' => 2,
+            'category' => 'visa',
+        ]);
+
+        $this->getJson('/api/state')->assertOk()
+            ->assertJsonPath('round.current', 1)
+            ->assertJsonPath('round.total', 1);
+    }
+
     public function test_expired_countdown_automatically_closes_and_reveals_without_mc_action(): void
     {
         [$player, $token] = $this->player();
@@ -840,7 +862,7 @@ class EventReliabilityTest extends TestCase
     {
         $question = Question::create(array_merge([
             'order_index' => 1,
-            'category' => 'general_knowledge',
+            'category' => 'fifa_world_cup',
             'type' => 'multiple_choice',
             'text' => 'Which Kenyan city is known as the Silicon Savannah?',
             'options' => ['Nairobi', 'Mombasa', 'Kisumu', 'Nakuru'],

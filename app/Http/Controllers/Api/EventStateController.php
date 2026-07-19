@@ -17,6 +17,8 @@ use Illuminate\Support\Facades\DB;
 
 class EventStateController extends Controller
 {
+    private const EVENT_QUESTION_CATEGORIES = ['fifa_world_cup', 'visa'];
+
     public function show(ScoringService $scoring): JsonResponse
     {
         $payload = app()->environment('testing')
@@ -33,7 +35,8 @@ class EventStateController extends Controller
         $question = null;
         $round = ['current' => 0, 'total' => 0, 'completed' => 0];
 
-        $roundQuestions = Question::where('status', '!=', 'skipped')
+        $roundQuestions = Question::whereIn('category', self::EVENT_QUESTION_CATEGORIES)
+            ->where('status', '!=', 'skipped')
             ->orderBy('order_index')
             ->orderBy('id')
             ->get(['id', 'status']);
@@ -43,7 +46,8 @@ class EventStateController extends Controller
         if ($state->current_question_id) {
             $q = Question::find($state->current_question_id);
             if ($q) {
-                $round['current'] = $roundQuestions->search(fn ($candidate) => $candidate->id === $q->id) + 1;
+                $roundIndex = $roundQuestions->search(fn ($candidate) => $candidate->id === $q->id);
+                $round['current'] = $roundIndex === false ? 0 : $roundIndex + 1;
                 $canRevealAnswers = in_array($state->phase, ['trivia_reveal', 'trivia_complete']);
                 $question = [
                     'id'              => $q->id,

@@ -11,7 +11,6 @@
       <div>
         <label class="block text-xs text-gray-500 mb-1">Category</label>
         <select v-model="form.category" class="w-full border rounded-xl px-3 py-2 text-sm focus:outline-none">
-          <option value="general_knowledge">General knowledge</option>
           <option value="fifa_world_cup">FIFA World Cup</option>
           <option value="visa">Visa</option>
         </select>
@@ -87,7 +86,7 @@ const labels = ['A', 'B', 'C', 'D']
 
 const form = reactive({
   text:             '',
-  category:         'general_knowledge',
+  category:         'fifa_world_cup',
   type:             'multiple_choice',
   options:          ['', '', '', ''],
   correct_answer:   '',
@@ -103,7 +102,7 @@ onMounted(() => {
   if (props.initial) {
     Object.assign(form, {
       text:             props.initial.text,
-      category:         props.initial.category ?? 'general_knowledge',
+      category:         props.initial.category ?? 'fifa_world_cup',
       type:             props.initial.type,
       options:          [...props.initial.options],
       correct_answer:   props.initial.correct_answer,

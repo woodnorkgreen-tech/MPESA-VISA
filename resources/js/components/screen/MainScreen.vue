@@ -4,13 +4,11 @@
 
     <div class="fixed right-3 top-3 z-50 flex items-center gap-2 print:hidden">
       <span v-if="linkMessage" class="rounded-full bg-black/70 px-3 py-2 text-xs font-medium text-white backdrop-blur">{{ linkMessage }}</span>
-      <button type="button" @click="copyScreenLink" title="Copy public Main Screen link"
-        class="rounded-full border border-white/15 bg-black/55 px-3 py-2 text-xs font-medium text-white backdrop-blur hover:bg-black/75 focus:outline-none focus:ring-2 focus:ring-visa-gold">
-        🔗 <span class="hidden sm:inline">Public link</span>
-      </button>
-      <button type="button" @click="toggleFullscreen" :title="isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'"
-        class="rounded-full border border-white/15 bg-black/55 px-3 py-2 text-xs font-medium text-white backdrop-blur hover:bg-black/75 focus:outline-none focus:ring-2 focus:ring-visa-gold">
-        {{ isFullscreen ? '✕' : '⛶' }} <span class="hidden sm:inline">{{ isFullscreen ? 'Exit' : 'Fullscreen' }}</span>
+      <button type="button" @click="toggleFullscreen"
+        :title="isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'"
+        :aria-label="isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'"
+        class="flex h-9 w-9 items-center justify-center rounded-full border border-white/15 bg-black/55 text-base text-white backdrop-blur hover:bg-black/75 focus:outline-none focus:ring-2 focus:ring-visa-gold">
+        {{ isFullscreen ? '✕' : '⛶' }}
       </button>
     </div>
 
@@ -18,7 +16,7 @@
          LOBBY / PREDICTIONS
     ══════════════════════════════════════════════════════════════════════ -->
     <template v-if="['lobby', 'predictions_open', 'predictions_closed'].includes(phase)">
-      <div class="phase-enter flex-1 flex min-h-0 flex-col px-6 pb-20 pt-5 lg:px-14 lg:pb-24 lg:pt-8">
+      <div class="phase-enter flex-1 flex min-h-0 flex-col px-6 pb-20 pt-5 lg:px-14 lg:pb-24 lg:pt-8 xl:pt-14 2xl:pt-20">
         <header class="screen-lobby-header mx-auto flex w-full max-w-[96rem] items-center justify-between gap-8">
           <div class="min-w-0 text-left">
             <h1 class="screen-title">FIFA World Cup 2026™ Final Match</h1>
@@ -32,7 +30,7 @@
 
         <div class="broadcast-grid mx-auto grid min-h-0 w-full max-w-[96rem] flex-1 grid-cols-[minmax(15rem,.78fr)_minmax(22rem,1.1fr)_minmax(19rem,.95fr)] items-center gap-6 pt-5 lg:gap-8 lg:pt-8">
           <div class="screen-panel screen-qr-panel flex flex-col items-center justify-center">
-            <div class="rounded-[1.25rem] bg-white p-3 shadow-2xl lg:p-4">
+            <div class="rounded-[1.25rem] bg-white p-1.5 shadow-2xl lg:p-2">
               <canvas ref="qrCanvas" :width="qrSize" :height="qrSize"></canvas>
             </div>
             <p class="mt-4 font-medium leading-tight text-white" style="font-size: clamp(1.2rem, 2.1vw, 2.7rem)">
@@ -298,7 +296,6 @@ const qrCanvas = ref(null)
 // Guests join via the same host that serves this screen. APP_URL (the meta tag)
 // may be a dev hostname that venue phones cannot resolve — never encode it in the QR.
 const appUrl   = window.location.origin
-const screenUrl = `${window.location.origin}/screen`
 const isFullscreen = ref(!!document.fullscreenElement)
 const linkMessage = ref('')
 const predictionFeed = ref([])
@@ -314,32 +311,23 @@ async function loadPredictionFeed() {
   }
 }
 
-async function copyScreenLink() {
-  try {
-    await navigator.clipboard.writeText(screenUrl)
-    linkMessage.value = 'Screen link copied'
-  } catch {
-    window.prompt('Copy the public Main Screen link:', screenUrl)
-    linkMessage.value = 'Public link ready'
-  }
-  clearTimeout(linkMessageTimer)
-  linkMessageTimer = setTimeout(() => { linkMessage.value = '' }, 2500)
-}
-
 async function toggleFullscreen() {
   try {
     if (document.fullscreenElement) await document.exitFullscreen()
     else await document.documentElement.requestFullscreen()
   } catch {
     linkMessage.value = 'Fullscreen is blocked by this browser'
+    clearTimeout(linkMessageTimer)
+    linkMessageTimer = setTimeout(() => { linkMessage.value = '' }, 2500)
   }
 }
 
 function syncFullscreen() { isFullscreen.value = !!document.fullscreenElement }
 
-// QR canvas: ~20% of the smaller viewport dimension, min 160, max 320
+// QR canvas: ~28% of the smaller viewport dimension, min 200, max 420 — sized
+// for scanning off a TV/monitor rather than a phone screen
 const qrSize = computed(() =>
-  Math.min(Math.max(Math.round(Math.min(window.innerWidth, window.innerHeight) * 0.2), 160), 320)
+  Math.min(Math.max(Math.round(Math.min(window.innerWidth, window.innerHeight) * 0.28), 200), 420)
 )
 
 onMounted(() => {

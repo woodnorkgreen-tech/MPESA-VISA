@@ -841,17 +841,20 @@ const categoryMeta = {
 }
 
 const categoryFilters = [
-  { value: 'all',               label: 'All',      activeClass: 'bg-gray-800 text-white' },
-  { value: 'general_knowledge', label: 'General',  activeClass: 'bg-gray-500 text-white' },
-  { value: 'fifa_world_cup',    label: 'FIFA ⚽',   activeClass: 'bg-blue-500 text-white' },
-  { value: 'visa',              label: 'Visa',     activeClass: 'bg-indigo-500 text-white' },
+  { value: 'all',            label: 'All',      activeClass: 'bg-gray-800 text-white' },
+  { value: 'fifa_world_cup', label: 'FIFA ⚽',   activeClass: 'bg-blue-500 text-white' },
+  { value: 'visa',           label: 'Visa',     activeClass: 'bg-indigo-500 text-white' },
 ]
 const durationOptions = [5, 10, 15, 20, 30, 45, 60, 90, 120]
 
+// This event only runs FIFA/Visa questions — general knowledge stays in the
+// bank for future events but is hidden here so it can't be activated by accident.
+const visibleQuestions = computed(() => questions.value.filter(q => q.category !== 'general_knowledge'))
+
 const filteredQuestions = computed(() =>
   activeCategory.value === 'all'
-    ? questions.value
-    : questions.value.filter(q => q.category === activeCategory.value)
+    ? visibleQuestions.value
+    : visibleQuestions.value.filter(q => q.category === activeCategory.value)
 )
 
 const nextAction = computed(() => ({
@@ -867,8 +870,8 @@ const nextAction = computed(() => ({
 
 function categoryCount(cat) {
   return cat === 'all'
-    ? questions.value.length
-    : questions.value.filter(q => q.category === cat).length
+    ? visibleQuestions.value.length
+    : visibleQuestions.value.filter(q => q.category === cat).length
 }
 
 const phases = [
