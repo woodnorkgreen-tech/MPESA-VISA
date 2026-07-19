@@ -57,17 +57,15 @@
             </div>
 
             <div v-if="phase === 'predictions_open'" class="screen-panel mt-4 max-w-xl px-5 py-4 text-left">
-              <p class="font-medium uppercase tracking-widest text-visa-gold" style="font-size: clamp(.6rem,.9vw,.9rem)">Predict before kick-off</p>
-              <p class="mt-2 font-semibold leading-snug text-white" style="font-size: clamp(.82rem,1.2vw,1.25rem)">
-                Correct score · First team to score · First goalscorer
-              </p>
-              <p class="mt-1 font-semibold leading-snug text-white" style="font-size: clamp(.82rem,1.2vw,1.25rem)">
-                First goal minute · Half-time result · Full-time result
-              </p>
-              <div class="mt-3 grid gap-2 text-white/76" style="font-size: clamp(.68rem,.9vw,.95rem)">
-                <p><span class="font-semibold text-white">Correct score</span> = exact scoreline</p>
-                <p><span class="font-semibold text-white">Full-time result</span> = win, draw, or loss</p>
-                <p class="text-visa-gold">90 minutes + stoppage time only</p>
+              <p class="font-medium uppercase tracking-widest text-visa-gold" style="font-size: clamp(.6rem,.9vw,.9rem)">Make your match predictions</p>
+              <p class="mt-2 font-semibold text-white" style="font-size: clamp(.78rem,1vw,1.05rem)">You'll predict:</p>
+              <div class="mt-2 grid grid-cols-2 gap-x-5 gap-y-1.5 text-white/82" style="font-size: clamp(.72rem,.92vw,1rem)">
+                <p>Correct score</p>
+                <p>First team to score</p>
+                <p>First goalscorer</p>
+                <p>First goal minute</p>
+                <p>Half-time result</p>
+                <p>Full-time result</p>
               </div>
             </div>
 
