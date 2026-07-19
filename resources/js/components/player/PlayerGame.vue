@@ -53,8 +53,8 @@
             <span class="absolute inset-0 flex items-center justify-center text-3xl">⚽</span>
           </div>
 
-          <h2 class="text-2xl sm:text-3xl font-bold text-white mb-2">Hang tight, {{ playerNickname }}!</h2>
-          <p class="text-gray-300 text-base sm:text-lg leading-relaxed">Predict and Win</p>
+          <h2 class="text-2xl sm:text-3xl font-bold text-white mb-2">Waiting to start</h2>
+          <p class="text-gray-300 text-base sm:text-lg leading-relaxed">Keep this page open. The game will update automatically.</p>
 
           <div class="mt-7 inline-flex items-center gap-2 rounded-full bg-white/5 border border-white/10 px-4 py-2">
             <span class="h-2 w-2 rounded-full bg-visa-gold animate-pulse" aria-hidden="true"></span>

@@ -4,9 +4,20 @@
       <header class="mb-2 shrink-0 text-center sm:mb-3">
         <p class="brand-kicker mb-1.5">Tap In with Visa</p>
         <h2 class="text-xl font-extrabold text-white sm:text-2xl">Predict the Final</h2>
-        <p class="mt-0.5 text-xs text-gray-400 sm:text-sm">Six quick steps. You can edit until predictions close.</p>
+        <p class="mt-0.5 text-xs text-gray-400 sm:text-sm">You can edit until predictions close.</p>
+        <div class="mx-auto mt-2 max-w-md rounded-2xl border border-white/10 bg-white/5 px-3 py-2 text-left">
+          <p class="text-center text-[10px] font-black uppercase tracking-widest text-visa-gold sm:text-[11px]">You'll predict</p>
+          <div class="mt-1.5 grid grid-cols-2 gap-x-3 gap-y-1 text-[11px] font-semibold text-gray-300 sm:text-xs">
+            <p>Correct score</p>
+            <p>First team to score</p>
+            <p>First goalscorer</p>
+            <p>First goal minute</p>
+            <p>Half-time result</p>
+            <p>Full-time result</p>
+          </div>
+        </div>
         <p class="mx-auto mt-1.5 max-w-md rounded-full border border-visa-gold/20 bg-visa-gold/10 px-3 py-1 text-[10px] font-semibold text-visa-gold sm:text-[11px]">
-          Score predictions use 90 minutes + stoppage time. Extra time and penalties do not count.
+          Correct score uses 90 minutes + stoppage time. Extra time and penalties do not count.
         </p>
       </header>
 
@@ -36,7 +47,7 @@
           <!-- Step 1: large, thumb-friendly score controls. -->
           <section v-else-if="step === 1" class="prediction-step" aria-labelledby="score-title">
             <div class="mb-3 text-center">
-              <h3 id="score-title" class="text-lg font-black text-white sm:text-xl">What will the final score be?</h3>
+              <h3 id="score-title" class="text-lg font-black text-white sm:text-xl">What will the correct score be?</h3>
               <p class="mt-1 text-xs text-gray-500">Use + and − or tap a common score below.</p>
             </div>
             <div class="grid grid-cols-[1fr_auto_1fr] items-center gap-2 sm:gap-5">
@@ -149,7 +160,7 @@
             </div>
             <div class="grid grid-cols-2 gap-2">
               <button type="button" @click="step = 1" class="review-row">
-                <span><span class="review-label">Final score</span><strong class="review-value">{{ form.score_home }} – {{ form.score_away }}</strong></span>
+                <span><span class="review-label">Correct score</span><strong class="review-value">{{ form.score_home }} – {{ form.score_away }}</strong></span>
                 <span class="text-xs font-bold text-visa-gold">Edit</span>
               </button>
               <button type="button" @click="step = 2" class="review-row">
@@ -213,7 +224,7 @@
       <h3 class="text-xl font-black text-white mb-2">Prediction saved</h3>
       <div class="space-y-2 text-left mb-2">
         <div class="review-row !min-h-0 !py-2.5">
-          <span class="review-label">Final score</span>
+          <span class="review-label">Correct score</span>
           <strong class="review-value">{{ form.score_home }} – {{ form.score_away }}</strong>
         </div>
         <div class="review-row !min-h-0 !py-2.5">
