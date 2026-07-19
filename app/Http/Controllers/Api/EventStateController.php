@@ -199,6 +199,7 @@ class EventStateController extends Controller
         $active = $roundSummaries[$category] ?? $roundSummaries[self::EVENT_QUESTION_CATEGORIES[0]];
         $active['status'] = match ($phase) {
             'trivia_ready' => 'coming',
+            'trivia_loading' => 'coming',
             'trivia_complete' => 'complete',
             'trivia_live' => 'live',
             'trivia_reveal' => 'reveal',

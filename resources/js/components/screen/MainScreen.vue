@@ -156,6 +156,25 @@
         </div>
       </div>
     </template>
+    <template v-else-if="phase === 'trivia_loading' || (phase === 'trivia_live' && !question)">
+      <div class="phase-enter flex-1 flex flex-col items-center justify-center px-8 pb-20 pt-8 text-center lg:px-16">
+        <img src="/images/visa-logo.svg" alt="Visa" class="mb-8 h-12 object-contain drop-shadow-lg lg:h-16" />
+        <p class="font-medium uppercase tracking-[.22em] text-visa-gold" style="font-size: clamp(.8rem, 1.35vw, 1.6rem)">
+          Round {{ activeRound.number }} · {{ activeRound.label }}
+        </p>
+        <h2 class="mt-5 font-semibold text-white" style="font-size: clamp(2.4rem, 6vw, 7rem)">
+          Loading next question
+        </h2>
+        <p class="mt-5 max-w-3xl text-white/70" style="font-size: clamp(1rem, 1.8vw, 2.2rem)">
+          Keep your phone ready. The MC will cue the question.
+        </p>
+        <div class="mt-10 flex items-center gap-3" aria-hidden="true">
+          <span class="h-3 w-3 animate-pulse rounded-full bg-visa-gold"></span>
+          <span class="h-3 w-3 animate-pulse rounded-full bg-visa-gold [animation-delay:.15s]"></span>
+          <span class="h-3 w-3 animate-pulse rounded-full bg-visa-gold [animation-delay:.3s]"></span>
+        </div>
+      </div>
+    </template>
     <template v-else-if="phase === 'trivia_live' && question">
       <div class="phase-enter flex-1 flex flex-col px-8 lg:px-16 pt-6 lg:pt-10 pb-4">
 

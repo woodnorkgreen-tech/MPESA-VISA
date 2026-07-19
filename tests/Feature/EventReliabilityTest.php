@@ -240,6 +240,13 @@ class EventReliabilityTest extends TestCase
             ->assertJsonPath('phase', 'trivia_ready');
 
         $this->assertSame('trivia_ready', EventState::current()->phase);
+
+        $this->withSession(['admin_logged_in' => true])
+            ->postJson('/api/admin/phase', ['phase' => 'trivia_loading'])
+            ->assertOk()
+            ->assertJsonPath('phase', 'trivia_loading');
+
+        $this->assertSame('trivia_loading', EventState::current()->phase);
     }
 
     public function test_audit_history_is_protected_and_returns_newest_first(): void

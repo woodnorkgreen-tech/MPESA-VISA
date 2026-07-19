@@ -865,6 +865,7 @@ const nextAction = computed(() => ({
   trivia_ready:       { phase: null, label: 'Start a question from the question bank', help: 'Cue the room, then select the first question and press Live.' },
   trivia_live:        { phase: null, label: 'Close and reveal the live question', help: 'Use the Close button on the live question.' },
   trivia_reveal:      { phase: null, label: 'Start the next draft question', help: 'Select the next reviewed question and press Live.' },
+  trivia_loading:     { phase: null, label: 'Question loading is showing', help: 'The selected question will go live automatically.' },
   trivia_complete:    { phase: 'prediction_reveal', label: 'Reveal prediction results when ready', help: 'Resolve the match result first.' },
   match_ended:        { phase: 'prediction_reveal', label: 'Reveal the prediction winner', help: 'Prediction scores have been calculated.' },
   prediction_reveal:  { phase: 'lobby', label: 'Return to lobby', help: 'Only use this when the event is complete.' },
@@ -890,6 +891,7 @@ const phaseColors = {
   predictions_open:   'bg-blue-100 text-blue-700',
   predictions_closed: 'bg-orange-100 text-orange-700',
   trivia_ready:       'bg-cyan-100 text-cyan-700',
+  trivia_loading:     'bg-cyan-100 text-cyan-700',
   trivia_live:        'bg-green-100 text-green-700',
   trivia_reveal:      'bg-purple-100 text-purple-700',
   trivia_complete:    'bg-purple-200 text-purple-800',
@@ -1193,11 +1195,23 @@ async function confirmQuestionActivation() {
   if (!question?.id || questionDialog.saving) return
   questionDialog.saving = true
   questionDialog.error = ''
+  const previousPhase = phase.value
   try {
+    await axios.post('/api/admin/phase', { phase: 'trivia_loading' })
+    await fetchState()
+    await new Promise(resolve => setTimeout(resolve, 1600))
     await axios.post(`/api/admin/questions/${question.id}/activate`)
     await Promise.all([loadQuestions(), fetchState(), loadAudits()])
     Object.assign(questionDialog, { open: false, question: null, saving: false, error: '' })
   } catch (e) {
+    if (phase.value === 'trivia_loading' && previousPhase && previousPhase !== 'trivia_loading') {
+      try {
+        await axios.post('/api/admin/phase', { phase: previousPhase })
+        await fetchState()
+      } catch {
+        // Keep the activation error visible; recovery controls can still change phase.
+      }
+    }
     questionDialog.error = e.response?.data?.message ?? 'Could not send this question live.'
     questionDialog.saving = false
   }
