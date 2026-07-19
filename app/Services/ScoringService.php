@@ -224,6 +224,7 @@ class ScoringService
             ->groupBy('player_id');
 
         return Player::select('id', 'nickname')
+            ->whereIn('id', $answersByPlayer->keys())
             ->get()
             ->map(function (Player $player) use ($answersByPlayer) {
                 $answers = ($answersByPlayer->get($player->id) ?? collect())

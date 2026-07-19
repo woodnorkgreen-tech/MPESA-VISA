@@ -806,7 +806,7 @@ class EventReliabilityTest extends TestCase
             ->assertJsonPath('question.round_number', 2)
             ->assertJsonPath('active_round.label', 'Visa 101')
             ->assertJsonPath('active_round.status', 'reveal')
-            ->assertJsonPath('leaderboards.fifa.0.trivia_score', 1000)
+            ->assertJsonPath('leaderboards.fifa.0', null)
             ->assertJsonPath('leaderboards.visa.0.trivia_score', 1000)
             ->assertJsonPath('leaderboard.0.trivia_score', 1000);
 
@@ -968,7 +968,15 @@ class EventReliabilityTest extends TestCase
     public function test_leaderboards_never_expose_phone_data(): void
     {
         [$player] = $this->player();
-        $player->update(['trivia_score' => 100]);
+        $question = $this->liveQuestion();
+        Answer::create([
+            'player_id' => $player->id,
+            'question_id' => $question->id,
+            'selected_option' => 'Nairobi',
+            'is_correct' => true,
+            'points_awarded' => 1000,
+            'response_time_ms' => 0,
+        ]);
 
         $response = $this->getJson('/api/state')->assertOk()
             ->assertJsonPath('leaderboard.0.nickname', 'Test Player');

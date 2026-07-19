@@ -92,16 +92,8 @@ class EventStateController extends Controller
             ->filter()
             ->values()
             ->toArray();
-        $triviaLeaderboard = $scoring->triviaLeaderboard(100);
-        $fifaLeaderboard = $scoring->roundTriviaLeaderboard('fifa_world_cup', 100);
-        $visaLeaderboard = $scoring->roundTriviaLeaderboard('visa', 100);
-        $activeTriviaLeaderboard = match ($question['category'] ?? null) {
-            'fifa_world_cup' => $fifaLeaderboard,
-            'visa' => $visaLeaderboard,
-            default => $triviaLeaderboard,
-        };
-        $predictionLeaderboard = $scoring->predictionLeaderboard(100);
         $activeRound = $this->activeRound($state->phase, $question['category'] ?? null, $roundSummaries);
+        [$leaderboard, $leaderboards] = $this->leaderboardPayload($state->phase, $question['category'] ?? null, $scoring);
 
         return [
             'phase'               => $state->phase,
@@ -112,15 +104,8 @@ class EventStateController extends Controller
             'question'            => $question,
             'show_phone_on_screen'=> (bool) $state->show_phone_on_screen,
             // The main screen can scroll a deep field; do not cap it to a top ten.
-            'leaderboard'         => in_array($state->phase, ['match_ended', 'prediction_reveal'])
-                ? $predictionLeaderboard
-                : $activeTriviaLeaderboard,
-            'leaderboards'         => [
-                'trivia' => $triviaLeaderboard,
-                'fifa' => $fifaLeaderboard,
-                'visa' => $visaLeaderboard,
-                'prediction' => $predictionLeaderboard,
-            ],
+            'leaderboard'         => $leaderboard,
+            'leaderboards'         => $leaderboards,
             'rounds'               => [
                 'fifa' => $roundSummaries['fifa_world_cup'],
                 'visa' => $roundSummaries['visa'],
@@ -137,6 +122,33 @@ class EventStateController extends Controller
                 'venue' => $matchConfig->venue,
             ],
         ];
+    }
+
+    private function leaderboardPayload(string $phase, ?string $questionCategory, ScoringService $scoring): array
+    {
+        $leaderboards = ['trivia' => [], 'fifa' => [], 'visa' => [], 'prediction' => []];
+
+        if (in_array($phase, ['match_ended', 'prediction_reveal'], true)) {
+            $leaderboards['prediction'] = $scoring->predictionLeaderboard(100);
+            return [$leaderboards['prediction'], $leaderboards];
+        }
+
+        if ($questionCategory === 'fifa_world_cup') {
+            $leaderboards['fifa'] = $scoring->roundTriviaLeaderboard('fifa_world_cup', 100);
+            return [$leaderboards['fifa'], $leaderboards];
+        }
+
+        if ($questionCategory === 'visa') {
+            $leaderboards['visa'] = $scoring->roundTriviaLeaderboard('visa', 100);
+            return [$leaderboards['visa'], $leaderboards];
+        }
+
+        if ($phase === 'trivia_complete') {
+            $leaderboards['trivia'] = $scoring->triviaLeaderboard(100);
+            return [$leaderboards['trivia'], $leaderboards];
+        }
+
+        return [[], $leaderboards];
     }
 
     private function roundSummaries($questions): array
