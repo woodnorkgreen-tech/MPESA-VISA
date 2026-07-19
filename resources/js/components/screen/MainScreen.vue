@@ -57,7 +57,7 @@
             </div>
 
             <div v-if="phase === 'predictions_open'" class="screen-panel mt-4 max-w-xl px-5 py-4 text-left">
-              <p class="font-medium uppercase tracking-widest text-visa-gold" style="font-size: clamp(.6rem,.9vw,.9rem)">Make your match predictions</p>
+              <p class="font-medium uppercase tracking-widest text-visa-gold" style="font-size: clamp(.6rem,.9vw,.9rem)">Make match prediction on your phone</p>
               <p class="mt-2 font-semibold text-white" style="font-size: clamp(.78rem,1vw,1.05rem)">You'll predict:</p>
               <div class="mt-2 grid grid-cols-2 gap-x-5 gap-y-1.5 text-white/82" style="font-size: clamp(.72rem,.92vw,1rem)">
                 <p>Correct score</p>

@@ -113,7 +113,7 @@ class EventReliabilityTest extends TestCase
         [$player, $token] = $this->player();
         $question = $this->liveQuestion([
             'duration_seconds' => 10,
-            'activated_at' => now()->subSeconds(11),
+            'activated_at' => now()->subMilliseconds(10500),
         ]);
 
         $this->getJson('/api/state')->assertOk()->assertJsonPath('phase', 'trivia_reveal');
