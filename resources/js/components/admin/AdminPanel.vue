@@ -972,6 +972,18 @@ function lines(value) {
   return [...new Set((value ?? '').split(/\r?\n/).map(v => v.trim()).filter(Boolean))]
 }
 
+function toDatetimeLocal(value) {
+  if (!value) return ''
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return ''
+  const local = new Date(date.getTime() - date.getTimezoneOffset() * 60000)
+  return local.toISOString().slice(0, 16)
+}
+
+function fromDatetimeLocal(value) {
+  return value ? new Date(value).toISOString() : null
+}
+
 async function loadTeams() {
   const { data } = await axios.get('/api/admin/teams')
   teams.value = data.data ?? []
@@ -1080,7 +1092,7 @@ async function loadMatchConfig() {
     away_team: config.away_team,
     home_squad_text: (config.home_squad ?? []).join('\n'),
     away_squad_text: (config.away_squad ?? []).join('\n'),
-    kickoff_at: config.kickoff_at ? config.kickoff_at.slice(0, 16) : '',
+    kickoff_at: toDatetimeLocal(config.kickoff_at),
     venue: config.venue ?? '',
   })
 }
@@ -1093,7 +1105,7 @@ async function saveMatchConfig(force) {
     await axios.put('/api/admin/match-config', {
       home_team: matchForm.home_team.trim(), away_team: matchForm.away_team.trim(),
       home_squad: lines(matchForm.home_squad_text), away_squad: lines(matchForm.away_squad_text),
-      kickoff_at: matchForm.kickoff_at || null, venue: matchForm.venue.trim() || null, force,
+      kickoff_at: fromDatetimeLocal(matchForm.kickoff_at), venue: matchForm.venue.trim() || null, force,
     })
     matchConfigMessage.value = 'Match configuration saved.'
     await loadMatchConfig()
