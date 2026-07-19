@@ -173,10 +173,11 @@ const lastSelectedAnswer  = ref(null)
 const playerScore         = ref(parseInt(sessionStorage.getItem('player_score') ?? '0'))
 const showPredictionsClosedModal = ref(false)
 
-function onAnswered({ isCorrect, pointsAwarded, totalScore }) {
+function onAnswered({ isCorrect, pointsAwarded, totalScore, selectedAnswer }) {
   answerResultKnown.value = true
   lastAnswerCorrect.value = isCorrect
   lastPoints.value        = pointsAwarded
+  lastSelectedAnswer.value = selectedAnswer ?? lastSelectedAnswer.value
   playerScore.value       = totalScore
   sessionStorage.setItem('player_score', totalScore)
 }

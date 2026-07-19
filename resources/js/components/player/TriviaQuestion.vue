@@ -85,7 +85,11 @@
       <img src="/images/visa-logo.svg" alt="Visa" class="mx-auto mb-4 h-6 w-auto object-contain" />
       <div class="text-4xl mb-3" aria-hidden="true">⏱️</div>
       <h3 class="text-xl font-black text-white mb-2">Time's up!</h3>
-      <template v-if="answered">
+      <template v-if="answerCheckLoading || submitting">
+        <p class="text-gray-300 text-sm sm:text-base">Checking your saved answer...</p>
+        <p class="text-gray-500 text-xs sm:text-sm mt-2">Hang tight while we confirm it with the game server.</p>
+      </template>
+      <template v-else-if="answered">
         <p class="text-gray-300 text-sm sm:text-base">
           Your answer — <strong class="text-white">{{ selected }}</strong> — is locked in.
         </p>
@@ -126,6 +130,8 @@ const pointsAwarded = ref(0)
 const submissionError = ref('')
 const submitting = ref(false)
 const showTimeUpModal = ref(false)
+const answerCheckLoading = ref(false)
+const timeUpHandled = ref(false)
 
 const timeLeft      = ref(props.question.seconds_remaining ?? props.question.duration_seconds)
 const circumference = 2 * Math.PI * 24
@@ -144,11 +150,11 @@ const startedAt = Date.now()
 let timer = null
 
 onMounted(() => {
-  if (timeLeft.value === 0 && !props.readOnly) showTimeUpModal.value = true
+  if (timeLeft.value === 0 && !props.readOnly) handleTimeUp()
   timer = setInterval(() => {
     if (timeLeft.value > 0) {
       timeLeft.value--
-      if (timeLeft.value === 0 && !props.readOnly) showTimeUpModal.value = true
+      if (timeLeft.value === 0 && !props.readOnly) handleTimeUp()
     }
   }, 1000)
 })
@@ -169,6 +175,37 @@ function optionClass(option) {
     return 'bg-visa/25 border-visa-gold text-white ring-2 ring-visa-gold/30'
   }
   return 'bg-gray-800 border-gray-700 hover:bg-gray-700 hover:border-gray-500 text-white'
+}
+
+async function handleTimeUp() {
+  if (timeUpHandled.value) return
+  timeUpHandled.value = true
+  showTimeUpModal.value = true
+
+  if (answered.value || props.readOnly) return
+
+  answerCheckLoading.value = true
+  try {
+    const { data } = await axios.get('/api/answers/result', {
+      params: { player_id: props.playerId, question_id: props.question.id },
+    })
+    if (data.answered) {
+      answered.value = true
+      selected.value = data.selected_option
+      isCorrect.value = data.is_correct ?? false
+      pointsAwarded.value = data.points_awarded ?? 0
+      emit('answered', {
+        isCorrect: isCorrect.value,
+        pointsAwarded: pointsAwarded.value,
+        totalScore: data.total_score,
+        selectedAnswer: selected.value,
+      })
+    }
+  } catch {
+    // Keep the modal open; the reveal screen will also fetch the authoritative result.
+  } finally {
+    answerCheckLoading.value = false
+  }
 }
 
 async function selectAnswer(option) {
@@ -193,6 +230,7 @@ async function selectAnswer(option) {
       isCorrect:     data.is_correct,
       pointsAwarded: data.points_awarded,
       totalScore:    data.total_score,
+      selectedAnswer: data.selected_option,
     })
   } catch (e) {
     submissionError.value = e.response?.data?.message ?? 'We could not record that answer. Please check your connection.'
