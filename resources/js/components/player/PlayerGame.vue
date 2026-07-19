@@ -74,6 +74,9 @@
           <p class="text-gray-300 text-base sm:text-lg leading-relaxed">
             When a question appears, tap your answer.
           </p>
+          <p class="mt-3 text-sm text-gray-400 sm:text-base">
+            The MC will cue each question.
+          </p>
 
           <div class="mt-7 inline-flex items-center gap-2 rounded-full bg-white/5 border border-white/10 px-4 py-2">
             <span class="h-2 w-2 rounded-full bg-visa-gold animate-pulse" aria-hidden="true"></span>
