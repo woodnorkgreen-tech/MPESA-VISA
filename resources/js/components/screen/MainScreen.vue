@@ -56,12 +56,19 @@
               </p>
             </div>
 
-            <div v-if="phase === 'predictions_open'" class="screen-panel mt-4 max-w-xl px-5 py-4">
-              <p class="font-medium uppercase tracking-widest text-visa-gold" style="font-size: clamp(.6rem,.9vw,.9rem)">Prediction rule</p>
-              <p class="mt-1 font-normal leading-snug text-white" style="font-size: clamp(.8rem,1.25vw,1.35rem)">
-                Final score means the score after 90 minutes + stoppage time.
+            <div v-if="phase === 'predictions_open'" class="screen-panel mt-4 max-w-xl px-5 py-4 text-left">
+              <p class="font-medium uppercase tracking-widest text-visa-gold" style="font-size: clamp(.6rem,.9vw,.9rem)">Predict before kick-off</p>
+              <p class="mt-2 font-semibold leading-snug text-white" style="font-size: clamp(.82rem,1.2vw,1.25rem)">
+                Correct score · First team to score · First goalscorer
               </p>
-              <p class="mt-1 text-white/70" style="font-size: clamp(.65rem,.95vw,1rem)">Extra time and penalty shootouts do not count.</p>
+              <p class="mt-1 font-semibold leading-snug text-white" style="font-size: clamp(.82rem,1.2vw,1.25rem)">
+                First goal minute · Half-time result · Full-time result
+              </p>
+              <div class="mt-3 grid gap-2 text-white/76" style="font-size: clamp(.68rem,.9vw,.95rem)">
+                <p><span class="font-semibold text-white">Correct score</span> = exact scoreline</p>
+                <p><span class="font-semibold text-white">Full-time result</span> = win, draw, or loss</p>
+                <p class="text-visa-gold">90 minutes + stoppage time only</p>
+              </div>
             </div>
 
             <div v-if="match.kickoff_at && kickoffCountdown" class="screen-countdown mt-4 w-full max-w-xl px-7 py-5">
