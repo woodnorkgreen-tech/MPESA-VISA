@@ -43,15 +43,17 @@
         Join the FIFA World Cup 2026™ Final Match for Argentina vs Spain. Predict the score, test your Visa and football knowledge, and climb the leaderboard.
       </p>
 
-      <button @click="view = 'register'"
-        class="play-btn w-full max-w-xs py-4 font-extrabold text-base sm:text-lg transition active:scale-95">
-        Join the game <span aria-hidden="true">→</span>
-      </button>
+      <div class="flex w-full max-w-xs flex-col gap-3">
+        <button @click="view = 'register'"
+          class="play-btn w-full py-4 font-extrabold text-base sm:text-lg transition active:scale-95">
+          Register <span aria-hidden="true">→</span>
+        </button>
 
-      <button @click="view = 'login'"
-        class="mt-5 text-sm font-semibold text-white/72 transition hover:text-white underline-offset-2 hover:underline sm:text-base pb-safe">
-        Already registered? <span class="font-bold text-white">Sign in</span>
-      </button>
+        <button @click="view = 'login'"
+          class="w-full rounded-2xl border border-visa-gold/55 bg-black/35 px-5 py-4 text-base font-extrabold text-white shadow-lg shadow-black/20 transition hover:border-visa-gold hover:bg-black/50 active:scale-95 sm:text-lg">
+          Already registered? Sign in
+        </button>
+      </div>
     </main>
 
     <aside class="landing-match-rail relative z-10 mx-5 mb-5 hidden items-center justify-between gap-6 border-t border-white/16 px-1 pt-4 text-white/70 sm:mx-8 lg:mx-16 lg:flex">
