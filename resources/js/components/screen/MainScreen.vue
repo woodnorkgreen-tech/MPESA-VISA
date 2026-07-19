@@ -94,6 +94,52 @@
         </div>
       </div>
     </template>
+    <template v-else-if="phase === 'trivia_ready'">
+      <div class="phase-enter flex-1 flex min-h-0 flex-col px-6 pb-20 pt-5 lg:px-14 lg:pb-24 lg:pt-10 xl:pt-14">
+        <header class="screen-lobby-header mx-auto flex w-full max-w-[96rem] items-center justify-between gap-8">
+          <div class="min-w-0 text-left">
+            <h1 class="screen-title">Trivia starts soon</h1>
+          </div>
+          <div class="flex shrink-0 items-center border-l border-white/18 pl-8">
+            <img src="/images/visa-logo.svg" alt="Visa"
+              class="object-contain drop-shadow-lg" style="height: clamp(1.7rem, 2.35vw, 3.2rem)" />
+          </div>
+        </header>
+
+        <div class="mx-auto grid min-h-0 w-full max-w-[96rem] flex-1 grid-cols-1 items-center gap-8 pt-8 lg:grid-cols-[minmax(18rem,.85fr)_minmax(22rem,1.15fr)] lg:gap-12">
+          <div class="screen-panel screen-qr-panel flex flex-col items-center justify-center">
+            <div class="rounded-[1.25rem] bg-white p-1.5 shadow-2xl lg:p-2">
+              <canvas ref="qrCanvas" :width="qrSize" :height="qrSize"></canvas>
+            </div>
+            <p class="mt-4 font-medium leading-tight text-white" style="font-size: clamp(1.25rem, 2.3vw, 3rem)">
+              Scan to play
+            </p>
+            <p class="mt-5 rounded-full border border-white/12 bg-white/6 px-4 py-2 font-medium text-white/78" style="font-size: clamp(.75rem, 1vw, 1.05rem)">
+              {{ playerCount }} players registered
+            </p>
+          </div>
+
+          <div class="min-w-0">
+            <div class="screen-panel px-7 py-7 lg:px-10 lg:py-9">
+              <p class="font-medium uppercase tracking-widest text-visa-gold" style="font-size: clamp(.7rem, 1vw, 1.15rem)">
+                Before question one
+              </p>
+              <div class="mt-6 grid gap-4">
+                <p class="rounded-2xl border border-white/10 bg-white/7 px-5 py-4 font-semibold text-white" style="font-size: clamp(1rem, 1.85vw, 2.35rem)">
+                  New players: register
+                </p>
+                <p class="rounded-2xl border border-white/10 bg-white/7 px-5 py-4 font-semibold text-white" style="font-size: clamp(1rem, 1.85vw, 2.35rem)">
+                  Already registered: sign in
+                </p>
+                <p class="rounded-2xl border border-visa-gold/35 bg-visa-gold/10 px-5 py-4 font-semibold text-white" style="font-size: clamp(.95rem, 1.55vw, 2rem)">
+                  When questions appear, tap your answer on your phone
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </template>
     <template v-else-if="phase === 'trivia_live' && question">
       <div class="phase-enter flex-1 flex flex-col px-8 lg:px-16 pt-6 lg:pt-10 pb-4">
 

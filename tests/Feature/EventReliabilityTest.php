@@ -232,6 +232,16 @@ class EventReliabilityTest extends TestCase
         ])->assertUnauthorized();
     }
 
+    public function test_admin_can_open_trivia_check_in_phase(): void
+    {
+        $this->withSession(['admin_logged_in' => true])
+            ->postJson('/api/admin/phase', ['phase' => 'trivia_ready'])
+            ->assertOk()
+            ->assertJsonPath('phase', 'trivia_ready');
+
+        $this->assertSame('trivia_ready', EventState::current()->phase);
+    }
+
     public function test_audit_history_is_protected_and_returns_newest_first(): void
     {
         EventAudit::record('phase.changed', null, ['phase' => 'lobby']);

@@ -516,8 +516,9 @@
 
         <div class="rounded-xl border border-amber-200 bg-amber-50/50 p-4 mb-4">
           <p class="text-sm font-bold text-gray-800 mb-1">Recovery actions</p><p class="text-xs text-gray-500 mb-3">Every action asks for confirmation and is recorded in Audit.</p>
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          <div class="grid grid-cols-2 sm:grid-cols-5 gap-2">
             <button @click="setPhase('predictions_closed')" class="rounded-lg bg-orange-600 px-3 py-2.5 text-xs font-bold text-white">Close predictions</button>
+            <button @click="setPhase('trivia_ready')" class="rounded-lg bg-cyan-700 px-3 py-2.5 text-xs font-bold text-white">Trivia check-in</button>
             <button @click="closeQuestion(liveQuestion)" :disabled="!liveQuestion" class="rounded-lg bg-purple-600 px-3 py-2.5 text-xs font-bold text-white disabled:opacity-30">Stop live question</button>
             <button @click="setPhase('trivia_complete')" class="rounded-lg bg-blue-700 px-3 py-2.5 text-xs font-bold text-white">Trivia complete</button>
             <button @click="setPhase('lobby')" class="rounded-lg bg-gray-700 px-3 py-2.5 text-xs font-bold text-white">Return to lobby</button>
@@ -860,7 +861,8 @@ const filteredQuestions = computed(() =>
 const nextAction = computed(() => ({
   lobby:              { phase: 'predictions_open', label: 'Open predictions', help: 'Players can submit their match predictions.' },
   predictions_open:   { phase: 'predictions_closed', label: 'Close predictions', help: 'Use this at kick-off before starting trivia.' },
-  predictions_closed: { phase: null, label: 'Start a question from the question bank', help: 'Review the question, then press Live.' },
+  predictions_closed: { phase: 'trivia_ready', label: 'Open trivia check-in', help: 'Show the QR and sign-in instructions before the MC starts question one.' },
+  trivia_ready:       { phase: null, label: 'Start a question from the question bank', help: 'Cue the room, then select the first question and press Live.' },
   trivia_live:        { phase: null, label: 'Close and reveal the live question', help: 'Use the Close button on the live question.' },
   trivia_reveal:      { phase: null, label: 'Start the next draft question', help: 'Select the next reviewed question and press Live.' },
   trivia_complete:    { phase: 'prediction_reveal', label: 'Reveal prediction results when ready', help: 'Resolve the match result first.' },
@@ -878,6 +880,7 @@ const phases = [
   { value: 'lobby',              label: 'Lobby' },
   { value: 'predictions_open',   label: 'Open Predictions' },
   { value: 'predictions_closed', label: 'Close Predictions' },
+  { value: 'trivia_ready',       label: 'Trivia Check-In' },
   { value: 'trivia_complete',    label: 'Trivia Complete' },
   { value: 'prediction_reveal',  label: 'Reveal Predictions' },
 ]
@@ -886,6 +889,7 @@ const phaseColors = {
   lobby:              'bg-gray-200 text-gray-600',
   predictions_open:   'bg-blue-100 text-blue-700',
   predictions_closed: 'bg-orange-100 text-orange-700',
+  trivia_ready:       'bg-cyan-100 text-cyan-700',
   trivia_live:        'bg-green-100 text-green-700',
   trivia_reveal:      'bg-purple-100 text-purple-700',
   trivia_complete:    'bg-purple-200 text-purple-800',

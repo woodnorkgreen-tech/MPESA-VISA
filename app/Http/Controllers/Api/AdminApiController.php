@@ -418,7 +418,7 @@ class AdminApiController extends Controller
     public function setPhase(Request $request): JsonResponse
     {
         $data = $request->validate([
-            'phase' => 'required|in:lobby,predictions_open,predictions_closed,trivia_complete,prediction_reveal',
+            'phase' => 'required|in:lobby,predictions_open,predictions_closed,trivia_ready,trivia_complete,prediction_reveal',
         ]);
 
         EventState::setCurrent(['phase' => $data['phase']]);

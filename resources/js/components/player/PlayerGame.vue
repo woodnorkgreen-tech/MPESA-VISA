@@ -1,5 +1,5 @@
 <template>
-  <div class="event-surface min-h-dvh text-white flex flex-col" :class="{ 'lobby-bg': phase === 'lobby' }">
+  <div class="event-surface min-h-dvh text-white flex flex-col" :class="{ 'lobby-bg': ['lobby', 'trivia_ready'].includes(phase) }">
 
     <!-- Not registered guard -->
     <div v-if="!playerId" class="flex-1 flex items-center justify-center p-6 text-center">
@@ -59,6 +59,25 @@
           <div class="mt-7 inline-flex items-center gap-2 rounded-full bg-white/5 border border-white/10 px-4 py-2">
             <span class="h-2 w-2 rounded-full bg-visa-gold animate-pulse" aria-hidden="true"></span>
             <span class="text-sm text-gray-300"><strong class="text-white font-bold">{{ playerCount }}</strong> players joined</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Trivia check-in ─────────────────────────────────────────────── -->
+      <div v-else-if="phase === 'trivia_ready'"
+        class="flex-1 flex flex-col items-center justify-center p-6 sm:p-10 text-center pb-safe">
+        <div class="lobby-card glass-card w-full max-w-sm rounded-3xl px-7 py-10 sm:px-10 sm:py-12">
+          <img src="/images/visa-logo.svg" alt="Visa"
+            class="mx-auto mb-7 h-8 max-w-[52vw] object-contain drop-shadow-2xl sm:h-10" />
+          <p class="brand-kicker mb-2">Trivia starts soon</p>
+          <h2 class="text-2xl sm:text-3xl font-bold text-visa-gold mb-3">You're ready</h2>
+          <p class="text-gray-300 text-base sm:text-lg leading-relaxed">
+            When a question appears, tap your answer.
+          </p>
+
+          <div class="mt-7 inline-flex items-center gap-2 rounded-full bg-white/5 border border-white/10 px-4 py-2">
+            <span class="h-2 w-2 rounded-full bg-visa-gold animate-pulse" aria-hidden="true"></span>
+            <span class="text-sm text-gray-300">Keep this page open</span>
           </div>
         </div>
       </div>
