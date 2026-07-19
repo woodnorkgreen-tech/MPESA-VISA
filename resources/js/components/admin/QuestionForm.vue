@@ -38,9 +38,10 @@
           <input v-model="form.options[idx]" type="text" required
             :disabled="form.type === 'true_false'"
             class="flex-1 border rounded-xl px-3 py-2 text-sm focus:outline-none disabled:bg-gray-50 disabled:text-gray-400" />
-          <input type="radio" :value="form.options[idx]" v-model="form.correct_answer"
+          <input type="radio" name="correct_answer" :value="idx" v-model="correctOptionIndex"
+            :disabled="!form.options[idx]?.trim()"
             :title="`Mark '${form.options[idx]}' as correct`"
-            class="accent-visa w-4 h-4" />
+            class="accent-visa w-4 h-4 disabled:cursor-not-allowed disabled:opacity-30" />
         </div>
       </div>
       <p class="text-xs text-gray-400 mt-1">Select the radio button next to the correct answer.</p>
@@ -74,7 +75,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, watch, onMounted } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import axios from 'axios'
 
 const props = defineProps({
@@ -97,6 +98,7 @@ const form = reactive({
 
 const saving   = ref(false)
 const errorMsg = ref('')
+const correctOptionIndex = ref(null)
 
 onMounted(() => {
   if (props.initial) {
@@ -110,6 +112,8 @@ onMounted(() => {
       is_double_points: props.initial.is_double_points,
       order_index:      props.initial.order_index,
     })
+    correctOptionIndex.value = form.options.findIndex(option => option === form.correct_answer)
+    if (correctOptionIndex.value === -1) correctOptionIndex.value = null
   }
 })
 
@@ -121,10 +125,10 @@ function onTypeChange() {
     form.options       = ['', '', '', '']
     form.correct_answer = ''
   }
+  correctOptionIndex.value = null
 }
 
 async function save() {
-  if (!form.correct_answer) { errorMsg.value = 'Select the correct answer.'; return }
   if (form.options.some(o => !o.trim())) { errorMsg.value = 'Fill in all options.'; return }
 
   saving.value   = true
@@ -134,7 +138,10 @@ async function save() {
       ? ['True', 'False']
       : form.options.filter(Boolean)
 
-    const payload = { ...form, options: filteredOptions }
+    const correctAnswer = filteredOptions[correctOptionIndex.value]
+    if (!correctAnswer) { errorMsg.value = 'Select the correct answer.'; return }
+
+    const payload = { ...form, options: filteredOptions, correct_answer: correctAnswer }
 
     if (props.initial?.id) {
       await axios.put(`/api/admin/questions/${props.initial.id}`, payload)
