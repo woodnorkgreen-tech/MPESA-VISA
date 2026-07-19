@@ -49,10 +49,10 @@
               <p class="font-medium uppercase tracking-widest"
                 :class="phase === 'predictions_closed' ? 'text-orange-400' : 'text-visa-gold'"
                 style="font-size: clamp(.65rem, 1vw, 1rem)">
-                {{ phase === 'predictions_closed' ? 'Predictions closed' : 'Predictions open' }}
+                {{ phase === 'lobby' ? 'Waiting to start' : phase === 'predictions_closed' ? 'Predictions closed' : 'Predictions open' }}
               </p>
               <p class="mt-1 font-medium tabular-nums text-white" style="font-size: clamp(1.25rem, 2.2vw, 2.8rem)">
-                {{ predictionCount }} locked in
+                {{ phase === 'lobby' ? 'Scan to join' : `${predictionCount} locked in` }}
               </p>
             </div>
 
