@@ -215,6 +215,111 @@ class ScoringService
             ->toArray();
     }
 
+    public function roundTriviaLeaderboard(string $category, int $limit = 10): array
+    {
+        $answersByPlayer = Answer::query()
+            ->whereHas('question', fn ($query) => $query->where('category', $category))
+            ->with('question')
+            ->get()
+            ->groupBy('player_id');
+
+        return Player::select('id', 'nickname')
+            ->get()
+            ->map(function (Player $player) use ($answersByPlayer) {
+                $answers = ($answersByPlayer->get($player->id) ?? collect())
+                    ->sortBy(fn (Answer $answer) => sprintf('%010d-%010d', $answer->question->order_index, $answer->question_id));
+
+                $score = $correctCount = $doubleCorrect = $streak = 0;
+                $correctResponseTotal = 0;
+
+                foreach ($answers as $answer) {
+                    $question = $answer->question;
+                    $isCorrect = $answer->selected_option === $question->correct_answer;
+
+                    if (!$isCorrect) {
+                        $streak = 0;
+                        continue;
+                    }
+
+                    $streak++;
+                    $correctCount++;
+                    $doubleCorrect += $question->is_double_points ? 1 : 0;
+                    $correctResponseTotal += (int) $answer->response_time_ms;
+                    $secondsRemaining = max(0, $question->duration_seconds - (int) ceil($answer->response_time_ms / 1000));
+                    $score += $this->calculateTriviaPoints(
+                        $question->is_double_points,
+                        $secondsRemaining,
+                        $question->duration_seconds,
+                        $streak,
+                    );
+                }
+
+                return [
+                    'id' => $player->id,
+                    'nickname' => $player->nickname,
+                    'trivia_score' => $score,
+                    'correct_count' => $correctCount,
+                    'double_correct' => $doubleCorrect,
+                    'avg_response_ms' => $correctCount > 0 ? $correctResponseTotal / $correctCount : null,
+                ];
+            })
+            ->sortBy([
+                ['trivia_score', 'desc'],
+                ['correct_count', 'desc'],
+                ['avg_response_ms', 'asc'],
+                ['double_correct', 'desc'],
+            ])
+            ->take($limit)
+            ->values()
+            ->map(fn (array $entry, int $index) => [
+                'id' => $entry['id'],
+                'rank' => $index + 1,
+                'nickname' => $entry['nickname'],
+                'trivia_score' => $entry['trivia_score'],
+                'correct_count' => $entry['correct_count'],
+            ])
+            ->toArray();
+    }
+
+    public function playerRoundTriviaScore(Player $player, string $category): int
+    {
+        $answers = Answer::query()
+            ->where('player_id', $player->id)
+            ->whereHas('question', fn ($query) => $query->where('category', $category))
+            ->with('question')
+            ->get()
+            ->sortBy(fn (Answer $answer) => sprintf('%010d-%010d', $answer->question->order_index, $answer->question_id));
+
+        $score = $streak = 0;
+
+        foreach ($answers as $answer) {
+            $question = $answer->question;
+            if ($answer->selected_option !== $question->correct_answer) {
+                $streak = 0;
+                continue;
+            }
+
+            $streak++;
+            $secondsRemaining = max(0, $question->duration_seconds - (int) ceil($answer->response_time_ms / 1000));
+            $score += $this->calculateTriviaPoints(
+                $question->is_double_points,
+                $secondsRemaining,
+                $question->duration_seconds,
+                $streak,
+            );
+        }
+
+        return $score;
+    }
+
+    public function playerRoundTriviaRank(Player $player, string $category): ?int
+    {
+        $entry = collect($this->roundTriviaLeaderboard($category, PHP_INT_MAX))
+            ->first(fn (array $entry) => (int) $entry['id'] === (int) $player->id);
+
+        return $entry ? (int) $entry['rank'] : null;
+    }
+
     public function predictionLeaderboard(int $limit = 10): array
     {
         return Prediction::query()

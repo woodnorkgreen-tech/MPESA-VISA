@@ -7,7 +7,7 @@
     <div class="flex items-center justify-between mb-4 sm:mb-6">
       <div>
         <span v-if="round.total" class="block text-[11px] sm:text-xs font-bold uppercase tracking-widest text-gray-500 mb-1">
-          Round {{ round.current }} of {{ round.total }}
+          Round {{ question.round_number ?? 1 }} · {{ question.round_title ?? 'Trivia' }} · Question {{ round.current }} of {{ round.total }}
         </span>
         <span v-if="question.is_double_points"
           class="bg-visa-gold text-black text-xs sm:text-sm font-bold px-3 py-1 rounded-full uppercase tracking-wide animate-pulse">
@@ -201,6 +201,8 @@ async function handleTimeUp() {
         isCorrect: isCorrect.value,
         pointsAwarded: pointsAwarded.value,
         totalScore: data.total_score,
+        roundScore: data.round_score,
+        roundRank: data.round_rank,
         selectedAnswer: selected.value,
       })
     }
@@ -234,6 +236,8 @@ async function selectAnswer(option) {
       isCorrect:     data.is_correct,
       pointsAwarded: data.points_awarded,
       totalScore:    data.total_score,
+      roundScore:    data.round_score,
+      roundRank:     data.round_rank,
       selectedAnswer: data.selected_option,
     })
   } catch (e) {

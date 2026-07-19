@@ -10,11 +10,14 @@ export function useEventState(intervalMs = 1500) {
     const phase               = ref('lobby')
     const question            = ref(null)
     const leaderboard         = ref([])
+    const leaderboards        = ref({ trivia: [], fifa: [], visa: [], prediction: [] })
     const playerCount         = ref(0)
     const predictionCount     = ref(0)
     const recentPredictions   = ref([])
     const match               = ref({ home_team: 'Home Team', away_team: 'Away Team', home_squad: [], away_squad: [] })
     const round               = ref({ current: 0, total: 0, completed: 0 })
+    const activeRound         = ref({ number: 1, label: 'FIFA 101', status: 'coming' })
+    const rounds              = ref({})
     const lastUpdatedAt       = ref(null)
     const loading             = ref(true)
     const error               = ref(null)
@@ -32,11 +35,14 @@ export function useEventState(intervalMs = 1500) {
             phase.value             = data.phase
             question.value          = data.question
             leaderboard.value       = data.leaderboard
+            leaderboards.value      = data.leaderboards ?? leaderboards.value
             playerCount.value       = data.player_count
             predictionCount.value   = data.prediction_count
             recentPredictions.value = data.recent_predictions ?? []
             match.value             = data.match ?? match.value
             round.value             = data.round ?? round.value
+            activeRound.value       = data.active_round ?? activeRound.value
+            rounds.value            = data.rounds ?? rounds.value
             lastUpdatedAt.value     = new Date()
             consecutiveFailures     = 0
             error.value             = null
@@ -68,5 +74,5 @@ export function useEventState(intervalMs = 1500) {
         window.removeEventListener('online', fetchState)
     })
 
-    return { phase, question, leaderboard, playerCount, predictionCount, recentPredictions, match, round, lastUpdatedAt, loading, error, fetchState }
+    return { phase, question, leaderboard, leaderboards, playerCount, predictionCount, recentPredictions, match, round, activeRound, rounds, lastUpdatedAt, loading, error, fetchState }
 }

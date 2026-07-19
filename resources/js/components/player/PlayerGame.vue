@@ -69,8 +69,9 @@
         <div class="lobby-card glass-card w-full max-w-sm rounded-3xl px-7 py-10 sm:px-10 sm:py-12">
           <img src="/images/visa-logo.svg" alt="Visa"
             class="mx-auto mb-7 h-8 max-w-[52vw] object-contain drop-shadow-2xl sm:h-10" />
-          <p class="brand-kicker mb-2">Trivia starts soon</p>
+          <p class="brand-kicker mb-2">Round {{ activeRound.number }} coming</p>
           <h2 class="text-2xl sm:text-3xl font-bold text-visa-gold mb-3">You're ready</h2>
+          <p class="-mt-1 mb-4 text-lg font-bold text-white sm:text-xl">{{ activeRound.label }}</p>
           <p class="text-gray-300 text-base sm:text-lg leading-relaxed">
             When a question appears on your phone, tap your answer.
           </p>
@@ -134,10 +135,11 @@
         class="flex-1 flex flex-col items-center justify-center p-6 sm:p-10 text-center pb-safe">
         <img src="/images/visa-logo.svg" alt="Visa"
           class="mb-7 h-10 max-w-[58vw] object-contain drop-shadow-2xl sm:h-12" />
-        <p class="brand-kicker mb-2">Watch party round complete</p>
-        <h2 class="text-2xl sm:text-3xl font-bold text-visa-gold mb-3">You're on the board</h2>
+        <p class="brand-kicker mb-2">Round {{ activeRound.number }} complete</p>
+        <h2 class="text-2xl sm:text-3xl font-bold text-visa-gold mb-3">{{ roundRankHeadline }}</h2>
+        <p class="-mt-1 mb-3 text-lg font-bold text-white sm:text-xl">{{ activeRound.label }}</p>
         <p class="text-gray-300 text-base sm:text-lg mb-1">
-          <strong class="text-white text-3xl sm:text-4xl">{{ playerScore }}</strong> pts
+          <strong class="text-white text-3xl sm:text-4xl">{{ playerRoundScore }}</strong> pts
         </p>
         <p class="text-gray-300 text-sm">Watch the big screen for the live leaderboard.</p>
       </div>
@@ -172,7 +174,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import axios from 'axios'
 import { useEventState } from '../../composables/useEventState'
 import PredictionsForm from './PredictionsForm.vue'
@@ -185,7 +187,7 @@ const storedPlayerValue = (key) => localStorage.getItem(key) ?? sessionStorage.g
 const playerId       = ref(adminPreview ? 'preview' : storedPlayerValue('player_id'))
 const playerNickname = ref(adminPreview ? 'MC Preview' : (storedPlayerValue('player_nickname') ?? 'Player'))
 
-const { phase, question, playerCount, match, round, loading } = useEventState()
+const { phase, question, playerCount, match, round, activeRound, loading } = useEventState()
 
 const lastAnswerCorrect   = ref(false)
 const lastPoints          = ref(0)
@@ -193,15 +195,26 @@ const answerResultKnown   = ref(false)
 const answerResultLoading = ref(false)
 const lastSelectedAnswer  = ref(null)
 const playerScore         = ref(parseInt(sessionStorage.getItem('player_score') ?? '0'))
+const playerRoundScore    = ref(parseInt(sessionStorage.getItem('player_round_score') ?? '0'))
+const playerRoundRank     = ref(parseInt(sessionStorage.getItem('player_round_rank') ?? '0'))
 const showPredictionsClosedModal = ref(false)
 
-function onAnswered({ isCorrect, pointsAwarded, totalScore, selectedAnswer }) {
+const roundRankHeadline = computed(() => {
+  if (!playerRoundRank.value) return "You're on the board"
+  return `You're #${playerRoundRank.value} on the board`
+})
+
+function onAnswered({ isCorrect, pointsAwarded, totalScore, roundScore, roundRank, selectedAnswer }) {
   answerResultKnown.value = true
   lastAnswerCorrect.value = isCorrect
   lastPoints.value        = pointsAwarded
   lastSelectedAnswer.value = selectedAnswer ?? lastSelectedAnswer.value
   playerScore.value       = totalScore
+  playerRoundScore.value  = roundScore ?? playerRoundScore.value
+  playerRoundRank.value   = roundRank ?? playerRoundRank.value
   sessionStorage.setItem('player_score', totalScore)
+  sessionStorage.setItem('player_round_score', playerRoundScore.value)
+  sessionStorage.setItem('player_round_rank', playerRoundRank.value)
 }
 
 async function loadSavedAnswerResult() {
@@ -217,7 +230,11 @@ async function loadSavedAnswerResult() {
     lastAnswerCorrect.value   = data.is_correct ?? false
     lastPoints.value          = data.points_awarded ?? 0
     playerScore.value         = data.total_score ?? playerScore.value
+    playerRoundScore.value    = data.round_score ?? playerRoundScore.value
+    playerRoundRank.value     = data.round_rank ?? playerRoundRank.value
     sessionStorage.setItem('player_score', playerScore.value)
+    sessionStorage.setItem('player_round_score', playerRoundScore.value)
+    sessionStorage.setItem('player_round_rank', playerRoundRank.value)
   } catch {
     answerResultKnown.value = false
   } finally {
@@ -230,6 +247,10 @@ watch([phase, question], ([currentPhase, currentQuestion], [previousPhase, previ
   if (currentPhase === 'trivia_live' && questionChanged) {
     answerResultKnown.value = false
     lastSelectedAnswer.value = null
+    playerRoundScore.value = 0
+    playerRoundRank.value = 0
+    sessionStorage.setItem('player_round_score', '0')
+    sessionStorage.setItem('player_round_rank', '0')
   }
   if (currentQuestion?.correct_answer && (questionChanged || !previousQuestion?.correct_answer || currentPhase !== previousPhase)) {
     loadSavedAnswerResult()

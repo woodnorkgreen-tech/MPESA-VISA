@@ -742,7 +742,185 @@ class EventReliabilityTest extends TestCase
 
         $this->getJson('/api/state')->assertOk()
             ->assertJsonPath('round.current', 1)
-            ->assertJsonPath('round.total', 1);
+            ->assertJsonPath('round.total', 1)
+            ->assertJsonPath('active_round.number', 2)
+            ->assertJsonPath('active_round.label', 'Visa 101')
+            ->assertJsonPath('active_round.status', 'live');
+    }
+
+    public function test_trivia_round_leaderboards_score_categories_separately(): void
+    {
+        [$player] = $this->player();
+        $fifaQuestion = Question::create([
+            'order_index' => 1,
+            'category' => 'fifa_world_cup',
+            'type' => 'multiple_choice',
+            'text' => 'Who hosts the World Cup?',
+            'options' => ['Brazil', 'Kenya'],
+            'correct_answer' => 'Brazil',
+            'duration_seconds' => 10,
+            'status' => 'closed',
+        ]);
+        $visaQuestion = Question::create([
+            'order_index' => 2,
+            'category' => 'visa',
+            'type' => 'multiple_choice',
+            'text' => 'Which brand is on the card?',
+            'options' => ['Visa', 'Cash'],
+            'correct_answer' => 'Visa',
+            'duration_seconds' => 10,
+            'status' => 'closed',
+        ]);
+        $secondVisaQuestion = Question::create([
+            'order_index' => 3,
+            'category' => 'visa',
+            'type' => 'multiple_choice',
+            'text' => 'Bonus round two?',
+            'options' => ['Visa', 'Cash'],
+            'correct_answer' => 'Visa',
+            'duration_seconds' => 10,
+            'status' => 'closed',
+        ]);
+
+        Answer::create([
+            'player_id' => $player->id,
+            'question_id' => $fifaQuestion->id,
+            'selected_option' => 'Brazil',
+            'is_correct' => true,
+            'points_awarded' => 1000,
+            'response_time_ms' => 0,
+        ]);
+        Answer::create([
+            'player_id' => $player->id,
+            'question_id' => $visaQuestion->id,
+            'selected_option' => 'Visa',
+            'is_correct' => true,
+            'points_awarded' => 1050,
+            'response_time_ms' => 0,
+        ]);
+
+        EventState::setCurrent(['phase' => 'trivia_reveal', 'current_question_id' => $visaQuestion->id]);
+
+        $this->getJson('/api/state')->assertOk()
+            ->assertJsonPath('question.round_title', 'Visa 101')
+            ->assertJsonPath('question.round_number', 2)
+            ->assertJsonPath('active_round.label', 'Visa 101')
+            ->assertJsonPath('active_round.status', 'reveal')
+            ->assertJsonPath('leaderboards.fifa.0.trivia_score', 1000)
+            ->assertJsonPath('leaderboards.visa.0.trivia_score', 1000)
+            ->assertJsonPath('leaderboard.0.trivia_score', 1000);
+
+        $this->getJson('/api/leaderboard')->assertOk()
+            ->assertJsonPath('fifa.0.trivia_score', 1000)
+            ->assertJsonPath('visa.0.trivia_score', 1000);
+    }
+
+    public function test_player_answer_result_returns_active_round_score_and_rank_separately(): void
+    {
+        [$player, $token] = $this->player();
+        $leader = Player::create(['nickname' => 'Round Leader', 'consent' => true]);
+        $fifaQuestion = Question::create([
+            'order_index' => 1,
+            'category' => 'fifa_world_cup',
+            'type' => 'multiple_choice',
+            'text' => 'Round one?',
+            'options' => ['Brazil', 'Kenya'],
+            'correct_answer' => 'Brazil',
+            'duration_seconds' => 10,
+            'status' => 'closed',
+        ]);
+        $visaQuestion = Question::create([
+            'order_index' => 2,
+            'category' => 'visa',
+            'type' => 'multiple_choice',
+            'text' => 'Round two?',
+            'options' => ['Visa', 'Cash'],
+            'correct_answer' => 'Visa',
+            'duration_seconds' => 10,
+            'status' => 'closed',
+        ]);
+        $secondVisaQuestion = Question::create([
+            'order_index' => 3,
+            'category' => 'visa',
+            'type' => 'multiple_choice',
+            'text' => 'Bonus round two?',
+            'options' => ['Visa', 'Cash'],
+            'correct_answer' => 'Visa',
+            'duration_seconds' => 10,
+            'status' => 'closed',
+        ]);
+
+        Answer::create([
+            'player_id' => $player->id,
+            'question_id' => $fifaQuestion->id,
+            'selected_option' => 'Brazil',
+            'is_correct' => true,
+            'points_awarded' => 1000,
+            'response_time_ms' => 0,
+        ]);
+        Answer::create([
+            'player_id' => $player->id,
+            'question_id' => $visaQuestion->id,
+            'selected_option' => 'Visa',
+            'is_correct' => true,
+            'points_awarded' => 1000,
+            'response_time_ms' => 0,
+        ]);
+        Answer::create([
+            'player_id' => $leader->id,
+            'question_id' => $visaQuestion->id,
+            'selected_option' => 'Visa',
+            'is_correct' => true,
+            'points_awarded' => 1000,
+            'response_time_ms' => 0,
+        ]);
+        Answer::create([
+            'player_id' => $leader->id,
+            'question_id' => $secondVisaQuestion->id,
+            'selected_option' => 'Visa',
+            'is_correct' => true,
+            'points_awarded' => 1050,
+            'response_time_ms' => 0,
+        ]);
+        $player->update(['trivia_score' => 2000]);
+
+        $this->withHeader('X-Player-Token', $token)
+            ->getJson("/api/answers/result?player_id={$player->id}&question_id={$visaQuestion->id}")
+            ->assertOk()
+            ->assertJsonPath('total_score', 2000)
+            ->assertJsonPath('round_score', 1000)
+            ->assertJsonPath('round_rank', 2);
+    }
+
+    public function test_trivia_check_in_moves_to_next_incomplete_round(): void
+    {
+        Question::create([
+            'order_index' => 1,
+            'category' => 'fifa_world_cup',
+            'type' => 'multiple_choice',
+            'text' => 'Round one done?',
+            'options' => ['Yes', 'No'],
+            'correct_answer' => 'Yes',
+            'duration_seconds' => 10,
+            'status' => 'closed',
+        ]);
+        Question::create([
+            'order_index' => 2,
+            'category' => 'visa',
+            'type' => 'multiple_choice',
+            'text' => 'Round two ready?',
+            'options' => ['Yes', 'No'],
+            'correct_answer' => 'Yes',
+            'duration_seconds' => 10,
+            'status' => 'draft',
+        ]);
+
+        EventState::setCurrent(['phase' => 'trivia_ready', 'current_question_id' => null]);
+
+        $this->getJson('/api/state')->assertOk()
+            ->assertJsonPath('active_round.number', 2)
+            ->assertJsonPath('active_round.label', 'Visa 101')
+            ->assertJsonPath('active_round.status', 'coming');
     }
 
     public function test_expired_countdown_automatically_closes_and_reveals_without_mc_action(): void

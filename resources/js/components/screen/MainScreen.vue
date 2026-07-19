@@ -127,8 +127,16 @@
           <div class="min-w-0">
             <div class="screen-panel px-7 py-7 lg:px-10 lg:py-9">
               <p class="font-medium uppercase tracking-widest text-visa-gold" style="font-size: clamp(.7rem, 1vw, 1.15rem)">
-                Before question one
+                {{ activeRound.number === 1 ? 'Before question one' : 'Before the next round' }}
               </p>
+              <div class="mt-4 rounded-2xl border border-visa-gold/35 bg-visa-gold/10 px-5 py-4">
+                <p class="font-medium uppercase tracking-widest text-visa-gold" style="font-size: clamp(.65rem, .9vw, 1rem)">
+                  Round {{ activeRound.number }} coming
+                </p>
+                <p class="mt-1 font-semibold text-white" style="font-size: clamp(1.25rem, 2.3vw, 3rem)">
+                  {{ activeRound.label }}
+                </p>
+              </div>
               <div class="mt-6 grid gap-4">
                 <p class="rounded-2xl border border-white/10 bg-white/7 px-5 py-4 font-semibold text-white" style="font-size: clamp(1rem, 1.85vw, 2.35rem)">
                   New players: register
@@ -156,7 +164,7 @@
           <div class="flex items-center gap-4">
           <span class="rounded-full border border-white/10 bg-black/20 px-4 py-2 font-medium uppercase tracking-widest text-gray-300"
             style="font-size: clamp(0.65rem, 1.1vw, 1.1rem)">
-            Round {{ round.current }} / {{ round.total }}
+            Round {{ activeRound.number }} · {{ activeRoundTitle }} · Question {{ round.current }} / {{ round.total }}
           </span>
           <span v-if="question.is_double_points"
             class="bg-visa-gold text-black font-semibold uppercase tracking-widest animate-pulse rounded-full px-5 py-2"
@@ -266,7 +274,7 @@
         </div>
 
         <div class="flex-1 overflow-hidden">
-          <Leaderboard :entries="leaderboard" compact />
+          <Leaderboard :entries="leaderboard" :title="`${activeRoundTitle} standings`" compact />
         </div>
       </div>
     </template>
@@ -278,10 +286,14 @@
       <div class="phase-enter flex-1 flex flex-col px-8 lg:px-16 pt-6 lg:pt-8 pb-4 overflow-hidden">
         <h2 class="flex-shrink-0 text-center font-light uppercase tracking-[.15em] text-visa-gold mb-3 lg:mb-4"
           style="font-size: clamp(1.1rem, 2.2vw, 2.4rem)">
-          TRIVIA LEADERBOARD
+          ROUND {{ activeRound.number }} COMPLETE
         </h2>
+        <p class="-mt-2 mb-4 flex-shrink-0 text-center font-medium uppercase tracking-[.18em] text-white/72"
+          style="font-size: clamp(.75rem, 1.25vw, 1.35rem)">
+          {{ activeRoundTitle }}
+        </p>
         <div class="min-h-0 flex-1">
-          <Leaderboard :entries="leaderboard" title="Trivia standings" />
+          <Leaderboard :entries="activeRoundLeaderboard" :title="`${activeRoundTitle} standings`" />
         </div>
       </div>
     </template>
@@ -342,7 +354,7 @@ import { useEventState } from '../../composables/useEventState'
 import Leaderboard from './Leaderboard.vue'
 import LiveLeaderboardStrip from './LiveLeaderboardStrip.vue'
 
-const { phase, question, leaderboard, playerCount, predictionCount, recentPredictions, match, round, error } = useEventState(1500)
+const { phase, question, leaderboard, leaderboards, playerCount, predictionCount, recentPredictions, match, round, activeRound, error } = useEventState(1500)
 
 // ── QR Code — size scales with viewport, capped for readability ───────────────
 const qrCanvas = ref(null)
@@ -423,6 +435,15 @@ const kickoffCountdown = computed(() => {
   return [days ? `${days}d` : null, `${String(hours).padStart(2, '0')}h`, `${String(minutes).padStart(2, '0')}m`, `${String(secs).padStart(2, '0')}s`].filter(Boolean).join(' ')
 })
 const totalQuestionAnswers = computed(() => Object.values(question.value?.answer_distribution ?? {}).reduce((sum, value) => sum + Number(value), 0))
+const activeRoundTitle = computed(() => question.value?.round_title ?? activeRound.value?.label ?? 'Trivia')
+const fifaLeaderboard = computed(() => leaderboards.value?.fifa ?? [])
+const visaLeaderboard = computed(() => leaderboards.value?.visa ?? [])
+const activeRoundLeaderboard = computed(() => {
+  const category = question.value?.category ?? activeRound.value?.category
+  if (category === 'fifa_world_cup') return fifaLeaderboard.value
+  if (category === 'visa') return visaLeaderboard.value
+  return leaderboards.value?.trivia ?? leaderboard.value
+})
 function optionCount(option) { return Number(question.value?.answer_distribution?.[option] ?? 0) }
 function optionPercent(option) { return totalQuestionAnswers.value ? Math.round(optionCount(option) / totalQuestionAnswers.value * 100) : 0 }
 const dashOffset = computed(() => {

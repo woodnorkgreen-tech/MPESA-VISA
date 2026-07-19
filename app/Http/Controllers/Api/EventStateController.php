@@ -18,12 +18,20 @@ use Illuminate\Support\Facades\DB;
 class EventStateController extends Controller
 {
     private const EVENT_QUESTION_CATEGORIES = ['fifa_world_cup', 'visa'];
+    private const ROUND_LABELS = [
+        'fifa_world_cup' => 'FIFA 101',
+        'visa' => 'Visa 101',
+    ];
+    private const ROUND_NUMBERS = [
+        'fifa_world_cup' => 1,
+        'visa' => 2,
+    ];
 
     public function show(ScoringService $scoring): JsonResponse
     {
         $payload = app()->environment('testing')
             ? $this->buildPayload($scoring)
-            : Cache::remember('public-event-state-v3', now()->addSecond(), fn () => $this->buildPayload($scoring));
+            : Cache::remember('public-event-state-v4', now()->addSecond(), fn () => $this->buildPayload($scoring));
 
         return response()->json($payload)->header('Cache-Control', 'no-store');
     }
@@ -39,9 +47,10 @@ class EventStateController extends Controller
             ->where('status', '!=', 'skipped')
             ->orderBy('order_index')
             ->orderBy('id')
-            ->get(['id', 'status']);
+            ->get(['id', 'status', 'category']);
         $round['total'] = $roundQuestions->count();
         $round['completed'] = $roundQuestions->where('status', 'closed')->count();
+        $roundSummaries = $this->roundSummaries($roundQuestions);
 
         if ($state->current_question_id) {
             $q = Question::find($state->current_question_id);
@@ -52,6 +61,9 @@ class EventStateController extends Controller
                 $question = [
                     'id'              => $q->id,
                     'order_index'     => $q->order_index,
+                    'category'        => $q->category,
+                    'round_title'     => self::ROUND_LABELS[$q->category] ?? 'Trivia',
+                    'round_number'    => self::ROUND_NUMBERS[$q->category] ?? null,
                     'type'            => $q->type,
                     'text'            => $q->text,
                     'options'         => $q->options,
@@ -80,18 +92,39 @@ class EventStateController extends Controller
             ->filter()
             ->values()
             ->toArray();
+        $triviaLeaderboard = $scoring->triviaLeaderboard(100);
+        $fifaLeaderboard = $scoring->roundTriviaLeaderboard('fifa_world_cup', 100);
+        $visaLeaderboard = $scoring->roundTriviaLeaderboard('visa', 100);
+        $activeTriviaLeaderboard = match ($question['category'] ?? null) {
+            'fifa_world_cup' => $fifaLeaderboard,
+            'visa' => $visaLeaderboard,
+            default => $triviaLeaderboard,
+        };
+        $predictionLeaderboard = $scoring->predictionLeaderboard(100);
+        $activeRound = $this->activeRound($state->phase, $question['category'] ?? null, $roundSummaries);
 
         return [
             'phase'               => $state->phase,
             'server_time'         => now()->toIso8601String(),
             'state_version'       => $state->updated_at?->getTimestampMs(),
             'round'               => $round,
+            'active_round'        => $activeRound,
             'question'            => $question,
             'show_phone_on_screen'=> (bool) $state->show_phone_on_screen,
             // The main screen can scroll a deep field; do not cap it to a top ten.
             'leaderboard'         => in_array($state->phase, ['match_ended', 'prediction_reveal'])
-                ? $scoring->predictionLeaderboard(100)
-                : $scoring->triviaLeaderboard(100),
+                ? $predictionLeaderboard
+                : $activeTriviaLeaderboard,
+            'leaderboards'         => [
+                'trivia' => $triviaLeaderboard,
+                'fifa' => $fifaLeaderboard,
+                'visa' => $visaLeaderboard,
+                'prediction' => $predictionLeaderboard,
+            ],
+            'rounds'               => [
+                'fifa' => $roundSummaries['fifa_world_cup'],
+                'visa' => $roundSummaries['visa'],
+            ],
             'player_count'        => Player::count(),
             'prediction_count'    => Prediction::count(),
             'recent_predictions'  => $recentPredictions,
@@ -104,6 +137,49 @@ class EventStateController extends Controller
                 'venue' => $matchConfig->venue,
             ],
         ];
+    }
+
+    private function roundSummaries($questions): array
+    {
+        $summaries = [];
+        foreach (self::EVENT_QUESTION_CATEGORIES as $category) {
+            $roundQuestions = $questions->where('category', $category);
+            $total = $roundQuestions->count();
+            $completed = $roundQuestions->where('status', 'closed')->count();
+            $live = $roundQuestions->where('status', 'live')->count() > 0;
+
+            $summaries[$category] = [
+                'category' => $category,
+                'number' => self::ROUND_NUMBERS[$category],
+                'label' => self::ROUND_LABELS[$category],
+                'total' => $total,
+                'completed' => $completed,
+                'status' => $live ? 'live' : ($total > 0 && $completed >= $total ? 'complete' : 'coming'),
+            ];
+        }
+
+        return $summaries;
+    }
+
+    private function activeRound(string $phase, ?string $questionCategory, array $roundSummaries): array
+    {
+        $category = $questionCategory;
+        if (!$category) {
+            $category = collect(self::EVENT_QUESTION_CATEGORIES)
+                ->first(fn ($roundCategory) => ($roundSummaries[$roundCategory]['status'] ?? null) !== 'complete')
+                ?? self::EVENT_QUESTION_CATEGORIES[0];
+        }
+
+        $active = $roundSummaries[$category] ?? $roundSummaries[self::EVENT_QUESTION_CATEGORIES[0]];
+        $active['status'] = match ($phase) {
+            'trivia_ready' => 'coming',
+            'trivia_complete' => 'complete',
+            'trivia_live' => 'live',
+            'trivia_reveal' => 'reveal',
+            default => $active['status'],
+        };
+
+        return $active;
     }
 
     /** Persist countdown expiry so the admin, player devices and screen agree. */
@@ -130,7 +206,7 @@ class EventStateController extends Controller
                 'correct_answer' => $question->correct_answer,
                 'reason' => 'countdown_expired',
             ]);
-            Cache::forget('public-event-state-v3');
+            Cache::forget('public-event-state-v4');
 
             return $lockedState->fresh();
         });
@@ -147,7 +223,7 @@ class EventStateController extends Controller
             return $enabled;
         });
 
-        Cache::forget('public-event-state-v3');
+        Cache::forget('public-event-state-v4');
 
         return response()->json(['show_phone_on_screen' => $enabled]);
     }

@@ -491,7 +491,7 @@ class AdminApiController extends Controller
             $changes['activated_at'] = now();
         }
         $question->update($changes);
-        Cache::forget('public-event-state-v3');
+        Cache::forget('public-event-state-v4');
         EventAudit::record('question.duration_updated', $question, [
             'duration_seconds' => $question->duration_seconds,
             'live_timer_restarted' => $question->status === 'live',

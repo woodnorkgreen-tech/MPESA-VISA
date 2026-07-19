@@ -26,7 +26,7 @@ class EventState extends Model
             'show_phone_on_screen' => false,
         ]);
         $state->update($attributes);
-        Cache::forget('public-event-state-v3');
+        Cache::forget('public-event-state-v4');
         return $state->fresh();
     }
 

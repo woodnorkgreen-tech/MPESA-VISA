@@ -142,12 +142,14 @@ class PlayerApiController extends Controller
             'is_correct'    => $data['selected_option'] === $question->correct_answer,
             'points_awarded'=> $points,
             'total_score'   => $player->fresh()->trivia_score,
+            'round_score'   => $scoring->playerRoundTriviaScore($player->fresh(), $question->category),
+            'round_rank'    => $scoring->playerRoundTriviaRank($player->fresh(), $question->category),
             'message'       => $existing ? 'Answer updated. You can change it again while the timer is running.' : 'Answer saved. You can change it while the timer is running.',
         ]);
     }
 
     /** Return the authoritative saved result used by the player's reveal UI. */
-    public function answerResult(Request $request): JsonResponse
+    public function answerResult(Request $request, ScoringService $scoring): JsonResponse
     {
         $data = $request->validate([
             'player_id'   => 'required|exists:players,id',
@@ -156,6 +158,7 @@ class PlayerApiController extends Controller
 
         $player = Player::findOrFail($data['player_id']);
         $this->assertPlayerSession($request, $player);
+        $question = Question::findOrFail($data['question_id']);
         $answer = $player->answers()
             ->where('question_id', $data['question_id'])
             ->first();
@@ -164,6 +167,8 @@ class PlayerApiController extends Controller
             return response()->json([
                 'answered'    => false,
                 'total_score' => $player->trivia_score,
+                'round_score' => $scoring->playerRoundTriviaScore($player, $question->category),
+                'round_rank'  => $scoring->playerRoundTriviaRank($player, $question->category),
             ]);
         }
 
@@ -173,6 +178,8 @@ class PlayerApiController extends Controller
             'is_correct'     => $answer->is_correct,
             'points_awarded' => $answer->points_awarded,
             'total_score'    => $player->trivia_score,
+            'round_score'    => $scoring->playerRoundTriviaScore($player, $question->category),
+            'round_rank'     => $scoring->playerRoundTriviaRank($player, $question->category),
         ]);
     }
 
@@ -299,6 +306,8 @@ class PlayerApiController extends Controller
     {
         return response()->json([
             'trivia'     => $scoring->triviaLeaderboard(10),
+            'fifa'       => $scoring->roundTriviaLeaderboard('fifa_world_cup', 10),
+            'visa'       => $scoring->roundTriviaLeaderboard('visa', 10),
             'prediction' => $scoring->predictionLeaderboard(10),
         ]);
     }
