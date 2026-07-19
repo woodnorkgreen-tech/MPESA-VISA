@@ -923,6 +923,37 @@ class EventReliabilityTest extends TestCase
             ->assertJsonPath('active_round.status', 'coming');
     }
 
+    public function test_trivia_complete_without_current_question_uses_last_completed_round_leaderboard(): void
+    {
+        [$player] = $this->player();
+        $question = Question::create([
+            'order_index' => 2,
+            'category' => 'visa',
+            'type' => 'multiple_choice',
+            'text' => 'Last round question?',
+            'options' => ['Visa', 'Cash'],
+            'correct_answer' => 'Visa',
+            'duration_seconds' => 10,
+            'status' => 'closed',
+        ]);
+        Answer::create([
+            'player_id' => $player->id,
+            'question_id' => $question->id,
+            'selected_option' => 'Visa',
+            'is_correct' => true,
+            'points_awarded' => 1000,
+            'response_time_ms' => 0,
+        ]);
+
+        EventState::setCurrent(['phase' => 'trivia_complete', 'current_question_id' => null]);
+
+        $this->getJson('/api/state')->assertOk()
+            ->assertJsonPath('active_round.label', 'Visa 101')
+            ->assertJsonPath('active_round.status', 'complete')
+            ->assertJsonPath('leaderboard.0.nickname', 'Test Player')
+            ->assertJsonPath('leaderboards.visa.0.trivia_score', 1000);
+    }
+
     public function test_expired_countdown_automatically_closes_and_reveals_without_mc_action(): void
     {
         [$player, $token] = $this->player();

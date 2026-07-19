@@ -92,8 +92,9 @@ class EventStateController extends Controller
             ->filter()
             ->values()
             ->toArray();
-        $activeRound = $this->activeRound($state->phase, $question['category'] ?? null, $roundSummaries);
-        [$leaderboard, $leaderboards] = $this->leaderboardPayload($state->phase, $question['category'] ?? null, $scoring);
+        $activeCategory = $question['category'] ?? $this->fallbackActiveCategory($state->phase, $roundQuestions, $roundSummaries);
+        $activeRound = $this->activeRound($state->phase, $activeCategory, $roundSummaries);
+        [$leaderboard, $leaderboards] = $this->leaderboardPayload($state->phase, $activeCategory, $scoring);
 
         return [
             'phase'               => $state->phase,
@@ -149,6 +150,19 @@ class EventStateController extends Controller
         }
 
         return [[], $leaderboards];
+    }
+
+    private function fallbackActiveCategory(string $phase, $roundQuestions, array $roundSummaries): ?string
+    {
+        if ($phase === 'trivia_complete') {
+            return $roundQuestions
+                ->where('status', 'closed')
+                ->sortByDesc('id')
+                ->first()?->category;
+        }
+
+        return collect(self::EVENT_QUESTION_CATEGORIES)
+            ->first(fn ($roundCategory) => ($roundSummaries[$roundCategory]['status'] ?? null) !== 'complete');
     }
 
     private function roundSummaries($questions): array
