@@ -426,7 +426,7 @@ const nowTick = ref(Date.now())
 const kickoffCountdown = computed(() => {
   if (!match.value?.kickoff_at) return ''
   const remaining = Math.max(0, new Date(match.value.kickoff_at).getTime() - nowTick.value)
-  if (remaining <= 0) return 'KICK-OFF TIME'
+  if (remaining <= 0) return 'MATCH IN PROGRESS'
   const seconds = Math.floor(remaining / 1000)
   const days = Math.floor(seconds / 86400)
   const hours = Math.floor((seconds % 86400) / 3600)
