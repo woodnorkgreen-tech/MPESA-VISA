@@ -346,14 +346,20 @@ onMounted(() => {
   document.addEventListener('fullscreenchange', syncFullscreen)
   loadPredictionFeed()
   predictionFeedTimer = setInterval(loadPredictionFeed, 3000)
-  if (qrCanvas.value) {
-    QRCode.toCanvas(qrCanvas.value, appUrl, {
+})
+
+// The QR canvas sits behind a phase v-if, so Vue destroys/recreates the
+// <canvas> element every time the screen leaves and returns to the lobby
+// group — redraw whenever that happens, not just on the initial mount.
+watch(qrCanvas, (canvas) => {
+  if (canvas) {
+    QRCode.toCanvas(canvas, appUrl, {
       width:  qrSize.value,
       margin: 1,
       color: { dark: '#000000', light: '#ffffff' },
     })
   }
-})
+}, { immediate: true })
 
 // ── Trivia timer ──────────────────────────────────────────────────────────────
 const optLabels     = ['A', 'B', 'C', 'D']

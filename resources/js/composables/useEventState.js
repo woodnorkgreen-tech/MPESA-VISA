@@ -21,6 +21,8 @@ export function useEventState(intervalMs = 1500) {
 
     let timer = null
     let requestInFlight = false
+    let consecutiveFailures = 0
+    const FAILURE_THRESHOLD = 3 // a single dropped poll shouldn't flash the banner
 
     async function fetchState() {
         if (requestInFlight) return
@@ -36,9 +38,13 @@ export function useEventState(intervalMs = 1500) {
             match.value             = data.match ?? match.value
             round.value             = data.round ?? round.value
             lastUpdatedAt.value     = new Date()
+            consecutiveFailures     = 0
             error.value             = null
         } catch (e) {
-            error.value = 'Connection issue — retrying…'
+            consecutiveFailures += 1
+            if (consecutiveFailures >= FAILURE_THRESHOLD) {
+                error.value = 'Connection issue — retrying…'
+            }
         } finally {
             loading.value = false
             requestInFlight = false
