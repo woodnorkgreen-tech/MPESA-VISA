@@ -63,9 +63,12 @@
       </div>
 
       <!-- Feedback banner -->
-      <div v-if="answered" class="text-center pb-2 sm:pb-4">
-        <p v-if="submissionError" class="text-visa-gold font-bold text-base sm:text-lg">
+      <div v-if="answered || submitting || submissionError" class="text-center pb-2 sm:pb-4">
+        <p v-if="submissionError" class="text-red-300 font-bold text-base sm:text-lg">
           {{ submissionError }}
+        </p>
+        <p v-else-if="submitting" class="text-visa-gold font-bold text-base sm:text-lg">
+          Saving answer...
         </p>
         <p v-else class="text-visa-gold font-bold text-base sm:text-lg">
           ✓ Answer saved — tap another choice to change it ({{ timeLeft }}s left)
@@ -211,6 +214,7 @@ async function handleTimeUp() {
 async function selectAnswer(option) {
   if (props.readOnly || submitting.value || timeLeft.value === 0) return
   submitting.value = true
+  const previousSelection = selected.value
   selected.value = option
   submissionError.value = ''
 
@@ -233,6 +237,7 @@ async function selectAnswer(option) {
       selectedAnswer: data.selected_option,
     })
   } catch (e) {
+    selected.value = answered.value ? previousSelection : null
     submissionError.value = e.response?.data?.message ?? 'We could not record that answer. Please check your connection.'
   } finally {
     submitting.value = false
