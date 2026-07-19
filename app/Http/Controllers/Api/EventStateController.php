@@ -19,7 +19,7 @@ class EventStateController extends Controller
 {
     private const EVENT_QUESTION_CATEGORIES = ['fifa_world_cup', 'visa'];
     private const ROUND_LABELS = [
-        'fifa_world_cup' => 'FIFA 101',
+        'fifa_world_cup' => 'Football 101',
         'visa' => 'Visa 101',
     ];
     private const ROUND_NUMBERS = [
