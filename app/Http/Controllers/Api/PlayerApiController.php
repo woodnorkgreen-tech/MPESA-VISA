@@ -19,6 +19,8 @@ use Illuminate\Validation\Rule;
 
 class PlayerApiController extends Controller
 {
+    private const ANSWER_GRACE_SECONDS = 2;
+
     // ── Registration ──────────────────────────────────────────────────────────
 
     public function store(Request $request): JsonResponse
@@ -115,7 +117,14 @@ class PlayerApiController extends Controller
             'selected_option' => ['required', 'string', Rule::in($question->options)],
         ]);
 
-        if ($state->phase !== 'trivia_live' || $question->status !== 'live' || $question->secondsRemaining() <= 0) {
+        $elapsedMs = $question->activated_at
+            ? max(0, (int) $question->activated_at->diffInMilliseconds(now()))
+            : $question->duration_seconds * 1000;
+        $acceptUntilMs = ($question->duration_seconds + self::ANSWER_GRACE_SECONDS) * 1000;
+        $acceptingPhase = in_array($state->phase, ['trivia_live', 'trivia_reveal'], true);
+        $acceptingStatus = in_array($question->status, ['live', 'closed'], true);
+
+        if (!$acceptingPhase || !$acceptingStatus || $elapsedMs > $acceptUntilMs) {
             return response()->json(['message' => 'Question is no longer accepting answers.'], 422);
         }
 
@@ -124,12 +133,7 @@ class PlayerApiController extends Controller
 
         $existing = $player->answers()->where('question_id', $question->id)->first();
         // Never trust a phone's clock for scoring. The server activation time is authoritative.
-        $serverResponseMs = $question->activated_at
-            ? min(
-                $question->duration_seconds * 1000,
-                max(0, (int) $question->activated_at->diffInMilliseconds(now()))
-            )
-            : $question->duration_seconds * 1000;
+        $serverResponseMs = min($question->duration_seconds * 1000, $elapsedMs);
         $points = $scoring->scoreAnswer($player, $question, $data['selected_option'], $serverResponseMs);
 
         return response()->json([

@@ -96,16 +96,43 @@ class EventReliabilityTest extends TestCase
     public function test_late_answer_is_rejected(): void
     {
         [$player, $token] = $this->player();
-        $question = $this->liveQuestion(['duration_seconds' => 10, 'activated_at' => now()->subSeconds(11)]);
+        $question = $this->liveQuestion(['duration_seconds' => 10, 'activated_at' => now()->subSeconds(13)]);
 
         $this->withHeader('X-Player-Token', $token)->postJson('/api/answers', [
             'player_id' => $player->id,
             'question_id' => $question->id,
             'selected_option' => 'Nairobi',
-            'response_time_ms' => 11000,
+            'response_time_ms' => 13000,
         ])->assertStatus(422);
 
         $this->assertSame(0, Answer::count());
+    }
+
+    public function test_answer_arriving_during_short_timeout_grace_is_saved(): void
+    {
+        [$player, $token] = $this->player();
+        $question = $this->liveQuestion([
+            'duration_seconds' => 10,
+            'activated_at' => now()->subSeconds(11),
+        ]);
+
+        $this->getJson('/api/state')->assertOk()->assertJsonPath('phase', 'trivia_reveal');
+
+        $this->withHeader('X-Player-Token', $token)->postJson('/api/answers', [
+            'player_id' => $player->id,
+            'question_id' => $question->id,
+            'selected_option' => 'Nairobi',
+            'response_time_ms' => 10000,
+        ])->assertOk()->assertJson([
+            'selected_option' => 'Nairobi',
+            'is_correct' => true,
+        ]);
+
+        $this->assertDatabaseHas('answers', [
+            'player_id' => $player->id,
+            'question_id' => $question->id,
+            'selected_option' => 'Nairobi',
+        ]);
     }
 
     public function test_admin_can_change_and_restart_a_live_question_countdown(): void
@@ -713,7 +740,7 @@ class EventReliabilityTest extends TestCase
         [$player, $token] = $this->player();
         $question = $this->liveQuestion([
             'duration_seconds' => 10,
-            'activated_at' => now()->subSeconds(11),
+            'activated_at' => now()->subSeconds(13),
         ]);
         Answer::create([
             'player_id' => $player->id,
